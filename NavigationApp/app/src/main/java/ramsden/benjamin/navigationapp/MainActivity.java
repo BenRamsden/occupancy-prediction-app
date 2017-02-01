@@ -15,6 +15,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    public static final long DEFAULT_MIN_TIME = 5;
+    public static final float DEFAULT_MIN_DISTANCE = 5f;
+    public static final String LOCATION_SERVICE_INTENT_FILTER = "LOCATION_SERVICE_INTENT_FILTER";
+
     private GoogleMap mMap;
 
     @Override
