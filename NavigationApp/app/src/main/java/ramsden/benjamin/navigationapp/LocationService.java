@@ -76,7 +76,7 @@ public class LocationService extends Service {
                 .setColor(Color.WHITE)
                 .setSmallIcon(R.drawable.ic_runner_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_runner_icon))
-                .setContentText("Activity Tracker");
+                .setContentText("NavigationApp");
         Intent resultIntent = new Intent(this, MainActivity.class);
         resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, pendingIntentCode, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);

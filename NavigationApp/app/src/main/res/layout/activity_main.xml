@@ -22,7 +22,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        tools:context="ramsden.benjamin.navigationapp.MapsActivity"
+        tools:context="ramsden.benjamin.navigationapp.MainActivity"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true" />
 

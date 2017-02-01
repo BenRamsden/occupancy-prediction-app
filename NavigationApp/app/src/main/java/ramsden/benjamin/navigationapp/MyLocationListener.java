@@ -43,20 +43,18 @@ public class MyLocationListener implements LocationListener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateTime = sdf.format(new Date());
 
-        /* Send Location update to ContentProvider to be inserted */
+        /* TODO: Send Location update to ContentProvider to be sent to backend database */
         ContentValues contentValues = new ContentValues();
-        contentValues.put(NavigationServerContract.LocationLogEntry.KEY_DATETIME, currentDateTime);
-        contentValues.put(NavigationServerContract.LocationLogEntry.KEY_LATITUDE, location.getLatitude());
-        contentValues.put(NavigationServerContract.LocationLogEntry.KEY_LONGITUDE, location.getLongitude());
-        contentValues.put(NavigationServerContract.LocationLogEntry.KEY_ALTITUDE, location.getAltitude());
+
+        /* Populate Content Values */
+
         myContext.getContentResolver().insert(queryUri,contentValues);
 
-        /* Send Location update by LocalBroadcast for UI elements to pick up on */
+        /* TODO: Send Location update by LocalBroadcast for UI elements to pick up on */
         Intent broadcastIntent = new Intent(MainActivity.LOCATION_SERVICE_INTENT_FILTER);
-        broadcastIntent.putExtra(NavigationServerContract.LocationLogEntry.KEY_DATETIME, currentDateTime);
-        broadcastIntent.putExtra(NavigationServerContract.LocationLogEntry.KEY_LATITUDE, location.getLatitude());
-        broadcastIntent.putExtra(NavigationServerContract.LocationLogEntry.KEY_LONGITUDE, location.getLongitude());
-        broadcastIntent.putExtra(NavigationServerContract.LocationLogEntry.KEY_ALTITUDE, location.getAltitude());
+
+        /* Populate broadcast intent extras */
+
         LocalBroadcastManager.getInstance(myContext).sendBroadcast(broadcastIntent);
 
         Log.d("g53mdp", "onLocationChanged lat:"+location.getLatitude() + " lng:" + location.getLongitude() + " alt:" + location.getAltitude());
