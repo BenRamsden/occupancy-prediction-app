@@ -76,14 +76,18 @@ public class APITestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_apitest);
 
         try {
-            //testJSONObject.put("lat","10.234");
-            //testJSONObject.put("lng","5.435");
+            testJSONObject.put("lat","10.234");
+            testJSONObject.put("lng","5.435");
             testJSONObject.put("number_connected","10");
-            //testJSONObject.put("observation_date","2017-02-05 00:36:22");
-            ///testJSONObject.put("audio_histogram","{{\"lo\":\"0\",\"hi\":\"500\",\"vl\":\"23.4\"},{\"lo\":\"0\",\"hi\":\"500\",\"vl\":\"23.4\"}}");
-            //testJSONObject.put("occupancy_estimate","23");
-            //testJSONObject.put("bluetooth_count","5");
-            //testJSONObject.put("acceleration_timeline","{\"1.02\",\"3.5\"}");
+            testJSONObject.put("observation_date","2017-02-05 00:36:22");
+            testJSONObject.put("occupancy_estimate","23");
+            testJSONObject.put("bluetooth_count","5");
+            testJSONObject.put("acceleration_timeline", new JSONObject().put("0","12.3").put("1","13.5"));
+
+            JSONObject audio_histogram = new JSONObject();
+            audio_histogram.put("0", new JSONObject().put("lo",500).put("hi",999).put("vl",22));
+            audio_histogram.put("1", new JSONObject().put("lo",0).put("hi",499).put("vl",34));
+            testJSONObject.put("audio_histogram",audio_histogram);
 
         } catch (JSONException e) {
             e.printStackTrace();
