@@ -9,8 +9,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -27,14 +30,39 @@ import android.widget.Toast;
 
 public class LocationService extends Service {
 
-    private final IBinder myBinder = new MyBinder();
-
     private static final int pendingIntentCode = 333;
     private static final int foregroudCode = 343;
     private Notification foregroundNotif;
     private boolean notifActive = false;
 
     private MyLocationListener locationListener = null;
+
+    class MyLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d("LocationService","onLocationChanged: " + location.toString());
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d("LocationService","onStatusChanged: " + status);
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d("LocationService","onProviderEnabled: " + provider);
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d("LocationService","onProviderDisabled: " + provider);
+
+        }
+    }
 
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
@@ -51,6 +79,8 @@ public class LocationService extends Service {
         initLocationListener();
     }
 
+    private final IBinder myBinder = new MyBinder();
+
     public class MyBinder extends Binder {
         LocationService getService() {
             return LocationService.this;
@@ -60,7 +90,7 @@ public class LocationService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("g53mdp","LocationService onBind");
+        Log.d(Constants.LOG_TAG,"LocationService onBind");
         return myBinder;
     }
 
@@ -69,7 +99,7 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("g53mdp", "LocationService onCreate");
+        Log.d(Constants.LOG_TAG, "LocationService onCreate");
 
         /* Create notification ready to create foreground Service notification on event user plays music */
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
@@ -101,7 +131,7 @@ public class LocationService extends Service {
     /* creates the foreground notification to keep the service alive
      * ensures the notification is not already active */
     public void startForegroundNotification() {
-        Log.d("g53mdp", "LocationService startForegroundNotification");
+        Log.d(Constants.LOG_TAG, "LocationService startForegroundNotification");
         if(!notifActive) {
             startForeground(foregroudCode, foregroundNotif);
             notifActive = true;
@@ -110,7 +140,7 @@ public class LocationService extends Service {
 
     /* removes the foreground notificaiton if it does exist  */
     public void stopForegroundNotification() {
-        Log.d("g53mdp", "LocationService stopForegroundNotification");
+        Log.d(Constants.LOG_TAG, "LocationService stopForegroundNotification");
         if(notifActive) {
             stopForeground(true);
             notifActive = false;
@@ -129,28 +159,28 @@ public class LocationService extends Service {
             return;
         }
 
-        Log.d("g53mdp", "initLocationListener called");
+        Log.d(Constants.LOG_TAG, "initLocationListener called");
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if(locationListener != null) {
             /* Remove any previous location listener request */
             try {
-                Log.d("g53mdp", "initLocationListener removed updates from locationListener");
+                Log.d(Constants.LOG_TAG, "initLocationListener removed updates from locationListener");
                 locationManager.removeUpdates(locationListener);
             } catch(SecurityException e) {
-                Log.d("g53mdp", e.toString());
+                Log.d(Constants.LOG_TAG, e.toString());
             }
         } else {
             /* Create instance of the location listener for the first time */
-            locationListener = new MyLocationListener(this);
+            locationListener = new MyLocationListener();
         }
 
         try {
-            Log.d("g53mdp", "initLocationListener requested location updates with minTime: " + minTime + " minDistance: " + minDistance);
+            Log.d(Constants.LOG_TAG, "initLocationListener requested location updates with minTime: " + minTime + " minDistance: " + minDistance);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, locationListener);
         } catch(SecurityException e) {
-            Log.d("g53mdp", e.toString());
+            Log.d(Constants.LOG_TAG, e.toString());
         }
     }
 
@@ -158,15 +188,15 @@ public class LocationService extends Service {
      * If the location service has been destroyed */
     @Override
     public void onDestroy() {
-        Log.d("g53mdp", "LocationService onDestroy");
+        Log.d(Constants.LOG_TAG, "LocationService onDestroy");
 
         if(locationListener != null) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             try {
-                Log.d("g53mdp", "onDestroy (LocationService) removed updates from locationListener");
+                Log.d(Constants.LOG_TAG, "onDestroy (LocationService) removed updates from locationListener");
                 locationManager.removeUpdates(locationListener);
             } catch(SecurityException e) {
-                Log.d("g53mdp", e.toString());
+                Log.d(Constants.LOG_TAG, e.toString());
             }
         }
 

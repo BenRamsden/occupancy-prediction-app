@@ -81,7 +81,7 @@ public class NavigationContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.d("g53mdp", "NavigationContentProvider onCreate");
+        Log.d(Constants.LOG_TAG, "NavigationContentProvider onCreate");
 
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -96,7 +96,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Log.d("g53mdp","NavigationContentProvider called with query");
+        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with query");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -158,7 +158,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Log.d("g53mdp","NavigationContentProvider called with insert");
+        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with insert");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -251,7 +251,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.d("g53mdp","NavigationContentProvider called with delete");
+        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with delete");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);
@@ -282,7 +282,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Log.d("g53mdp","NavigationContentProvider called with update");
+        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with update");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);

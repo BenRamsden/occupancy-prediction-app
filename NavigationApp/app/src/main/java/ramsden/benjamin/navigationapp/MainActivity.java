@@ -1,10 +1,20 @@
 package ramsden.benjamin.navigationapp;
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,7 +27,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final long DEFAULT_MIN_TIME = 5;
     public static final float DEFAULT_MIN_DISTANCE = 5f;
-    public static final String LOCATION_SERVICE_INTENT_FILTER = "LOCATION_SERVICE_INTENT_FILTER";
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
+
+    /* Connection to the LocationService
+     * In the main activity this is purely used to ensure the LocationService
+     * Is destroyed upon exiting the application
+     * Unless the user has specified the location tracking continue (foreground)
+     * Through the options menu */
+    private LocationService locationService = null;
+    private ServiceConnection locationServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(Constants.LOG_TAG, "Service Connected to MainActivity");
+
+            LocationService.MyBinder binder = (LocationService.MyBinder) service;
+            locationService = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            locationService = null;
+        }
+    };
+
+
 
     private GoogleMap mMap;
 
@@ -38,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(new Intent(MainActivity.this, APITestActivity.class));
             }
         });
+
+        checkPermissionsStartService(true);
     }
 
     @Override
@@ -48,5 +83,72 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        enableMapMyLocation();
+    }
+
+
+    public void enableMapMyLocation() {
+        /* Try enable mMap location now user has responded to permission request
+        * If not, error will be caught and dealt with here */
+        if(mMap != null && !mMap.isMyLocationEnabled()) {
+            try {
+                mMap.setMyLocationEnabled(true);
+            } catch (SecurityException e) {
+                Log.d(Constants.LOG_TAG, e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if(locationService != null) {
+            unbindService(locationServiceConnection);
+        }
+
+        /* TODO: Stop service stopping if it is foregrounded (recording background data) */
+        stopService(new Intent(this, LocationService.class));
+    }
+
+
+
+
+
+    /* Shows and hides the location text prompt in the Main Activity
+     * Based on whether the permission have been granted or not to access location */
+    private void checkPermissionsStartService(boolean requestIfNotGranted) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if(locationService == null) {
+                /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
+                Intent locationServiceIntent = new Intent(this, LocationService.class);
+                startService(locationServiceIntent);
+                bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
+            }
+
+            enableMapMyLocation();
+
+        } else if(requestIfNotGranted) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+        } else {
+            Toast.makeText(this, "This application cannot function without the location permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /* Receives the callback from the OS after the user has clicked Allow location permission
+     * This calls the UI update method to remove the prompt to the user,
+     * Also sets the map to use the users location now available */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION:
+                checkPermissionsStartService(false);
+                break;
+        }
+
     }
 }
