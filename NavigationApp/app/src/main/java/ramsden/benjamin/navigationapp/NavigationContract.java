@@ -11,12 +11,12 @@ import android.provider.BaseColumns;
  * Currently only has one table to store the time and locations recorded from the user
  */
 
-public class NavigationServerContract implements BaseColumns {
+public class NavigationContract implements BaseColumns {
 
-    private NavigationServerContract() {}
+    private NavigationContract() {}
 
     public static class Users {
-        public static final String TABLE_NAME = "Users";
+        public static final String TABLE_NAME = "users";
 
         public static final String PKEY_ID_USER = "idUser";
 
@@ -29,7 +29,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class Hotspots {
-        public static final String TABLE_NAME = "Hotspots";
+        public static final String TABLE_NAME = "hotspots";
 
         public static final String PKEY_ID_HOTSPOT = "idHotspot";
 
@@ -41,7 +41,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class HotspotObservations {
-        public static final String TABLE_NAME = "HotspotObservations";
+        public static final String TABLE_NAME = "hotspot_observations";
 
         public static final String PKEY_ID_HOTSPOT_OBSERVATION = "idHotspotObservation";
         public static final String PKEY_ID_HOTSPOT = "idHotspot";
@@ -55,7 +55,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class AudioObservations {
-        public static final String TABLE_NAME = "AudioObservations";
+        public static final String TABLE_NAME = "audio_observations";
 
         public static final String PKEY_ID_AUDIO_OBSERVATION = "idAudioObservation";
         public static final String PKEY_ID_USER = "idUser";
@@ -68,7 +68,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class CrowdObservations {
-        public static final String TABLE_NAME = "CrowdObservations";
+        public static final String TABLE_NAME = "crowd_observations";
 
         public static final String PKEY_ID_CROWD_OBSERVATION = "idCrowdObservation";
         public static final String PKEY_ID_USER = "idUser";
@@ -81,7 +81,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class BluetoothObservations {
-        public static final String TABLE_NAME = "BluetoothObservations";
+        public static final String TABLE_NAME = "bluetooth_observations";
 
         public static final String PKEY_ID_BLUETOOTH_OBSERVATION = "idBluetoothObservation";
         public static final String PKEY_ID_USER = "idUser";
@@ -94,7 +94,7 @@ public class NavigationServerContract implements BaseColumns {
     }
 
     public static class AccelerometerObservations {
-        public static final String TABLE_NAME = "AccelerometerObservations";
+        public static final String TABLE_NAME = "accelerometer_observations";
 
         public static final String PKEY_ID_ACCELEROMETER_OBSERVATION = "idAccelerometerObservation";
         public static final String PKEY_ID_USER = "idUser";

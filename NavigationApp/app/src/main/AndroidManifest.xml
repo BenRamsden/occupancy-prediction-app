@@ -39,8 +39,8 @@
         <service android:name=".LocationService" />
 
         <provider
-            android:name=".LocationContentProvider"
-            android:authorities="com.psybr1.activitytracker.LocationContentProvider" />
+            android:name=".NavigationContentProvider"
+            android:authorities="ramsden.benjamin.navigationapp.NavigationContentProvider" />
 
         <activity android:name=".APITestActivity"></activity>
     </application>

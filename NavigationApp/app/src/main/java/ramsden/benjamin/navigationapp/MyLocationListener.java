@@ -38,7 +38,7 @@ public class MyLocationListener implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        Uri queryUri = LocationContentProvider.CONTENT_URI;
+        Uri queryUri = NavigationContentProvider.CONTENT_URI;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateTime = sdf.format(new Date());

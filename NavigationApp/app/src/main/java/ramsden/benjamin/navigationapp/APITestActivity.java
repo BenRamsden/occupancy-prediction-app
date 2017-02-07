@@ -1,31 +1,27 @@
 package ramsden.benjamin.navigationapp;
 
+import android.content.ContentValues;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NoCache;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -121,38 +117,31 @@ public class APITestActivity extends AppCompatActivity {
     private void API_GET_Observations(String observation) {
         Toast.makeText(APITestActivity.this, "Requesting GET observation: "+observation, Toast.LENGTH_SHORT).show();
 
-        if(!valid_observation.contains(observation)) {
-            Toast.makeText(this,"API_GET_Observations called with unsupported observation type: "+observation, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                api_root+"/observations/"+observation+"?apitoken="+apitoken,
-                null,
-                responseListener,
-                errorListener
-        );
-
-        apiRequestQueue.add(jsonRequest);
+        getContentResolver().query(Uri.parse(NavigationContentProvider.CONTENT_URI+"/"+observation+"_observations"), null, null, null, null);
     }
 
     private void API_POST_Observation(String observation, JSONObject body) {
-        Toast.makeText(APITestActivity.this, "Requesting POST observation: "+observation, Toast.LENGTH_SHORT).show();
 
-        if(!valid_observation.contains(observation)) {
-            Toast.makeText(this,"API_POST_Observation called with unsupported observation type: "+observation, Toast.LENGTH_LONG).show();
-            return;
+        ContentValues contentValues = new ContentValues();
+
+        try {
+            contentValues.put("lat","10.234");
+            contentValues.put("lng","5.435");
+            contentValues.put("number_connected","10");
+            contentValues.put("observation_date","2017-02-05 00:36:22");
+            contentValues.put("occupancy_estimate","23");
+            contentValues.put("bluetooth_count","5");
+            contentValues.put("acceleration_timeline", new JSONObject().put("0","12.3").put("1","13.5").toString());
+
+            JSONObject audio_histogram = new JSONObject();
+            audio_histogram.put("0", new JSONObject().put("lo",500).put("hi",999).put("vl",22));
+            audio_histogram.put("1", new JSONObject().put("lo",0).put("hi",499).put("vl",34));
+            contentValues.put("audio_histogram",audio_histogram.toString());
+        } catch(JSONException ex) {
+
         }
 
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(
-                Request.Method.POST,
-                api_root+"/observations/"+observation+"?apitoken="+apitoken,
-                body,
-                responseListener,
-                errorListener
-        );
+        getContentResolver().insert(Uri.parse(NavigationContentProvider.CONTENT_URI+"/"+observation+"_observations"), contentValues);
 
-        apiRequestQueue.add(jsonRequest);
     }
 }
