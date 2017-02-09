@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -48,38 +49,60 @@ public class DataCollectionService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(Constants.SERVICE_LOG_TAG,"onLocationChanged: " + location.toString());
+            Log.d(Constants.LOCATION_LOG_TAG,"onLocationChanged: " + location.toString());
 
-            //collectAccelerometerObservations(location);
+            // collect Accelerometer Observations
 
-            //collectAudioObservations(location);
+            // collect Audio Observations
 
-            //collectBluetoothObservations(location);
+            // collect Bluetooth Observations
 
-            //collectCrowdObservations(location);
+            // collect Crowd Observations
 
-            //collectHotspotObservations(location);
+            // collect Hotspot Observations
 
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(Constants.SERVICE_LOG_TAG,"onStatusChanged: " + status);
+            Log.d(Constants.LOCATION_LOG_TAG,"onStatusChanged: " + status);
 
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.d(Constants.SERVICE_LOG_TAG,"onProviderEnabled: " + provider);
+            Log.d(Constants.LOCATION_LOG_TAG,"onProviderEnabled: " + provider);
 
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.d(Constants.SERVICE_LOG_TAG,"onProviderDisabled: " + provider);
+            Log.d(Constants.LOCATION_LOG_TAG,"onProviderDisabled: " + provider);
 
         }
     }
+
+    /*************** Accelerometer */
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private SensorEventListener mAccelerometerListener;
+
+    private void initAccelerometerListener() {
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mAccelerometerListener = new AccelerometerListener();
+            mSensorManager.registerListener(mAccelerometerListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(Constants.SERVICE_LOG_TAG, "Accelerometer Sensor SUCCESS (Subscribed)");
+        } else {
+            mAccelerometer = null;
+            Log.d(Constants.SERVICE_LOG_TAG, "Accelerometer Sensor FAILED (NoDefaultSensor)");
+        }
+    }
+
+    /*******************************/
 
 
     /* Provides the activities using the service the ability to
@@ -132,6 +155,9 @@ public class DataCollectionService extends Service {
         foregroundNotif = builder.build();
 
         initLocationListener();
+
+        initAccelerometerListener();
+
     }
 
     @Override
