@@ -29,24 +29,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final float DEFAULT_MIN_DISTANCE = 5f;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
 
-    /* Connection to the LocationService
-     * In the main activity this is purely used to ensure the LocationService
+    /* Connection to the DataCollectionService
+     * In the main activity this is purely used to ensure the DataCollectionService
      * Is destroyed upon exiting the application
      * Unless the user has specified the location tracking continue (foreground)
      * Through the options menu */
-    private LocationService locationService = null;
+    private DataCollectionService dataCollectionService = null;
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(Constants.LOG_TAG, "Service Connected to MainActivity");
+            Log.d(Constants.GENERAL_LOG_TAG, "Service Connected to MainActivity");
 
-            LocationService.MyBinder binder = (LocationService.MyBinder) service;
-            locationService = binder.getService();
+            DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
+            dataCollectionService = binder.getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            locationService = null;
+            dataCollectionService = null;
         }
     };
 
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 mMap.setMyLocationEnabled(true);
             } catch (SecurityException e) {
-                Log.d(Constants.LOG_TAG, e.getMessage());
+                Log.d(Constants.GENERAL_LOG_TAG, e.getMessage());
             }
         }
     }
@@ -104,12 +104,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onDestroy() {
         super.onDestroy();
 
-        if(locationService != null) {
+        if(dataCollectionService != null) {
             unbindService(locationServiceConnection);
         }
 
         /* TODO: Stop service stopping if it is foregrounded (recording background data) */
-        stopService(new Intent(this, LocationService.class));
+        stopService(new Intent(this, DataCollectionService.class));
     }
 
 
@@ -120,9 +120,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Based on whether the permission have been granted or not to access location */
     private void checkPermissionsStartService(boolean requestIfNotGranted) {
         if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if(locationService == null) {
+            if(dataCollectionService == null) {
                 /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
-                Intent locationServiceIntent = new Intent(this, LocationService.class);
+                Intent locationServiceIntent = new Intent(this, DataCollectionService.class);
                 startService(locationServiceIntent);
                 bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
             }

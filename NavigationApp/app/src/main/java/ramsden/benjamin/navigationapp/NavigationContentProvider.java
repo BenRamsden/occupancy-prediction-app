@@ -2,7 +2,6 @@ package ramsden.benjamin.navigationapp;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.SyncAdapterType;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
@@ -81,7 +80,7 @@ public class NavigationContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.d(Constants.LOG_TAG, "NavigationContentProvider onCreate");
+        Log.d(Constants.GENERAL_LOG_TAG, "NavigationContentProvider onCreate");
 
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -96,7 +95,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with query");
+        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with query");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -158,7 +157,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with insert");
+        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with insert");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -251,7 +250,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with delete");
+        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with delete");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);
@@ -282,7 +281,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Log.d(Constants.LOG_TAG,"NavigationContentProvider called with update");
+        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with update");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);
