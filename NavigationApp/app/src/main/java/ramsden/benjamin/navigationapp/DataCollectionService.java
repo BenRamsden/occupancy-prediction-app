@@ -78,7 +78,6 @@ public class DataCollectionService extends Service {
                 lastAccelerometerObservation = System.currentTimeMillis();
             }
 
-
             // collect Audio Observations
             if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
                 AsyncTask sendAudio = new SendAudio();
@@ -153,7 +152,7 @@ public class DataCollectionService extends Service {
     SensorAudio mMicrophone;
 
     private void initMicrophone() {
-        mMicrophone = new SensorAudio();
+        mMicrophone = new SensorAudio(this);
     }
 
     /*******************************/
@@ -361,13 +360,33 @@ public class DataCollectionService extends Service {
             if(mBluetooth != null) {
                 mBluetooth.startDiscovery();
 
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                int max_bluetooth_polls = 300;
+                int bluetooth_polls = 0;
+
+                Integer bluetooth_count = 0;
+                int consistent_count = 0;
+
+                while(consistent_count < 100 && bluetooth_polls < max_bluetooth_polls) {
+                    Integer temp_bluetooth_count = mBluetooth.getBluetoothDeviceCount();
+
+                    if(temp_bluetooth_count == bluetooth_count) {
+                        consistent_count++;
+                    } else {
+                        consistent_count = 0;
+                        bluetooth_count = temp_bluetooth_count;
+                    }
+
+                    Log.d(Constants.SENSOR_BLUETOOTH, "bluetooth_count: " + bluetooth_count + " consistent_count: " + consistent_count + " bluetooth_polls: " + bluetooth_polls);
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    bluetooth_polls++;
                 }
 
-                Integer bluetooth_count = mBluetooth.getBluetoothDeviceCount();
 
                 if(bluetooth_count == null) {
                     Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
@@ -402,13 +421,19 @@ public class DataCollectionService extends Service {
             if(mMicrophone != null) {
                 mMicrophone.start();
 
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Integer amplitude = 0;
+                int reading_count = 0;
+                final int reading_cap = 1000;
 
-                Integer amplitude = mMicrophone.getAmplitude();
+                while(amplitude == 0 && reading_count++ < reading_cap) {
+                    amplitude = mMicrophone.getAmplitude();
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 mMicrophone.stop();
 
@@ -416,9 +441,12 @@ public class DataCollectionService extends Service {
                     Log.d(Constants.MY_LOCATION_LISTENER, "Result: audio_histogram is null");
 
                 } else {
-                    String tempAudioJSON = null;
+                    JSONObject audio_histogram = new JSONObject();
+                    JSONObject entry0 = new JSONObject();
+
                     try {
-                        tempAudioJSON = new JSONObject().put("1",amplitude).toString();
+                        entry0.put("lo",0).put("hi",20000).put("vl", amplitude);
+                        audio_histogram.put("0", entry0);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -426,12 +454,12 @@ public class DataCollectionService extends Service {
                     ContentValues audioValues = new ContentValues();
                     audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
                     audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, tempAudioJSON);
+                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, audio_histogram.toString());
                     audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
                     Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
                     getContentResolver().insert(microphoneUri, audioValues);
 
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + tempAudioJSON.toString());
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + audio_histogram.toString());
                 }
 
             } else {

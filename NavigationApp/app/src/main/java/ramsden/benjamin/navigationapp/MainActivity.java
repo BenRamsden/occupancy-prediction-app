@@ -29,8 +29,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final float DEFAULT_MIN_DISTANCE = 1f;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
     private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
-    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH = 767;
-    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN = 757;
+    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH = 757;
+    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN = 767;
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 777;
 
     /* Connection to the DataCollectionService
      * In the main activity this is purely used to ensure the DataCollectionService
@@ -158,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
             Log.d(Constants.PERMISSIONS, "Got BLUETOOTH permission");
 
-
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH permission");
 
@@ -175,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED) {
             Log.d(Constants.PERMISSIONS, "Got BLUETOOTH_ADMIN permission");
 
-
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH_ADMIN permission");
 
@@ -185,6 +184,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(Constants.PERMISSIONS, "User denied BLUETOOTH_ADMIN permission");
 
             Toast.makeText(this, "This application cannot function without the BLUETOOTH_ADMIN permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            bootservice = false;
+        }
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(Constants.PERMISSIONS, "Got WRITE_EXTERNAL_STORAGE permission");
+
+        } else if(requestIfNotGranted) {
+            Log.d(Constants.PERMISSIONS, "Requesting WRITE_EXTERNAL_STORAGE permission");
+
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            return;
+        } else {
+            Log.d(Constants.PERMISSIONS, "User denied WRITE_EXTERNAL_STORAGE permission");
+
+            Toast.makeText(this, "This application cannot function without the WRITE_EXTERNAL_STORAGE permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
             bootservice = false;
         }
 
@@ -216,6 +230,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 checkPermissionsStartService(false);
                 break;
             case MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
+                checkPermissionsStartService(false);
+                break;
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
                 checkPermissionsStartService(false);
                 break;
         }

@@ -1,5 +1,6 @@
 package ramsden.benjamin.navigationapp;
 
+import android.content.Context;
 import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,6 +13,13 @@ import java.io.IOException;
 
 public class SensorAudio {
     private MediaRecorder mRecorder = null;
+    private String mFileName = null;
+
+    public SensorAudio(Context context) {
+        // Record to the external cache directory for visibility
+        mFileName = context.getExternalCacheDir().getAbsolutePath();
+        mFileName += "/sensoraudiotest.3gp";
+    }
 
     public void start() {
         Log.d(Constants.SENSOR_MICROPHONE, "start");
@@ -22,7 +30,7 @@ public class SensorAudio {
                 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                mRecorder.setOutputFile("/dev/null");
+                mRecorder.setOutputFile(mFileName);
                 mRecorder.prepare();
                 mRecorder.start();
             }

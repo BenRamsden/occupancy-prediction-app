@@ -25,7 +25,10 @@ public class SensorBluetooth {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-                Log.d(Constants.SENSOR_BLUETOOTH, intent.getExtras().toString());
+                String device = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
+                String rssi_msg = Integer.toString(intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE));
+
+                Log.d(Constants.SENSOR_BLUETOOTH, "Found bluetooth device: " + device + " message: " + rssi_msg);
                 count++;
             }
         }
