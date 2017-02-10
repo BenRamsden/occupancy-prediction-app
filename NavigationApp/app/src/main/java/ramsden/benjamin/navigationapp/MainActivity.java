@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final long DEFAULT_MIN_TIME = 5;
     public static final float DEFAULT_MIN_DISTANCE = 5f;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
+    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
 
     /* Connection to the DataCollectionService
      * In the main activity this is purely used to ensure the DataCollectionService
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(Constants.GENERAL_LOG_TAG, "Service Connected to MainActivity");
+            Log.d(Constants.NAVIGATION_APP, "Service Connected to MainActivity");
 
             DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
             dataCollectionService = binder.getService();
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 mMap.setMyLocationEnabled(true);
             } catch (SecurityException e) {
-                Log.d(Constants.GENERAL_LOG_TAG, e.getMessage());
+                Log.d(Constants.NAVIGATION_APP, e.getMessage());
             }
         }
     }
@@ -119,21 +120,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /* Shows and hides the location text prompt in the Main Activity
      * Based on whether the permission have been granted or not to access location */
     private void checkPermissionsStartService(boolean requestIfNotGranted) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if(dataCollectionService == null) {
-                /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
-                Intent locationServiceIntent = new Intent(this, DataCollectionService.class);
-                startService(locationServiceIntent);
-                bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
-            }
+        boolean bootservice = true;
 
-            enableMapMyLocation();
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
 
         } else if(requestIfNotGranted) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
-
+            bootservice = false;
         } else {
-            Toast.makeText(this, "This application cannot function without the location permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "This application cannot function without the ACCESS_FINE_LOCATION permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            bootservice = false;
+        }
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+
+
+        } else if(requestIfNotGranted) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+            bootservice = false;
+        } else {
+            Toast.makeText(this, "This application cannot function without the RECORD_AUDIO permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            bootservice = false;
+        }
+
+
+        if(bootservice && dataCollectionService == null) {
+            enableMapMyLocation();
+
+            /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
+            Intent locationServiceIntent = new Intent(this, DataCollectionService.class);
+            startService(locationServiceIntent);
+            bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -146,6 +164,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_FINE_LOCATION:
+                checkPermissionsStartService(false);
+                break;
+            case MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
                 checkPermissionsStartService(false);
                 break;
         }

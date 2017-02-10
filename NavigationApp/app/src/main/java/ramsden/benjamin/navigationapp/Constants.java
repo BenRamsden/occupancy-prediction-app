@@ -5,10 +5,11 @@ package ramsden.benjamin.navigationapp;
  */
 
 public class Constants {
-    public static final String GENERAL_LOG_TAG = "NavigationApp";
-    public static final String SERVICE_LOG_TAG = "DataCollectionService";
+    public static final String NAVIGATION_APP = "NavigationApp";
+    public static final String DATA_COLLECTION_SERVICE = "DataCollectionService";
 
-    public static final String LOCATION_LOG_TAG = "MyLocationListener";
-    public static final String ACCELEROMETER_LOG_TAG = "MyAccelerometerListener";
+    public static final String MY_LOCATION_LISTENER = "MyLocationListener";
+    public static final String SENSOR_ACCELEROMETER = "SensorAccelerometer";
+    public static final String SENSOR_MICROPHONE = "SensorMicrophone";
 
 }

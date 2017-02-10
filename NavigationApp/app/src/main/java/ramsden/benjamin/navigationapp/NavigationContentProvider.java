@@ -80,7 +80,7 @@ public class NavigationContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.d(Constants.GENERAL_LOG_TAG, "NavigationContentProvider onCreate");
+        Log.d(Constants.NAVIGATION_APP, "NavigationContentProvider onCreate");
 
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -95,7 +95,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with query");
+        Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with query");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -157,7 +157,7 @@ public class NavigationContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with insert");
+        Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with insert");
 
         int uriType = URI_MATCHER.match(uri);
 
@@ -250,7 +250,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with delete");
+        Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with delete");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);
@@ -281,7 +281,7 @@ public class NavigationContentProvider extends ContentProvider {
      * From the SQLite Database */
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Log.d(Constants.GENERAL_LOG_TAG,"NavigationContentProvider called with update");
+        Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with update");
         /* TODO: Implement RESTFUL Interface, using Service Helper -> Service -> RESTFUL */
 
         int uriType = URI_MATCHER.match(uri);
