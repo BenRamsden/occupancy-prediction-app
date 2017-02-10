@@ -23,8 +23,9 @@ import java.util.HashMap;
 
 public class SensorAccelerometer implements SensorEventListener {
 
-    private boolean enableLogging = true;
+    private static final long POLLING_INTERVAL_MILLIS = 5000;
 
+    private boolean enableLogging = true;
     private long last_update_time = 0;
     private long current_index = 0;
 
@@ -32,7 +33,7 @@ public class SensorAccelerometer implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(last_update_time < System.currentTimeMillis() - 5000) {
+        if(last_update_time < System.currentTimeMillis() - POLLING_INTERVAL_MILLIS) {
             if(enableLogging) Log.d(Constants.SENSOR_ACCELEROMETER, "onSensorChanged (hit interval): " + event);
 
             try {

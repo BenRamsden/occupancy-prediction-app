@@ -51,32 +51,59 @@ public class DataCollectionService extends Service {
     class MyLocationListener implements LocationListener {
 
         long lastAccelerometerObservation = 0;
+        long accelerometerMinIntervalMillis = 60000;
+
         long lastAudioObservation = 0;
+        long audioMinIntervalMillis = 60000;
+
         long lastBluetoothObservation = 0;
+        long bluetoothMinIntervalMillis = 60000;
+
         long lastCrowdObservation = 0;
+        long crowdMinIntervalMillis = 60000;
+
         long lastHotspotObservation = 0;
+        long hotspotMinIntervalMillis = 60000;
 
         @Override
         public void onLocationChanged(Location location) {
             Log.d(Constants.MY_LOCATION_LISTENER,"onLocationChanged: " + location.toString());
 
-            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+            String current_date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
             // collect Accelerometer Observations
-            AsyncTask sendAccelerometer = new SendAccelerometer();
-            sendAccelerometer.execute(location);
+            if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
+                AsyncTask sendAccelerometer = new SendAccelerometer();
+                sendAccelerometer.execute(location);
+                lastAccelerometerObservation = System.currentTimeMillis();
+            }
+
 
             // collect Audio Observations
-            AsyncTask sendAudio = new SendAudio();
-            sendAudio.execute(location);
+            if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
+                AsyncTask sendAudio = new SendAudio();
+                sendAudio.execute(location);
+                lastAudioObservation = System.currentTimeMillis();
+            }
 
             // collect Bluetooth Observations
-            AsyncTask sendBluetooth = new SendBluetooth();
-            sendBluetooth.execute(location);
+            if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
+                AsyncTask sendBluetooth = new SendBluetooth();
+                sendBluetooth.execute(location);
+                lastBluetoothObservation = System.currentTimeMillis();
+            }
 
             // collect Crowd Observations
+            if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
+                // TODO: Crowd observations
+                lastCrowdObservation = System.currentTimeMillis();
+            }
 
             // collect Hotspot Observations
+            if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
+                // TODO: Hotspot observations
+                lastHotspotObservation = System.currentTimeMillis();
+            }
 
         }
 
