@@ -10,7 +10,7 @@ import java.io.IOException;
  * Created by ben on 09/02/2017.
  */
 
-public class SensorMicrophone {
+public class SensorAudio {
     private MediaRecorder mRecorder = null;
 
     public void start() {

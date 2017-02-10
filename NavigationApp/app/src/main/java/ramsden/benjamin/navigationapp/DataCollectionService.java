@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -61,99 +62,17 @@ public class DataCollectionService extends Service {
 
             String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
 
-            // collect Accelerometer Observations]
-            if(mAccelerometerListener != null) {
-                HashMap<String, JSONObject> acceleration_timeline = mAccelerometerListener.getAccelerationTimeline();
-
-                JSONObject acceleration_timeline_json = new JSONObject(acceleration_timeline);
-
-                if(acceleration_timeline_json.length() == 0) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: acceleration_timeline has length 0");
-                } else {
-                    ContentValues accelerometerValues = new ContentValues();
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, location.getLongitude());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, acceleration_timeline_json.toString());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
-                    getContentResolver().insert(accelerometerUri, accelerometerValues);
-
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
-                }
-
-            } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
-            }
+            // collect Accelerometer Observations
+            AsyncTask sendAccelerometer = new SendAccelerometer();
+            sendAccelerometer.execute(location);
 
             // collect Audio Observations
-            if(mMicrophone != null) {
-                mMicrophone.start();
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                Integer amplitude = mMicrophone.getAmplitude();
-
-                mMicrophone.stop();
-
-                if(amplitude == null) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: audio_histogram is null");
-
-                } else {
-                    String tempAudioJSON = null;
-                    try {
-                        tempAudioJSON = new JSONObject().put("1",amplitude).toString();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    ContentValues audioValues = new ContentValues();
-                    audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, tempAudioJSON);
-                    audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
-                    getContentResolver().insert(microphoneUri, audioValues);
-
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + tempAudioJSON.toString());
-                }
-
-            } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
-            }
+            AsyncTask sendAudio = new SendAudio();
+            sendAudio.execute(location);
 
             // collect Bluetooth Observations
-            if(mBluetooth != null) {
-                mBluetooth.startDiscovery();
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                Integer bluetooth_count = mBluetooth.getBluetoothDeviceCount();
-
-                if(bluetooth_count == null) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
-                } else {
-                    ContentValues bluetoothValues = new ContentValues();
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LATITUDE, location.getLatitude());
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LONGITUDE, location.getLongitude());
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_BLUETOOTH_COUNT, bluetooth_count);
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri bluetoothUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.BluetoothObservations.TABLE_NAME);
-                    getContentResolver().insert(bluetoothUri, bluetoothValues);
-
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent bluetooth_count: " + bluetooth_count);
-                }
-
-            } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-            }
+            AsyncTask sendBluetooth = new SendBluetooth();
+            sendBluetooth.execute(location);
 
             // collect Crowd Observations
 
@@ -204,10 +123,10 @@ public class DataCollectionService extends Service {
 
     /*************** Microphone */
 
-    SensorMicrophone mMicrophone;
+    SensorAudio mMicrophone;
 
     private void initMicrophone() {
-        mMicrophone = new SensorMicrophone();
+        mMicrophone = new SensorAudio();
     }
 
     /*******************************/
@@ -366,5 +285,133 @@ public class DataCollectionService extends Service {
         }
 
         super.onDestroy();
+    }
+
+
+    class SendAccelerometer extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            Location location = (Location) params[0];
+
+            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+            if(mAccelerometerListener != null) {
+                HashMap<String, JSONObject> acceleration_timeline = mAccelerometerListener.getAccelerationTimeline();
+
+                JSONObject acceleration_timeline_json = new JSONObject(acceleration_timeline);
+
+                if(acceleration_timeline_json.length() == 0) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: acceleration_timeline has length 0");
+                } else {
+                    ContentValues accelerometerValues = new ContentValues();
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, location.getLongitude());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, acceleration_timeline_json.toString());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
+                    getContentResolver().insert(accelerometerUri, accelerometerValues);
+
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
+                }
+
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
+            }
+
+            return null;
+        }
+    }
+
+    class SendBluetooth extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            Location location = (Location) params[0];
+
+            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+            if(mBluetooth != null) {
+                mBluetooth.startDiscovery();
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Integer bluetooth_count = mBluetooth.getBluetoothDeviceCount();
+
+                if(bluetooth_count == null) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
+                } else {
+                    ContentValues bluetoothValues = new ContentValues();
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LATITUDE, location.getLatitude());
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LONGITUDE, location.getLongitude());
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_BLUETOOTH_COUNT, bluetooth_count);
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri bluetoothUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.BluetoothObservations.TABLE_NAME);
+                    getContentResolver().insert(bluetoothUri, bluetoothValues);
+
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent bluetooth_count: " + bluetooth_count);
+                }
+
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
+            }
+
+            return null;
+        }
+    }
+
+    class SendAudio extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            Location location = (Location) params[0];
+
+            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+            if(mMicrophone != null) {
+                mMicrophone.start();
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Integer amplitude = mMicrophone.getAmplitude();
+
+                mMicrophone.stop();
+
+                if(amplitude == null) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: audio_histogram is null");
+
+                } else {
+                    String tempAudioJSON = null;
+                    try {
+                        tempAudioJSON = new JSONObject().put("1",amplitude).toString();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    ContentValues audioValues = new ContentValues();
+                    audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
+                    audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
+                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, tempAudioJSON);
+                    audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
+                    getContentResolver().insert(microphoneUri, audioValues);
+
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + tempAudioJSON.toString());
+                }
+
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
+            }
+
+            return null;
+        }
     }
 }
