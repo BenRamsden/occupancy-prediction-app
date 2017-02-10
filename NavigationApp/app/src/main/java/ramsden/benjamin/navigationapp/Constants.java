@@ -14,6 +14,7 @@ public class Constants {
     public static final String SENSOR_BLUETOOTH = "SensorBluetooth";
 
     public static final String PERMISSIONS = "Permissions";
+    public static final String CONTENT_PROVIDER = "ContentProvider";
 
 
 }

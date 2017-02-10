@@ -45,15 +45,17 @@ public class NavigationContentProvider extends ContentProvider {
     private final Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
-            Toast.makeText(getContext(), "NET_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "NET_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
+            Log.d(Constants.CONTENT_PROVIDER, "RESPONSE: " + response);
         }
     };
 
     private final Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Toast.makeText(getContext(), "NET_ERROR: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
-            error.printStackTrace(System.out);
+            Log.d(Constants.CONTENT_PROVIDER, "ERROR: " + error);
+            //Toast.makeText(getContext(), "NET_ERROR: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
+            //error.printStackTrace(System.out);
         }
     };
 
@@ -232,6 +234,8 @@ public class NavigationContentProvider extends ContentProvider {
             Toast.makeText(getContext(), "ContentProvider insert: api_sub string not set, cannot send", Toast.LENGTH_SHORT).show();
             return null;
         }
+
+        Log.d(Constants.CONTENT_PROVIDER, "POST to " + api_sub + ": " + insertJSON.toString());
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest(
                 Request.Method.POST,

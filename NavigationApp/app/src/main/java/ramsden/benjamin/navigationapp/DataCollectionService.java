@@ -140,6 +140,13 @@ public class DataCollectionService extends Service {
                 if(bluetooth_count == null) {
                     Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
                 } else {
+                    ContentValues bluetoothValues = new ContentValues();
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LATITUDE, location.getLatitude());
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LONGITUDE, location.getLongitude());
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_BLUETOOTH_COUNT, bluetooth_count);
+                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri bluetoothUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.BluetoothObservations.TABLE_NAME);
+                    getContentResolver().insert(bluetoothUri, bluetoothValues);
 
                     Log.d(Constants.MY_LOCATION_LISTENER, "Sent bluetooth_count: " + bluetooth_count);
                 }
