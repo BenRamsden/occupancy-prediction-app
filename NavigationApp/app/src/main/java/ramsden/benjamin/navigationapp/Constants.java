@@ -11,5 +11,9 @@ public class Constants {
     public static final String MY_LOCATION_LISTENER = "MyLocationListener";
     public static final String SENSOR_ACCELEROMETER = "SensorAccelerometer";
     public static final String SENSOR_MICROPHONE = "SensorMicrophone";
+    public static final String SENSOR_BLUETOOTH = "SensorBluetooth";
+
+    public static final String PERMISSIONS = "Permissions";
+
 
 }

@@ -67,15 +67,22 @@ public class DataCollectionService extends Service {
 
                 JSONObject acceleration_timeline_json = new JSONObject(acceleration_timeline);
 
-                Log.d(Constants.MY_LOCATION_LISTENER, "Got acceleration timeline: " + acceleration_timeline_json.toString());
+                if(acceleration_timeline_json.length() == 0) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: acceleration_timeline has length 0");
+                } else {
+                    ContentValues accelerometerValues = new ContentValues();
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, location.getLongitude());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, acceleration_timeline_json.toString());
+                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
+                    getContentResolver().insert(accelerometerUri, accelerometerValues);
 
-                ContentValues accelerometerValues = new ContentValues();
-                accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
-                accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, location.getLongitude());
-                accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, acceleration_timeline_json.toString());
-                accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, current_date);
-                Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
-                getContentResolver().insert(accelerometerUri, accelerometerValues);
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
+                }
+
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
             }
 
             // collect Audio Observations
@@ -83,33 +90,63 @@ public class DataCollectionService extends Service {
                 mMicrophone.start();
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
                 Integer amplitude = mMicrophone.getAmplitude();
-                Log.d(Constants.MY_LOCATION_LISTENER, "Got microphone amplitude: " + amplitude);
 
                 mMicrophone.stop();
 
-                String tempAudioJSON = null;
-                try {
-                    tempAudioJSON = new JSONObject().put("1",amplitude).toString();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if(amplitude == null) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: audio_histogram is null");
+
+                } else {
+                    String tempAudioJSON = null;
+                    try {
+                        tempAudioJSON = new JSONObject().put("1",amplitude).toString();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    ContentValues audioValues = new ContentValues();
+                    audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
+                    audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
+                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, tempAudioJSON);
+                    audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
+                    Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
+                    getContentResolver().insert(microphoneUri, audioValues);
+
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + tempAudioJSON.toString());
                 }
 
-                ContentValues audioValues = new ContentValues();
-                audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
-                audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
-                audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, tempAudioJSON);
-                audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
-                Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
-                getContentResolver().insert(microphoneUri, audioValues);
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
             }
 
             // collect Bluetooth Observations
+            if(mBluetooth != null) {
+                mBluetooth.startDiscovery();
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Integer bluetooth_count = mBluetooth.getBluetoothDeviceCount();
+
+                if(bluetooth_count == null) {
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
+                } else {
+
+                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent bluetooth_count: " + bluetooth_count);
+                }
+
+            } else {
+                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
+            }
 
             // collect Crowd Observations
 
@@ -168,6 +205,16 @@ public class DataCollectionService extends Service {
 
     /*******************************/
 
+    /*************** Bluetooth */
+
+    SensorBluetooth mBluetooth;
+
+    private void initBluetooth() {
+        mBluetooth = new SensorBluetooth(this);
+    }
+
+    /*******************************/
+
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
      */
@@ -217,11 +264,13 @@ public class DataCollectionService extends Service {
         builder.setContentIntent(resultPendingIntent);
         foregroundNotif = builder.build();
 
-        initLocationListener();
-
         initAccelerometer();
 
         initMicrophone();
+
+        initBluetooth();
+
+        initLocationListener();
 
     }
 

@@ -25,10 +25,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    public static final long DEFAULT_MIN_TIME = 5;
-    public static final float DEFAULT_MIN_DISTANCE = 5f;
+    public static final long DEFAULT_MIN_TIME = 1;
+    public static final float DEFAULT_MIN_DISTANCE = 1f;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
     private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
+    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH = 767;
+    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN = 757;
 
     /* Connection to the DataCollectionService
      * In the main activity this is purely used to ensure the DataCollectionService
@@ -123,27 +125,68 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         boolean bootservice = true;
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
+            Log.d(Constants.PERMISSIONS, "Got ACCESS_FINE_LOCATION permission");
 
         } else if(requestIfNotGranted) {
+            Log.d(Constants.PERMISSIONS, "Requesting ACCESS_FINE_LOCATION permission");
+
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
-            bootservice = false;
+            return;
         } else {
+            Log.d(Constants.PERMISSIONS, "User denied ACCESS_FINE_LOCATION permission");
+
             Toast.makeText(this, "This application cannot function without the ACCESS_FINE_LOCATION permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
             bootservice = false;
         }
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-
+            Log.d(Constants.PERMISSIONS, "Got RECORD_AUDIO permission");
 
         } else if(requestIfNotGranted) {
+            Log.d(Constants.PERMISSIONS, "Requesting RECORD_AUDIO permission");
+
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-            bootservice = false;
+            return;
         } else {
+            Log.d(Constants.PERMISSIONS, "User denied RECORD_AUDIO permission");
+
             Toast.makeText(this, "This application cannot function without the RECORD_AUDIO permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
             bootservice = false;
         }
 
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(Constants.PERMISSIONS, "Got BLUETOOTH permission");
+
+
+        } else if(requestIfNotGranted) {
+            Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH permission");
+
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH}, MY_PERMISSIONS_REQUEST_BLUETOOTH);
+            return;
+        } else {
+            Log.d(Constants.PERMISSIONS, "User denied BLUETOOTH permission");
+
+            Toast.makeText(this, "This application cannot function without the BLUETOOTH permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            bootservice = false;
+        }
+
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(Constants.PERMISSIONS, "Got BLUETOOTH_ADMIN permission");
+
+
+        } else if(requestIfNotGranted) {
+            Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH_ADMIN permission");
+
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN);
+            return;
+        } else {
+            Log.d(Constants.PERMISSIONS, "User denied BLUETOOTH_ADMIN permission");
+
+            Toast.makeText(this, "This application cannot function without the BLUETOOTH_ADMIN permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
+            bootservice = false;
+        }
 
         if(bootservice && dataCollectionService == null) {
             enableMapMyLocation();
@@ -167,6 +210,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 checkPermissionsStartService(false);
                 break;
             case MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
+                checkPermissionsStartService(false);
+                break;
+            case MY_PERMISSIONS_REQUEST_BLUETOOTH:
+                checkPermissionsStartService(false);
+                break;
+            case MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
                 checkPermissionsStartService(false);
                 break;
         }
