@@ -22,7 +22,7 @@ public class SensorAudio {
     }
 
     public void start() {
-        Log.d(Constants.SENSOR_MICROPHONE, "start");
+        Log.d(Constants.SENSOR_MICROPHONE, "startScan");
 
         try {
             if (mRecorder == null) {

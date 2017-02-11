@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Manages the applications LocationListener
@@ -100,7 +102,8 @@ public class DataCollectionService extends Service {
 
             // collect Hotspot Observations
             if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
-                // TODO: Hotspot observations
+                AsyncTask sendHotspot = new SendWifi();
+                sendHotspot.execute(location);
                 lastHotspotObservation = System.currentTimeMillis();
             }
 
@@ -167,6 +170,16 @@ public class DataCollectionService extends Service {
 
     /*******************************/
 
+    /*************** Wifi */
+
+    SensorHotspot mWifi;
+
+    private void initWifi() {
+        mWifi = new SensorHotspot(this);
+    }
+
+    /*******************************/
+
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
      */
@@ -223,6 +236,8 @@ public class DataCollectionService extends Service {
         initBluetooth();
 
         initLocationListener();
+
+        initWifi();
 
     }
 
@@ -421,11 +436,12 @@ public class DataCollectionService extends Service {
             if(mMicrophone != null) {
                 mMicrophone.start();
 
-                Integer amplitude = 0;
-                int reading_count = 0;
-                final int reading_cap = 1000;
+                int max_audio_polls = 100;
+                int audio_polls = 0;
 
-                while(amplitude == 0 && reading_count++ < reading_cap) {
+                Integer amplitude = 0;
+
+                while(audio_polls < max_audio_polls) {
                     amplitude = mMicrophone.getAmplitude();
 
                     try {
@@ -433,6 +449,8 @@ public class DataCollectionService extends Service {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    audio_polls++;
                 }
 
                 mMicrophone.stop();
@@ -456,14 +474,48 @@ public class DataCollectionService extends Service {
                     audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
                     audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, audio_histogram.toString());
                     audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri microphoneUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
-                    getContentResolver().insert(microphoneUri, audioValues);
+                    Uri audioUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
+                    getContentResolver().insert(audioUri, audioValues);
 
                     Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + audio_histogram.toString());
                 }
 
             } else {
                 Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
+            }
+
+            return null;
+        }
+    }
+
+    class SendWifi extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            final Location location = (Location) params[0];
+
+            final String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+            if(mWifi != null) {
+
+                mWifi.startScan(new SensorHotspotCallback() {
+                    @Override
+                    public void sendScanResults(List<ScanResult> scanResultList) {
+
+                        Log.d(Constants.MY_LOCATION_LISTENER, "sendScanResults received callback with scanResultsList: " + scanResultList.toString());
+
+                        ContentValues hotspotValues = new ContentValues();
+                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_LATITUDE, location.getLatitude());
+                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_LONGITUDE, location.getLongitude());
+                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_NUMBER_CONNECTED, scanResultList.size());
+                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE, current_date);
+                        Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
+                        getContentResolver().insert(hotspotUri, hotspotValues);
+
+                        Log.d(Constants.MY_LOCATION_LISTENER, "Sent wifi count: " + scanResultList.size());
+                    }
+                });
+
             }
 
             return null;

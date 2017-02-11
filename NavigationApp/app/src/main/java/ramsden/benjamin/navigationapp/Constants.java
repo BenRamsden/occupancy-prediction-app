@@ -12,6 +12,7 @@ public class Constants {
     public static final String SENSOR_ACCELEROMETER = "SensorAccelerometer";
     public static final String SENSOR_MICROPHONE = "SensorAudio";
     public static final String SENSOR_BLUETOOTH = "SensorBluetooth";
+    public static final String SENSOR_WIFI = "SensorHotspot";
 
     public static final String PERMISSIONS = "Permissions";
     public static final String CONTENT_PROVIDER = "ContentProvider";
