@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.List;
@@ -22,11 +23,15 @@ public class SensorHotspot {
             if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 
                 if(mCallback == null) {
-                    Toast.makeText(context, "wifiReceiver: null mCallback", Toast.LENGTH_SHORT).show();
+                    Log.d(Constants.SENSOR_WIFI, "wifiReceiver got SCAN_RESULTS_AVAILABLE_ACTION but no mCallback set, likely scan result is not app invoked");
                     return;
                 }
 
+                Log.d(Constants.SENSOR_WIFI, "wifiReceiver sending scan results to mCallback");
                 mCallback.sendScanResults(mWifiManager.getScanResults());
+
+                /* Set callback to null so future non-app invoked scan results do not get sent with outdated location data */
+                mCallback = null;
 
             }
         }
@@ -50,10 +55,6 @@ public class SensorHotspot {
         this.mCallback = mCallback;
 
         mWifiManager.startScan();
-    }
-
-    public List<ScanResult> getScanResults() {
-        return mScanResults;
     }
 
 }

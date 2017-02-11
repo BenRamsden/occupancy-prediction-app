@@ -69,7 +69,7 @@ public class DataCollectionService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onLocationChanged: " + location.toString());
+            Log.d(Constants.DATA_COLLECTION_SERVICE,"onLocationChanged: " + location.toString());
 
             String current_date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
@@ -111,19 +111,19 @@ public class DataCollectionService extends Service {
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onStatusChanged: " + status);
+            Log.d(Constants.DATA_COLLECTION_SERVICE,"onStatusChanged: " + status);
 
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderEnabled: " + provider);
+            Log.d(Constants.DATA_COLLECTION_SERVICE,"onProviderEnabled: " + provider);
 
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderDisabled: " + provider);
+            Log.d(Constants.DATA_COLLECTION_SERVICE,"onProviderDisabled: " + provider);
 
         }
     }
@@ -235,9 +235,9 @@ public class DataCollectionService extends Service {
 
         initBluetooth();
 
-        initLocationListener();
-
         initWifi();
+
+        initLocationListener();
 
     }
 
@@ -343,7 +343,7 @@ public class DataCollectionService extends Service {
                 JSONObject acceleration_timeline_json = new JSONObject(acceleration_timeline);
 
                 if(acceleration_timeline_json.length() == 0) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: acceleration_timeline has length 0");
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: acceleration_timeline has length 0");
                 } else {
                     ContentValues accelerometerValues = new ContentValues();
                     accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
@@ -353,11 +353,11 @@ public class DataCollectionService extends Service {
                     Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
                     getContentResolver().insert(accelerometerUri, accelerometerValues);
 
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
                 }
 
             } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
             }
 
             return null;
@@ -404,7 +404,7 @@ public class DataCollectionService extends Service {
 
 
                 if(bluetooth_count == null) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: bluetooth_count is null");
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: bluetooth_count is null");
                 } else {
                     ContentValues bluetoothValues = new ContentValues();
                     bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LATITUDE, location.getLatitude());
@@ -414,11 +414,11 @@ public class DataCollectionService extends Service {
                     Uri bluetoothUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.BluetoothObservations.TABLE_NAME);
                     getContentResolver().insert(bluetoothUri, bluetoothValues);
 
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent bluetooth_count: " + bluetooth_count);
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent bluetooth_count: " + bluetooth_count);
                 }
 
             } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
             }
 
             return null;
@@ -456,7 +456,7 @@ public class DataCollectionService extends Service {
                 mMicrophone.stop();
 
                 if(amplitude == null) {
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Result: audio_histogram is null");
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: audio_histogram is null");
 
                 } else {
                     JSONObject audio_histogram = new JSONObject();
@@ -477,11 +477,11 @@ public class DataCollectionService extends Service {
                     Uri audioUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
                     getContentResolver().insert(audioUri, audioValues);
 
-                    Log.d(Constants.MY_LOCATION_LISTENER, "Sent audio_histogram: " + audio_histogram.toString());
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent audio_histogram: " + audio_histogram.toString());
                 }
 
             } else {
-                Log.d(Constants.MY_LOCATION_LISTENER, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
             }
 
             return null;
@@ -502,7 +502,7 @@ public class DataCollectionService extends Service {
                     @Override
                     public void sendScanResults(List<ScanResult> scanResultList) {
 
-                        Log.d(Constants.MY_LOCATION_LISTENER, "sendScanResults received callback with scanResultsList: " + scanResultList.toString());
+                        Log.d(Constants.DATA_COLLECTION_SERVICE, "sendScanResults received callback with scanResultsList: " + scanResultList.toString());
 
                         ContentValues hotspotValues = new ContentValues();
                         hotspotValues.put(NavigationContract.HotspotObservations.KEY_LATITUDE, location.getLatitude());
@@ -512,7 +512,7 @@ public class DataCollectionService extends Service {
                         Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
                         getContentResolver().insert(hotspotUri, hotspotValues);
 
-                        Log.d(Constants.MY_LOCATION_LISTENER, "Sent wifi count: " + scanResultList.size());
+                        Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent wifi count: " + scanResultList.size());
                     }
                 });
 
