@@ -2,10 +2,12 @@ package ramsden.benjamin.navigationapp;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -246,6 +248,11 @@ public class NavigationContentProvider extends ContentProvider {
         );
 
         apiRequestQueue.add(jsonRequest);
+
+        Intent sent_log_intent = new Intent(SentLogActivity.SENT_LOG_RECEIVER);
+        sent_log_intent.putExtra(SentLogActivity.SENT_EXTRA_FIELD, "To: " + api_sub + "\nBody: " + insertJSON.toString());
+        getContext().sendBroadcast(sent_log_intent);
+        Log.d(Constants.CONTENT_PROVIDER, "Sent sent_log_intent");
 
         return null;
     }

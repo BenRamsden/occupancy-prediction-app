@@ -56,4 +56,14 @@ public class SensorBluetooth {
     public Integer getBluetoothDeviceCount() {
         return count;
     }
+
+    public void unregisterReceiver() {
+        if(mContext != null && bluetoothReceiver != null) {
+            Log.d(Constants.SENSOR_BLUETOOTH, "unregistering bluetoothReceiver");
+            mContext.unregisterReceiver(bluetoothReceiver);
+        } else {
+            Log.d(Constants.SENSOR_BLUETOOTH, "failed to unregister bluetoothReceiver");
+        }
+    }
+
 }

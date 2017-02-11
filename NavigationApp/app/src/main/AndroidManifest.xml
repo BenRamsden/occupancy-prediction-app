@@ -48,7 +48,8 @@
             android:name=".NavigationContentProvider"
             android:authorities="ramsden.benjamin.navigationapp.NavigationContentProvider" />
 
-        <activity android:name=".APITestActivity"></activity>
+        <activity android:name=".APITestActivity" />
+        <activity android:name=".SentLogActivity"></activity>
     </application>
 
 </manifest>

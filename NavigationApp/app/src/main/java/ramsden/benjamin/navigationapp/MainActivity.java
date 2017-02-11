@@ -79,6 +79,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        Button sent_log_button = (Button) findViewById(R.id.sent_log_button);
+        sent_log_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SentLogActivity.class));
+            }
+        });
+
         checkPermissionsStartService(true);
     }
 

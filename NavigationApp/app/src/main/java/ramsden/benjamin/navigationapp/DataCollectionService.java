@@ -325,9 +325,12 @@ public class DataCollectionService extends Service {
             }
         }
 
+        if(mBluetooth != null) {
+            mBluetooth.unregisterReceiver();
+        }
+
         super.onDestroy();
     }
-
 
     class SendAccelerometer extends AsyncTask {
 
