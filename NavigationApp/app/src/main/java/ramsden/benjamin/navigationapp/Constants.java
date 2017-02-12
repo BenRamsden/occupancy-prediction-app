@@ -8,7 +8,7 @@ public class Constants {
     public static final String NAVIGATION_APP = "NavigationApp";
     public static final String DATA_COLLECTION_SERVICE = "DataCollectionService";
     public static final String SENSOR_ACCELEROMETER = "SensorAccelerometer";
-    public static final String SENSOR_MICROPHONE = "SensorAudio";
+    public static final String SENSOR_AUDIO = "SensorAudio";
     public static final String SENSOR_BLUETOOTH = "SensorBluetooth";
     public static final String SENSOR_WIFI = "SensorHotspot";
 

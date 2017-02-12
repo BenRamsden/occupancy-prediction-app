@@ -329,6 +329,10 @@ public class DataCollectionService extends Service {
             mBluetooth.unregisterReceiver();
         }
 
+        if(mWifi != null) {
+            mWifi.unregisterReceiver();
+        }
+
         super.onDestroy();
     }
 
@@ -445,7 +449,7 @@ public class DataCollectionService extends Service {
                 Integer amplitude = 0;
 
                 while(audio_polls < max_audio_polls) {
-                    amplitude = mMicrophone.getAmplitude();
+                    amplitude = -1;
 
                     try {
                         Thread.sleep(100);
@@ -484,7 +488,7 @@ public class DataCollectionService extends Service {
                 }
 
             } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_MICROPHONE + " is null");
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
             }
 
             return null;

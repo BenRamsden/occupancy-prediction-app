@@ -42,4 +42,12 @@
         android:layout_toEndOf="@+id/api_test_button"
         android:id="@+id/sent_log_button" />
 
+    <Button
+        android:text="Spectrum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/sent_log_button"
+        android:layout_toEndOf="@+id/sent_log_button"
+        android:id="@+id/spectrum_button" />
+
 </RelativeLayout>

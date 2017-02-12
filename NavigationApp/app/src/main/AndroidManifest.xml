@@ -49,7 +49,7 @@
             android:authorities="ramsden.benjamin.navigationapp.NavigationContentProvider" />
 
         <activity android:name=".APITestActivity" />
-        <activity android:name=".SentLogActivity"></activity>
+        <activity android:name=".SentLogActivity" />
     </application>
 
 </manifest>

@@ -57,4 +57,13 @@ public class SensorHotspot {
         mWifiManager.startScan();
     }
 
+    public void unregisterReceiver() {
+        if(mContext != null && wifiReceiver != null) {
+            Log.d(Constants.SENSOR_WIFI, "unregistering wifiReceiver");
+            mContext.unregisterReceiver(wifiReceiver);
+        } else {
+            Log.d(Constants.SENSOR_WIFI, "failed to unregister wifiReceiver");
+        }
+    }
+
 }
