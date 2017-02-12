@@ -2,7 +2,6 @@ package ramsden.benjamin.navigationapp;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.media.RemotePlaybackClient;
 import android.util.Log;
 
 /**
@@ -11,19 +10,19 @@ import android.util.Log;
 
 public class SensorAudio {
 
-    RecordAudio recordAudio;
+    SensorAudioAsyncTask sensorAudioAsyncTask;
 
     public SensorAudio(Context context) {
         // Record to the external cache directory for visibility
-        recordAudio = new RecordAudio();
+        sensorAudioAsyncTask = new SensorAudioAsyncTask();
 
     }
 
     public void start() {
         Log.d(Constants.SENSOR_AUDIO, "startScan");
 
-        if(recordAudio.getStatus() == AsyncTask.Status.PENDING) {
-            recordAudio.execute();
+        if(sensorAudioAsyncTask.getStatus() == AsyncTask.Status.PENDING) {
+            sensorAudioAsyncTask.execute();
         }
 
     }
