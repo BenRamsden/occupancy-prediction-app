@@ -438,55 +438,8 @@ public class DataCollectionService extends Service {
         protected Object doInBackground(Object[] params) {
             Location location = (Location) params[0];
 
-            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-
             if(mMicrophone != null) {
-                mMicrophone.start();
-
-                int max_audio_polls = 100;
-                int audio_polls = 0;
-
-                Integer amplitude = 0;
-
-                while(audio_polls < max_audio_polls) {
-                    amplitude = -1;
-
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    audio_polls++;
-                }
-
-                mMicrophone.stop();
-
-                if(amplitude == null) {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: audio_histogram is null");
-
-                } else {
-                    JSONObject audio_histogram = new JSONObject();
-                    JSONObject entry0 = new JSONObject();
-
-                    try {
-                        entry0.put("lo",0).put("hi",20000).put("vl", amplitude);
-                        audio_histogram.put("0", entry0);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    ContentValues audioValues = new ContentValues();
-                    audioValues.put(NavigationContract.AudioObservations.KEY_LATITUDE, location.getLatitude());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_LONGITUDE, location.getLongitude());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_AUDIO_HISTOGRAM, audio_histogram.toString());
-                    audioValues.put(NavigationContract.AudioObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri audioUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AudioObservations.TABLE_NAME);
-                    getContentResolver().insert(audioUri, audioValues);
-
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent audio_histogram: " + audio_histogram.toString());
-                }
-
+                mMicrophone.start(location);
             } else {
                 Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
             }
