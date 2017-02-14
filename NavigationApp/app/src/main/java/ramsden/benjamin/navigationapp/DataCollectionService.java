@@ -93,8 +93,13 @@ public class DataCollectionService extends Service {
 
             // collect Bluetooth Observations
             if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
-                AsyncTask sendBluetooth = new SendBluetooth();
-                sendBluetooth.execute(location);
+
+                if(mBluetooth != null) {
+                    mBluetooth.start(location);
+                } else {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
+                }
+
                 lastBluetoothObservation = System.currentTimeMillis();
             }
 
@@ -380,65 +385,6 @@ public class DataCollectionService extends Service {
         }
     }
 
-    class SendBluetooth extends AsyncTask {
 
-        @Override
-        protected Object doInBackground(Object[] params) {
-            Location location = (Location) params[0];
-
-            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-
-            if(mBluetooth != null) {
-                mBluetooth.startDiscovery();
-
-                int max_bluetooth_polls = 300;
-                int bluetooth_polls = 0;
-
-                Integer bluetooth_count = 0;
-                int consistent_count = 0;
-
-                while(consistent_count < 100 && bluetooth_polls < max_bluetooth_polls) {
-                    Integer temp_bluetooth_count = mBluetooth.getBluetoothDeviceCount();
-
-                    if(temp_bluetooth_count == bluetooth_count) {
-                        consistent_count++;
-                    } else {
-                        consistent_count = 0;
-                        bluetooth_count = temp_bluetooth_count;
-                    }
-
-                    Log.d(Constants.SENSOR_BLUETOOTH, "bluetooth_count: " + bluetooth_count + " consistent_count: " + consistent_count + " bluetooth_polls: " + bluetooth_polls);
-
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    bluetooth_polls++;
-                }
-
-
-                if(bluetooth_count == null) {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: bluetooth_count is null");
-                } else {
-                    ContentValues bluetoothValues = new ContentValues();
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LATITUDE, location.getLatitude());
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_LONGITUDE, location.getLongitude());
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_BLUETOOTH_COUNT, bluetooth_count);
-                    bluetoothValues.put(NavigationContract.BluetoothObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri bluetoothUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.BluetoothObservations.TABLE_NAME);
-                    getContentResolver().insert(bluetoothUri, bluetoothValues);
-
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent bluetooth_count: " + bluetooth_count);
-                }
-
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-            }
-
-            return null;
-        }
-    }
 
 }
