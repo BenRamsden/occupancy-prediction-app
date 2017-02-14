@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,13 +21,46 @@ import java.util.List;
 
 public class SensorHotspot {
 
+    private Context mContext;
+    private WifiManager mWifiManager;
+    private List<ScanResult> mScanResults;
+
+    /* This variable is set by the start method, and unset by the broadcast receiver
+     * In effect this means only 1 scan result is sent for a location after start() is called */
+    private Location mLocation = null;
+
+    public SensorHotspot(Context context) {
+        mContext = context;
+
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+
+        mContext.registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+    }
+
+    public void start(Location location) {
+        Log.d(Constants.SENSOR_HOTSPOT, "start");
+
+        mLocation = location;
+
+        mWifiManager.startScan(); /* TODO: Investigate is this needed, could wait for a system invoked one first, then if not trigger our own scan */
+    }
+
+    public void unregisterReceiver() {
+        if(mContext != null && wifiReceiver != null) {
+            Log.d(Constants.SENSOR_HOTSPOT, "unregistering wifiReceiver");
+            mContext.unregisterReceiver(wifiReceiver);
+        } else {
+            Log.d(Constants.SENSOR_HOTSPOT, "failed to unregister wifiReceiver");
+        }
+    }
+
     private final BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 
                 if(mLocation == null) {
-                    Log.d(Constants.SENSOR_WIFI, "wifiReceiver got SCAN_RESULTS_AVAILABLE_ACTION but mLocation is null, likely scan result is not app invoked");
+                    Log.d(Constants.SENSOR_HOTSPOT, "wifiReceiver got SCAN_RESULTS_AVAILABLE_ACTION but mLocation is null, likely scan result is not app invoked");
                     return;
                 }
 
@@ -44,42 +76,13 @@ public class SensorHotspot {
                 Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
                 mContext.getContentResolver().insert(hotspotUri, hotspotValues);
 
-                Log.d(Constants.SENSOR_WIFI, "Sent wifi count: " + mScanResults.size());
+                Log.d(Constants.SENSOR_HOTSPOT, "Sent wifi count: " + mScanResults.size());
 
-                /* Set callback to null so future non-app invoked scan results do not get sent with outdated location data */
+                /* Set location to null so future non-app invoked scan results do not get sent with outdated location data */
                 mLocation = null;
 
             }
         }
     };
-
-    private Context mContext;
-    private WifiManager mWifiManager;
-    private List<ScanResult> mScanResults;
-
-    private Location mLocation = null;
-
-    public SensorHotspot(Context context) {
-        mContext = context;
-
-        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-
-        mContext.registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-    }
-
-    public void start(Location location) {
-        mLocation = location;
-
-        mWifiManager.startScan(); /* TODO: Investigate is this needed, could wait for a system invoked one first, then if not trigger our own scan */
-    }
-
-    public void unregisterReceiver() {
-        if(mContext != null && wifiReceiver != null) {
-            Log.d(Constants.SENSOR_WIFI, "unregistering wifiReceiver");
-            mContext.unregisterReceiver(wifiReceiver);
-        } else {
-            Log.d(Constants.SENSOR_WIFI, "failed to unregister wifiReceiver");
-        }
-    }
 
 }

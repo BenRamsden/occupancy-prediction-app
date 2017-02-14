@@ -3,7 +3,6 @@ package ramsden.benjamin.navigationapp;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,9 +13,6 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.net.wifi.ScanResult;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -25,13 +21,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
-
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Manages the applications LocationListener
@@ -70,20 +59,23 @@ public class DataCollectionService extends Service {
         public void onLocationChanged(Location location) {
             Log.d(Constants.DATA_COLLECTION_SERVICE,"onLocationChanged: " + location.toString());
 
-            String current_date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-
             // collect Accelerometer Observations
             if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
-                AsyncTask sendAccelerometer = new SendAccelerometer();
-                sendAccelerometer.execute(location);
+
+                if(sensorAccelerometer != null) {
+                    sensorAccelerometer.start(location);
+                } else {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
+                }
+
                 lastAccelerometerObservation = System.currentTimeMillis();
             }
 
             // collect Audio Observations
             if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
 
-                if(mMicrophone != null) {
-                    mMicrophone.start(location);
+                if(sensorAudio != null) {
+                    sensorAudio.start(location);
                 } else {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
                 }
@@ -94,8 +86,8 @@ public class DataCollectionService extends Service {
             // collect Bluetooth Observations
             if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
 
-                if(mBluetooth != null) {
-                    mBluetooth.start(location);
+                if(sensorBluetooth != null) {
+                    sensorBluetooth.start(location);
                 } else {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
                 }
@@ -105,17 +97,19 @@ public class DataCollectionService extends Service {
 
             // collect Crowd Observations
             if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
+
                 // TODO: Crowd observations
+
                 lastCrowdObservation = System.currentTimeMillis();
             }
 
             // collect Hotspot Observations
             if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
 
-                if(mWifi != null) {
-                    mWifi.start(location);
+                if(sensorHotspot != null) {
+                    sensorHotspot.start(location);
                 } else {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_WIFI + " is null");
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
                 }
 
                 lastHotspotObservation = System.currentTimeMillis();
@@ -146,15 +140,15 @@ public class DataCollectionService extends Service {
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
-    private SensorAccelerometer mAccelerometerListener;
+    private SensorAccelerometer sensorAccelerometer;
 
     private void initAccelerometer() {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mAccelerometerListener = new SensorAccelerometer();
-            mSensorManager.registerListener(mAccelerometerListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorAccelerometer = new SensorAccelerometer(DataCollectionService.this);
+            mSensorManager.registerListener(sensorAccelerometer, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             Log.d(Constants.DATA_COLLECTION_SERVICE, "Accelerometer Sensor SUCCESS (Subscribed)");
         } else {
             mAccelerometer = null;
@@ -166,30 +160,30 @@ public class DataCollectionService extends Service {
 
     /*************** Microphone */
 
-    SensorAudio mMicrophone;
+    SensorAudio sensorAudio;
 
     private void initMicrophone() {
-        mMicrophone = new SensorAudio(this);
+        sensorAudio = new SensorAudio(this);
     }
 
     /*******************************/
 
     /*************** Bluetooth */
 
-    SensorBluetooth mBluetooth;
+    SensorBluetooth sensorBluetooth;
 
     private void initBluetooth() {
-        mBluetooth = new SensorBluetooth(this);
+        sensorBluetooth = new SensorBluetooth(this);
     }
 
     /*******************************/
 
     /*************** Wifi */
 
-    SensorHotspot mWifi;
+    SensorHotspot sensorHotspot;
 
     private void initWifi() {
-        mWifi = new SensorHotspot(this);
+        sensorHotspot = new SensorHotspot(this);
     }
 
     /*******************************/
@@ -339,52 +333,15 @@ public class DataCollectionService extends Service {
             }
         }
 
-        if(mBluetooth != null) {
-            mBluetooth.unregisterReceiver();
+        if(sensorBluetooth != null) {
+            sensorBluetooth.unregisterReceiver();
         }
 
-        if(mWifi != null) {
-            mWifi.unregisterReceiver();
+        if(sensorHotspot != null) {
+            sensorHotspot.unregisterReceiver();
         }
 
         super.onDestroy();
     }
-
-    class SendAccelerometer extends AsyncTask {
-
-        @Override
-        protected Object doInBackground(Object[] params) {
-            Location location = (Location) params[0];
-
-            String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-
-            if(mAccelerometerListener != null) {
-                HashMap<String, JSONObject> acceleration_timeline = mAccelerometerListener.getAccelerationTimeline();
-
-                JSONObject acceleration_timeline_json = new JSONObject(acceleration_timeline);
-
-                if(acceleration_timeline_json.length() == 0) {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Result: acceleration_timeline has length 0");
-                } else {
-                    ContentValues accelerometerValues = new ContentValues();
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, location.getLatitude());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, location.getLongitude());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, acceleration_timeline_json.toString());
-                    accelerometerValues.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, current_date);
-                    Uri accelerometerUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.AccelerometerObservations.TABLE_NAME);
-                    getContentResolver().insert(accelerometerUri, accelerometerValues);
-
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent acceleration timeline: " + acceleration_timeline_json.toString());
-                }
-
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
-            }
-
-            return null;
-        }
-    }
-
-
 
 }

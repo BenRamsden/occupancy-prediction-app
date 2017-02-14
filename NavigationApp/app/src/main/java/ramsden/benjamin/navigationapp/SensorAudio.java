@@ -38,17 +38,18 @@ public class SensorAudio {
     public void start(Location location) {
         Log.d(Constants.SENSOR_AUDIO, "start");
 
-        mLocation = location;
-
         if(sensorAudioAsyncTask != null && sensorAudioAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
             Log.d(Constants.SENSOR_AUDIO, "sensorAudioAsyncTask has status RUNNING, refused to start another");
             return;
         }
 
+        mLocation = location;
+
         sensorAudioAsyncTask = new SensorAudioAsyncTask();
 
         sensorAudioAsyncTask.execute();
     }
+
 
     public class SensorAudioAsyncTask extends AsyncTask<Void, double[], Boolean> {
 

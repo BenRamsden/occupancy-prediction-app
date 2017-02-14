@@ -57,12 +57,12 @@ public class SensorBluetooth {
     public void start(Location location) {
         Log.d(Constants.SENSOR_BLUETOOTH, "start");
 
-        mLocation = location;
-
         if(sensorBluetoothAsyncTask != null && sensorBluetoothAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
             Log.d(Constants.SENSOR_BLUETOOTH, "sensorBluetoothAsyncTask has status RUNNING, refused to start another");
             return;
         }
+
+        mLocation = location;
 
         sensorBluetoothAsyncTask = new SensorBluetoothAsyncTask();
 
@@ -112,7 +112,7 @@ public class SensorBluetooth {
                     bluetooth_count = temp_bluetooth_count;
                 }
 
-                Log.d(Constants.SENSOR_BLUETOOTH, "bluetooth_count: " + bluetooth_count + " consistent_count: " + consistent_count + " bluetooth_polls: " + bluetooth_polls);
+                //Log.d(Constants.SENSOR_BLUETOOTH, "bluetooth_count: " + bluetooth_count + " consistent_count: " + consistent_count + " bluetooth_polls: " + bluetooth_polls);
 
                 try {
                     Thread.sleep(100);
