@@ -26,7 +26,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -107,8 +106,13 @@ public class DataCollectionService extends Service {
 
             // collect Hotspot Observations
             if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
-                AsyncTask sendHotspot = new SendWifi();
-                sendHotspot.execute(location);
+
+                if(mWifi != null) {
+                    mWifi.start(location);
+                } else {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_WIFI + " is null");
+                }
+
                 lastHotspotObservation = System.currentTimeMillis();
             }
 
@@ -437,37 +441,4 @@ public class DataCollectionService extends Service {
         }
     }
 
-    class SendWifi extends AsyncTask {
-
-        @Override
-        protected Object doInBackground(Object[] params) {
-            final Location location = (Location) params[0];
-
-            final String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-
-            if(mWifi != null) {
-
-                mWifi.startScan(new SensorHotspotCallback() {
-                    @Override
-                    public void sendScanResults(List<ScanResult> scanResultList) {
-
-                        Log.d(Constants.DATA_COLLECTION_SERVICE, "sendScanResults received callback with scanResultsList: " + scanResultList.toString());
-
-                        ContentValues hotspotValues = new ContentValues();
-                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_LATITUDE, location.getLatitude());
-                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_LONGITUDE, location.getLongitude());
-                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_NUMBER_CONNECTED, scanResultList.size());
-                        hotspotValues.put(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE, current_date);
-                        Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
-                        getContentResolver().insert(hotspotUri, hotspotValues);
-
-                        Log.d(Constants.DATA_COLLECTION_SERVICE, "Sent wifi count: " + scanResultList.size());
-                    }
-                });
-
-            }
-
-            return null;
-        }
-    }
 }
