@@ -73,10 +73,9 @@ public class SensorHotspot {
                 for(ScanResult scanResult : mScanResults) {
                     ContentValues hotspotValues = new ContentValues();
                     hotspotValues.put(NavigationContract.Hotspots.KEY_SSID, scanResult.SSID);
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_CHANNEL, 0);
+                    hotspotValues.put(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL, scanResult.level);
                     hotspotValues.put(NavigationContract.Hotspots.KEY_FREQUENCY, scanResult.frequency);
                     hotspotValues.put(NavigationContract.Hotspots.KEY_MAC, scanResult.BSSID);
-                    // TODO: hotspotValues.put(NavigationContract.Hotspots.KEY_LEVEL, scanResult.level);
                     hotspotValues.put(NavigationContract.Hotspots.KEY_REGISTER_DATE, current_date);
                     Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.Hotspots.TABLE_NAME);
                     mContext.getContentResolver().insert(hotspotUri, hotspotValues);

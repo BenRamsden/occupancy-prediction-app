@@ -35,7 +35,7 @@ public class NavigationContract implements BaseColumns {
 
         public static final String KEY_SSID = "ssid";
         public static final String KEY_MAC = "mac";
-        public static final String KEY_CHANNEL = "channel";
+        public static final String KEY_SIGNAL_LEVEL = "signal_level";
         public static final String KEY_FREQUENCY = "frequency";
         public static final String KEY_REGISTER_DATE = "register_date";
     }

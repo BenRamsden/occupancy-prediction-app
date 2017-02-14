@@ -7,7 +7,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -173,20 +172,20 @@ public class NavigationContentProvider extends ContentProvider {
             switch (uriType) {
                 case USERS:
                     api_sub = "/users";
-                    insertJSON.put(NavigationContract.Users.KEY_USERNAME, NavigationContract.Users.KEY_USERNAME);
-                    insertJSON.put(NavigationContract.Users.KEY_PASSWORD, NavigationContract.Users.KEY_PASSWORD);
-                    insertJSON.put(NavigationContract.Users.KEY_FULL_NAME, NavigationContract.Users.KEY_FULL_NAME);
-                    insertJSON.put(NavigationContract.Users.KEY_API_TOKEN, NavigationContract.Users.KEY_API_TOKEN);
-                    insertJSON.put(NavigationContract.Users.KEY_EMAIL_ADDRESS, NavigationContract.Users.KEY_EMAIL_ADDRESS);
-                    insertJSON.put(NavigationContract.Users.KEY_REGISTER_DATE, NavigationContract.Users.KEY_REGISTER_DATE);
+                    insertJSON.put(NavigationContract.Users.KEY_USERNAME, values.get(NavigationContract.Users.KEY_USERNAME));
+                    insertJSON.put(NavigationContract.Users.KEY_PASSWORD, values.get(NavigationContract.Users.KEY_PASSWORD));
+                    insertJSON.put(NavigationContract.Users.KEY_FULL_NAME, values.get(NavigationContract.Users.KEY_FULL_NAME));
+                    insertJSON.put(NavigationContract.Users.KEY_API_TOKEN, values.get(NavigationContract.Users.KEY_API_TOKEN));
+                    insertJSON.put(NavigationContract.Users.KEY_EMAIL_ADDRESS, values.get(NavigationContract.Users.KEY_EMAIL_ADDRESS));
+                    insertJSON.put(NavigationContract.Users.KEY_REGISTER_DATE, values.get(NavigationContract.Users.KEY_REGISTER_DATE));
                     break;
                 case HOTSPOTS:
                     api_sub = "/hotspots";
-                    insertJSON.put(NavigationContract.Hotspots.KEY_SSID, NavigationContract.Hotspots.KEY_SSID);
-                    insertJSON.put(NavigationContract.Hotspots.KEY_CHANNEL, NavigationContract.Hotspots.KEY_CHANNEL);
-                    insertJSON.put(NavigationContract.Hotspots.KEY_FREQUENCY, NavigationContract.Hotspots.KEY_FREQUENCY);
-                    insertJSON.put(NavigationContract.Hotspots.KEY_MAC, NavigationContract.Hotspots.KEY_MAC);
-                    insertJSON.put(NavigationContract.Hotspots.KEY_REGISTER_DATE, NavigationContract.Hotspots.KEY_REGISTER_DATE);
+                    insertJSON.put(NavigationContract.Hotspots.KEY_SSID, values.get(NavigationContract.Hotspots.KEY_SSID));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL, values.get(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_FREQUENCY, values.get(NavigationContract.Hotspots.KEY_FREQUENCY));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_MAC, values.get(NavigationContract.Hotspots.KEY_MAC));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_REGISTER_DATE, values.get(NavigationContract.Hotspots.KEY_REGISTER_DATE));
                     break;
                 case HOTSPOT_OBSERVATIONS:
                     api_sub = "/observations/hotspot";
