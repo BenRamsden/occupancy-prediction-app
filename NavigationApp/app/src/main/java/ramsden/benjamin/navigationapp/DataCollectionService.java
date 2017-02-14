@@ -82,8 +82,13 @@ public class DataCollectionService extends Service {
 
             // collect Audio Observations
             if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
-                AsyncTask sendAudio = new SendAudio();
-                sendAudio.execute(location);
+
+                if(mMicrophone != null) {
+                    mMicrophone.start(location);
+                } else {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
+                }
+
                 lastAudioObservation = System.currentTimeMillis();
             }
 
@@ -426,22 +431,6 @@ public class DataCollectionService extends Service {
 
             } else {
                 Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-            }
-
-            return null;
-        }
-    }
-
-    class SendAudio extends AsyncTask {
-
-        @Override
-        protected Object doInBackground(Object[] params) {
-            Location location = (Location) params[0];
-
-            if(mMicrophone != null) {
-                mMicrophone.start(location);
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
             }
 
             return null;

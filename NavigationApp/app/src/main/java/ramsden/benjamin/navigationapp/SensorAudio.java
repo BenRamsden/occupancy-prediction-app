@@ -50,11 +50,6 @@ public class SensorAudio {
         sensorAudioAsyncTask.execute();
     }
 
-    public void stop() {
-        Log.d(Constants.SENSOR_AUDIO, "stop");
-
-    }
-
     public class SensorAudioAsyncTask extends AsyncTask<Void, double[], Boolean> {
 
         private static final int sampling_rate = 44100;
@@ -94,7 +89,7 @@ public class SensorAudio {
             double[] fft_buffer = new double[bin_size];
 
             for(int i = 0; i < 50000 && histograms_size < 5; i++) {
-                Log.d(Constants.SENSOR_AUDIO, "Spectogram analysis iteration " + i);
+                //Log.d(Constants.SENSOR_AUDIO, "Spectogram analysis iteration " + i);
 
                 buffer_size = audioRecord.read(read_buffer, 0, bin_size);
 
@@ -105,11 +100,12 @@ public class SensorAudio {
                 realDoubleFFT.ft(fft_buffer);
 
                 if(publishSkipCount == 0) {
-                    Log.d(Constants.SENSOR_AUDIO, "publishProgress");
+                    publishSkipCount = 255;
+
+                    Log.d(Constants.SENSOR_AUDIO, "Spectogram analysis publishProgress iteration: " + i);
                     publishProgress(fft_buffer);
                 } else {
                     publishSkipCount--;
-                    System.out.print("s");
                 }
 
             }
@@ -129,7 +125,7 @@ public class SensorAudio {
 
                 double vl = Math.abs(progress[0][bin]) * 10;
 
-                Log.d(Constants.SENSOR_AUDIO, "bin: " + bin + " lo: " + HzPerBin*bin + " hi: " + (HzPerBin*(bin+1)-1) + " vl: " + vl);
+                //Log.d(Constants.SENSOR_AUDIO, "bin: " + bin + " lo: " + HzPerBin*bin + " hi: " + (HzPerBin*(bin+1)-1) + " vl: " + vl);
 
                 try {
                     this_bin.put("lo", String.valueOf(HzPerBin*bin));
@@ -144,7 +140,6 @@ public class SensorAudio {
 
             try {
                 histograms.put(String.valueOf(histograms_size++), histogram);
-                publishSkipCount = 255;
             } catch (JSONException ex) {
                 Log.d(Constants.SENSOR_AUDIO, "JSONException putting histogram into histograms ex: " + ex.toString());
             }
