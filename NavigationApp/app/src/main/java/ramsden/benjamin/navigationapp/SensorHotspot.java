@@ -68,32 +68,25 @@ public class SensorHotspot {
 
                 mScanResults = mWifiManager.getScanResults();
 
-                /* TODO: combine into one send (change api) */
-                /* TODO: OR cache information already sent to avoid re-sending */
                 for(ScanResult scanResult : mScanResults) {
-                    ContentValues hotspotValues = new ContentValues();
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_SSID, scanResult.SSID);
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL, scanResult.level);
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_FREQUENCY, scanResult.frequency);
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_MAC, scanResult.BSSID);
-                    hotspotValues.put(NavigationContract.Hotspots.KEY_REGISTER_DATE, current_date);
-                    Uri hotspotUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.Hotspots.TABLE_NAME);
-                    mContext.getContentResolver().insert(hotspotUri, hotspotValues);
+                    ContentValues hotspotObservationValues = new ContentValues();
 
-                    Log.d(Constants.SENSOR_HOTSPOT, "Sent hotspot: " + scanResult.SSID);
+                    /* Hotspot entry */
+                    hotspotObservationValues.put(NavigationContract.Hotspots.KEY_SSID, scanResult.SSID);
+                    hotspotObservationValues.put(NavigationContract.Hotspots.KEY_FREQUENCY, scanResult.frequency);
+                    hotspotObservationValues.put(NavigationContract.Hotspots.KEY_MAC, scanResult.BSSID);
+
+                    /* Hotspot Observation entry */
+                    hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_LATITUDE, mLocation.getLatitude());
+                    hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_LONGITUDE, mLocation.getLongitude());
+                    hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_SIGNAL_LEVEL, scanResult.level);
+                    hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE, current_date);
+
+                    Uri hotspotObservationUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
+                    mContext.getContentResolver().insert(hotspotObservationUri, hotspotObservationValues);
+
+                    Log.d(Constants.SENSOR_HOTSPOT, "Sent hotspot: " + scanResult.SSID + " with signal_level: " + scanResult.level);
                 }
-
-                Integer number_connected = 0; //not yet authorised to count ip's on local subnet
-
-                ContentValues hotspotObservationValues = new ContentValues();
-                hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_LATITUDE, mLocation.getLatitude());
-                hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_LONGITUDE, mLocation.getLongitude());
-                hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_NUMBER_CONNECTED, number_connected);
-                hotspotObservationValues.put(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE, current_date);
-                Uri hotspotObservationUri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.HotspotObservations.TABLE_NAME);
-                mContext.getContentResolver().insert(hotspotObservationUri, hotspotObservationValues);
-
-                Log.d(Constants.SENSOR_HOTSPOT, "Sent hotspotObservation count: " + number_connected);
 
                 /* Set location to null so future non-app invoked scan results do not get sent with outdated location data */
                 mLocation = null;

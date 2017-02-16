@@ -35,9 +35,7 @@ public class NavigationContract implements BaseColumns {
 
         public static final String KEY_SSID = "ssid";
         public static final String KEY_MAC = "mac";
-        public static final String KEY_SIGNAL_LEVEL = "signal_level";
         public static final String KEY_FREQUENCY = "frequency";
-        public static final String KEY_REGISTER_DATE = "register_date";
     }
 
     public static class HotspotObservations {
@@ -50,7 +48,7 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_LATITUDE = "lat";
         public static final String KEY_LONGITUDE = "lng";
 
-        public static final String KEY_NUMBER_CONNECTED = "number_connected";
+        public static final String KEY_SIGNAL_LEVEL = "signal_level";
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 

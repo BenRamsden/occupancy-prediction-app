@@ -181,17 +181,18 @@ public class NavigationContentProvider extends ContentProvider {
                     break;
                 case HOTSPOTS:
                     api_sub = "/hotspots";
-                    insertJSON.put(NavigationContract.Hotspots.KEY_SSID, values.get(NavigationContract.Hotspots.KEY_SSID));
-                    insertJSON.put(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL, values.get(NavigationContract.Hotspots.KEY_SIGNAL_LEVEL));
-                    insertJSON.put(NavigationContract.Hotspots.KEY_FREQUENCY, values.get(NavigationContract.Hotspots.KEY_FREQUENCY));
-                    insertJSON.put(NavigationContract.Hotspots.KEY_MAC, values.get(NavigationContract.Hotspots.KEY_MAC));
-                    insertJSON.put(NavigationContract.Hotspots.KEY_REGISTER_DATE, values.get(NavigationContract.Hotspots.KEY_REGISTER_DATE));
-                    break;
+                    throw new Error("/hotspots does not have a direct insert api, use /observations/hotspot");
                 case HOTSPOT_OBSERVATIONS:
                     api_sub = "/observations/hotspot";
+                    /* Hotspots entry */
+                    insertJSON.put(NavigationContract.Hotspots.KEY_SSID, values.get(NavigationContract.Hotspots.KEY_SSID));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_FREQUENCY, values.get(NavigationContract.Hotspots.KEY_FREQUENCY));
+                    insertJSON.put(NavigationContract.Hotspots.KEY_MAC, values.get(NavigationContract.Hotspots.KEY_MAC));
+
+                    /* Hotspot Observation Entry */
                     insertJSON.put(NavigationContract.HotspotObservations.KEY_LATITUDE, values.get(NavigationContract.HotspotObservations.KEY_LATITUDE));
                     insertJSON.put(NavigationContract.HotspotObservations.KEY_LONGITUDE, values.get(NavigationContract.HotspotObservations.KEY_LONGITUDE));
-                    insertJSON.put(NavigationContract.HotspotObservations.KEY_NUMBER_CONNECTED, values.get(NavigationContract.HotspotObservations.KEY_NUMBER_CONNECTED));
+                    insertJSON.put(NavigationContract.HotspotObservations.KEY_SIGNAL_LEVEL, values.get(NavigationContract.HotspotObservations.KEY_SIGNAL_LEVEL));
                     insertJSON.put(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE, values.get(NavigationContract.HotspotObservations.KEY_OBSERVATION_DATE));
                     break;
                 case AUDIO_OBSERVATIONS:
