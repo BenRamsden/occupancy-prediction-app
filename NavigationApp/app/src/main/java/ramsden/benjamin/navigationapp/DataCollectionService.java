@@ -22,6 +22,8 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationServices;
+
 /**
  * Manages the applications LocationListener
  * Ensures that the location listener continues to provide the content provider with information
@@ -36,111 +38,16 @@ public class DataCollectionService extends Service {
     private Notification foregroundNotif;
     private boolean notifActive = false;
 
-    private MyLocationListener locationListener = null;
-
-    class MyLocationListener implements LocationListener {
-
-        long lastAccelerometerObservation = 0;
-        long accelerometerMinIntervalMillis = 60000;
-
-        long lastAudioObservation = 0;
-        long audioMinIntervalMillis = 60000;
-
-        long lastBluetoothObservation = 0;
-        long bluetoothMinIntervalMillis = 60000;
-
-        long lastCrowdObservation = 0;
-        long crowdMinIntervalMillis = 60000;
-
-        long lastHotspotObservation = 0;
-        long hotspotMinIntervalMillis = 60000;
-
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.d(Constants.DATA_COLLECTION_SERVICE,"onLocationChanged: " + location.toString());
-
-            // collect Accelerometer Observations
-            if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
-
-                if(sensorAccelerometer != null) {
-                    sensorAccelerometer.start(location);
-                } else {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
-                }
-
-                lastAccelerometerObservation = System.currentTimeMillis();
-            }
-
-            // collect Audio Observations
-            if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
-
-                if(sensorAudio != null) {
-                    sensorAudio.start(location);
-                } else {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
-                }
-
-                lastAudioObservation = System.currentTimeMillis();
-            }
-
-            // collect Bluetooth Observations
-            if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
-
-                if(sensorBluetooth != null) {
-                    sensorBluetooth.start(location);
-                } else {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-                }
-
-                lastBluetoothObservation = System.currentTimeMillis();
-            }
-
-            // collect Crowd Observations
-            if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
-
-                // TODO: Crowd observations
-
-                lastCrowdObservation = System.currentTimeMillis();
-            }
-
-            // collect Hotspot Observations
-            if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
-
-                if(sensorHotspot != null) {
-                    sensorHotspot.start(location);
-                } else {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
-                }
-
-                lastHotspotObservation = System.currentTimeMillis();
-            }
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(Constants.DATA_COLLECTION_SERVICE,"onStatusChanged: " + status);
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.d(Constants.DATA_COLLECTION_SERVICE,"onProviderEnabled: " + provider);
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.d(Constants.DATA_COLLECTION_SERVICE,"onProviderDisabled: " + provider);
-
-        }
-    }
+    private MyLocationListener locationListener;
 
     /*************** Accelerometer */
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private SensorAccelerometer sensorAccelerometer;
+
+    private long lastAccelerometerObservation = 0;
+    private long accelerometerMinIntervalMillis = 60000;
 
     private void initAccelerometer() {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -156,34 +63,125 @@ public class DataCollectionService extends Service {
         }
     }
 
+    public void startAccelerometer(Location location) {
+        if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
+
+            if(sensorAccelerometer != null) {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
+                sensorAccelerometer.start(location);
+            } else {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
+            }
+
+            lastAccelerometerObservation = System.currentTimeMillis();
+        } else {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " got location update, but minIntevalMillis not passed yet");
+        }
+    }
+
     /*******************************/
 
     /*************** Microphone */
 
-    SensorAudio sensorAudio;
+    private SensorAudio sensorAudio;
+
+    private long lastAudioObservation = 0;
+    private long audioMinIntervalMillis = 60000;
 
     private void initMicrophone() {
         sensorAudio = new SensorAudio(this);
+    }
+
+    public void startAudio(Location location) {
+        if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
+
+            if(sensorAudio != null) {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " started taking a reading");
+                sensorAudio.start(location);
+            } else {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
+            }
+
+            lastAudioObservation = System.currentTimeMillis();
+        } else {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " got location update, but minIntevalMillis not passed yet");
+        }
     }
 
     /*******************************/
 
     /*************** Bluetooth */
 
-    SensorBluetooth sensorBluetooth;
+    private SensorBluetooth sensorBluetooth;
+
+    private long lastBluetoothObservation = 0;
+    private long bluetoothMinIntervalMillis = 60000;
 
     private void initBluetooth() {
         sensorBluetooth = new SensorBluetooth(this);
+    }
+
+    public void startBluetooth(Location location) {
+        if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
+
+            if(sensorBluetooth != null) {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " started taking a reading");
+                sensorBluetooth.start(location);
+            } else {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
+            }
+
+            lastBluetoothObservation = System.currentTimeMillis();
+        } else {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " got location update, but minIntevalMillis not passed yet");
+        }
     }
 
     /*******************************/
 
     /*************** Wifi */
 
-    SensorHotspot sensorHotspot;
+    private SensorHotspot sensorHotspot;
+
+    private long lastHotspotObservation = 0;
+    private long hotspotMinIntervalMillis = 60000;
 
     private void initWifi() {
         sensorHotspot = new SensorHotspot(this);
+    }
+
+    public void startHotspot(Location location) {
+        if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
+
+            if(sensorHotspot != null) {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " started taking a reading");
+                sensorHotspot.start(location);
+            } else {
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
+            }
+
+            lastHotspotObservation = System.currentTimeMillis();
+        } else {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " got location update, but minIntevalMillis not passed yet");
+        }
+    }
+
+    /*******************************/
+
+    /*************** Crowd */
+
+    private long lastCrowdObservation = 0;
+    private long crowdMinIntervalMillis = 60000;
+
+    public void startCrowd(Location location) {
+        if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
+
+            // TODO: Crowd observations
+
+            lastCrowdObservation = System.currentTimeMillis();
+        } else {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_CROWD + " got location update, but minIntevalMillis not passed yet");
+        }
     }
 
     /*******************************/
@@ -191,10 +189,10 @@ public class DataCollectionService extends Service {
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
      */
-    private long minTime = MainActivity.DEFAULT_MIN_TIME;  //minimum time different between 2 location updates
+    private long minTime = Constants.DEFAULT_MIN_TIME;  //minimum time different between 2 location updates
     public long getMinTime() { return minTime; }
 
-    private float minDistance = MainActivity.DEFAULT_MIN_DISTANCE;   //minimum distance between 2 location updates
+    private float minDistance = Constants.DEFAULT_MIN_DISTANCE;   //minimum distance between 2 location updates
     public float getMinDistance() { return minDistance; }
 
     public void updateLocationListenerOptions(long minTime, float minDistance) {
@@ -246,6 +244,10 @@ public class DataCollectionService extends Service {
         initWifi();
 
         initLocationListener();
+
+        /* TODO: Experiment with calling locationListener.locationChanged(location)
+         * With the last received location, if no update has been provided by system for a period
+         * Meaning we get up to date data at the current location */
 
     }
 
@@ -306,7 +308,7 @@ public class DataCollectionService extends Service {
             }
         } else {
             /* Create instance of the location listener for the first time */
-            locationListener = new MyLocationListener();
+            locationListener = new MyLocationListener(this);
         }
 
         try {

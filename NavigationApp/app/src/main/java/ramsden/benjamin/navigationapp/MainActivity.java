@@ -25,17 +25,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    public static final long DEFAULT_MIN_TIME = 1;
-    public static final float DEFAULT_MIN_DISTANCE = 1f;
-
-    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
-    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
-    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH = 757;
-    private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN = 767;
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 777;
-    private static final int MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE = 787;
-    private static final int MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE = 797;
-
     /* Connection to the DataCollectionService
      * In the main activity this is purely used to ensure the DataCollectionService
      * Is destroyed upon exiting the application
@@ -142,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting ACCESS_FINE_LOCATION permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constants.MY_PERMISSIONS_REQUEST_FINE_LOCATION);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied ACCESS_FINE_LOCATION permission");
@@ -157,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting RECORD_AUDIO permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, Constants.MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied RECORD_AUDIO permission");
@@ -173,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH}, MY_PERMISSIONS_REQUEST_BLUETOOTH);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH}, Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied BLUETOOTH permission");
@@ -189,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting BLUETOOTH_ADMIN permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied BLUETOOTH_ADMIN permission");
@@ -204,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting WRITE_EXTERNAL_STORAGE permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied WRITE_EXTERNAL_STORAGE permission");
@@ -219,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting ACCESS_WIFI_STATE permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_WIFI_STATE}, MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_WIFI_STATE}, Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied ACCESS_WIFI_STATE permission");
@@ -234,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(requestIfNotGranted) {
             Log.d(Constants.PERMISSIONS, "Requesting CHANGE_WIFI_STATE permission");
 
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE);
             return;
         } else {
             Log.d(Constants.PERMISSIONS, "User denied CHANGE_WIFI_STATE permission");
@@ -261,13 +250,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_FINE_LOCATION:
-            case MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
-            case MY_PERMISSIONS_REQUEST_BLUETOOTH:
-            case MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
-            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
-            case MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE:
-            case MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE:
+            case Constants.MY_PERMISSIONS_REQUEST_FINE_LOCATION:
+            case Constants.MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
+            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH:
+            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
+            case Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
+            case Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE:
+            case Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE:
                 checkPermissionsStartService(false);
                 break;
             default:
