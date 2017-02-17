@@ -9,8 +9,10 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -32,67 +34,48 @@ public class DataCollectionService extends Service {
     private Notification foregroundNotif;
     private boolean notifActive = false;
 
-    private MyLocationListener locationListener;
-
-    /*************** Accelerometer */
-
     private SensorAccelerometerManager sensorAccelerometerManager;
-
-    public void startAccelerometer(Location location) {
-        if(sensorAccelerometerManager != null) {
-            sensorAccelerometerManager.startAccelerometer(location);
-        }
-    }
-
-    /*******************************/
-
-    /*************** Microphone */
-
     private SensorAudioManager sensorAudioManager;
-
-    public void startAudio(Location location) {
-        if(sensorAudioManager != null) {
-            sensorAudioManager.startAudio(location);
-        }
-    }
-
-    /*******************************/
-
-    /*************** Bluetooth */
-
     private SensorBluetoothManager sensorBluetoothManager;
-
-    public void startBluetooth(Location location) {
-        if(sensorBluetoothManager != null) {
-            sensorBluetoothManager.startBluetooth(location);
-        }
-    }
-
-    /*******************************/
-
-    /*************** Wifi */
-
     private SensorHotspotManager sensorHotspotManager;
-
-    public void startHotspot(Location location) {
-        if(sensorHotspotManager != null) {
-            sensorHotspotManager.startHotspot(location);
-        }
-    }
-
-    /*******************************/
-
-    /*************** Crowd */
-
     private SensorCrowdManager sensorCrowdManager;
 
-    public void startCrowd(Location location) {
-        if(sensorCrowdManager != null) {
+    private MyLocationListener locationListener;
+
+    class MyLocationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(Constants.MY_LOCATION_LISTENER,"onLocationChanged: " + location.toString());
+
+            sensorAccelerometerManager.startAccelerometer(location);
+
+            sensorAudioManager.startAudio(location);
+
+            sensorBluetoothManager.startBluetooth(location);
+
             sensorCrowdManager.startCrowd(location);
+
+            sensorHotspotManager.startHotspot(location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d(Constants.MY_LOCATION_LISTENER,"onStatusChanged: " + status);
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderEnabled: " + provider);
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderDisabled: " + provider);
+
         }
     }
-
-    /*******************************/
 
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
@@ -218,7 +201,7 @@ public class DataCollectionService extends Service {
             }
         } else {
             /* Create instance of the location listener for the first time */
-            locationListener = new MyLocationListener(this);
+            locationListener = new MyLocationListener();
         }
 
         try {
