@@ -14,7 +14,7 @@ public class SensorAudioManager {
     private SensorAudio sensorAudio;
 
     private long lastAudioObservation = 0;
-    private long audioMinIntervalMillis = 60000;
+    private long audioMinIntervalMillis = Constants.DEFAULT_AUDIO_INTERVAL;
 
     public SensorAudioManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;

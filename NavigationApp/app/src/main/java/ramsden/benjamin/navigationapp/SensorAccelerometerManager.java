@@ -19,7 +19,7 @@ public class SensorAccelerometerManager {
     private SensorAccelerometer sensorAccelerometer;
 
     private long lastAccelerometerObservation = 0;
-    private long accelerometerMinIntervalMillis = 60000;
+    private long accelerometerMinIntervalMillis = Constants.DEFAULT_ACCELEROMETER_INTERVAL;
 
     public SensorAccelerometerManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;

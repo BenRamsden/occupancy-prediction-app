@@ -15,7 +15,7 @@ public class SensorBluetoothManager {
     private SensorBluetooth sensorBluetooth;
 
     private long lastBluetoothObservation = 0;
-    private long bluetoothMinIntervalMillis = 60000;
+    private long bluetoothMinIntervalMillis = Constants.DEFAULT_BLUETOOTH_INTERVAL;
 
     public SensorBluetoothManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;

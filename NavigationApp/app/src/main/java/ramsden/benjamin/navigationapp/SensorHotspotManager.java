@@ -14,7 +14,7 @@ public class SensorHotspotManager {
     private SensorHotspot sensorHotspot;
 
     private long lastHotspotObservation = 0;
-    private long hotspotMinIntervalMillis = 60000;
+    private long hotspotMinIntervalMillis = Constants.DEFAULT_HOTSPOT_INTERVAL;
 
     public SensorHotspotManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;

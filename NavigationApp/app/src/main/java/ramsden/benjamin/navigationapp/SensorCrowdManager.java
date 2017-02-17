@@ -12,7 +12,7 @@ public class SensorCrowdManager {
     private DataCollectionService mDataCollectionService;
 
     private long lastCrowdObservation = 0;
-    private long crowdMinIntervalMillis = 60000;
+    private long crowdMinIntervalMillis = Constants.DEFAULT_CROWD_INTERVAL;
 
     public SensorCrowdManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;
