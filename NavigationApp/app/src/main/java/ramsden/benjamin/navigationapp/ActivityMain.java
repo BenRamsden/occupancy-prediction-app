@@ -155,7 +155,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (PermissionManager.isManagedPermission(requestCode)) {
+        if (grantResults.length > 0 && PermissionManager.isManagedPermission(requestCode)) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 checkPermissionsStartService(true);
             } else {
