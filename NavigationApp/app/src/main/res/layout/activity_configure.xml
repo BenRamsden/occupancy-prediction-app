@@ -12,11 +12,13 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <CheckBox
                 android:text="DataCollectionService Connected"
@@ -33,24 +35,81 @@
             android:layout_height="match_parent" >
 
             <Switch
-                android:text="Backgroud Data Collection"
+                android:text="Background Data Collection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/foreground_service_switch"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1" />
+
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:text="Minimum Location Distance"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView3"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/minimum_location_distance_edittext"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/minimum_location_distance_button"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:text="Minimum Location Time"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView6"
+                    android:layout_weight="1"
+                    android:layout_width="200dp" />
+
+                <EditText
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/minimum_location_time_edittext"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:id="@+id/minimum_location_time_button"
+                    android:layout_weight="1"
+                    android:layout_width="100dp" />
+            </LinearLayout>
+
+        </TableRow>
     </TableLayout>
 
 </RelativeLayout>

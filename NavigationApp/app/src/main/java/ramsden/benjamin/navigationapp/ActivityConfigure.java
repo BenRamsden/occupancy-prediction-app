@@ -5,12 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -29,6 +33,9 @@ public class ActivityConfigure extends AppCompatActivity {
 
             service_connected_checkbox.setChecked(true);
             foreground_service_switch.setChecked(dataCollectionService.isForegroundNotification());
+            minimum_location_distance_edittext.setText(String.valueOf( (int) dataCollectionService.getMinDistance()));
+            minimum_location_time_edittext.setText(String.valueOf(dataCollectionService.getMinTime()));
+
         }
 
         @Override
@@ -38,11 +45,15 @@ public class ActivityConfigure extends AppCompatActivity {
 
             service_connected_checkbox.setChecked(false);
             foreground_service_switch.setChecked(false);
+            minimum_location_time_edittext.setText("");
+            minimum_location_distance_edittext.setText("");
         }
     };
 
     private CheckBox service_connected_checkbox;
     private Switch foreground_service_switch;
+    private EditText minimum_location_distance_edittext;
+    private EditText minimum_location_time_edittext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +61,52 @@ public class ActivityConfigure extends AppCompatActivity {
         setContentView(R.layout.activity_configure);
 
         service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
+
+        minimum_location_distance_edittext = (EditText) findViewById(R.id.minimum_location_distance_edittext);
+
+        final Button minimum_location_distance_button = (Button) findViewById(R.id.minimum_location_distance_button);
+        minimum_location_distance_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = minimum_location_distance_edittext.getText().toString();
+
+                Float min_distance;
+
+                try {
+                    min_distance = Float.parseFloat(text);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityConfigure.this, "Minimum Distance entered is invalid", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                dataCollectionService.updateLocationListenerOptions(dataCollectionService.getMinTime(), min_distance);
+
+                Toast.makeText(ActivityConfigure.this, "Minimum location distance updated to " + min_distance, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        minimum_location_time_edittext = (EditText) findViewById(R.id.minimum_location_time_edittext);
+
+        final Button minimum_location_time_button = (Button) findViewById(R.id.minimum_location_time_button);
+        minimum_location_time_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = minimum_location_time_edittext.getText().toString();
+                Long min_time;
+
+                try {
+                    min_time = Long.parseLong(text);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityConfigure.this, "Minimum Time entered is invalid", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                dataCollectionService.updateLocationListenerOptions(min_time, dataCollectionService.getMinDistance());
+
+                Toast.makeText(ActivityConfigure.this, "Minimum location time updated to " + min_time, Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
         foreground_service_switch = (Switch) findViewById(R.id.foreground_service_switch);
         foreground_service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -62,8 +119,10 @@ public class ActivityConfigure extends AppCompatActivity {
                 }
 
                 if(isChecked) {
+                    Toast.makeText(ActivityConfigure.this, "Service foregrounded", Toast.LENGTH_SHORT).show();
                     dataCollectionService.startForegroundNotification();
                 } else {
+                    Toast.makeText(ActivityConfigure.this, "Service backgrounded", Toast.LENGTH_SHORT).show();
                     dataCollectionService.stopForegroundNotification();
                 }
 

@@ -126,7 +126,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
 
             unbindService(locationServiceConnection);
         }
-        
+
         if(!foreground_service) {
             stopService(new Intent(this, DataCollectionService.class));
         }
