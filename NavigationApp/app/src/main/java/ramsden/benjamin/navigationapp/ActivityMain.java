@@ -140,22 +140,15 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode) {
-            case Constants.MY_PERMISSIONS_REQUEST_FINE_LOCATION:
-            case Constants.MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
-            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH:
-            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
-            case Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
-            case Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE:
-            case Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkPermissionsStartService(true);
-                } else {
-                    checkPermissionsStartService(false);
-                }
-                break;
-            default:
-                Toast.makeText(ActivityMain.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
+        if (PermissionManager.isManagedPermission(requestCode)) {
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkPermissionsStartService(true);
+            } else {
+                /* Do not keep asking user for that permission if they denied the first time */
+                checkPermissionsStartService(false);
+            }
+        } else {
+            Toast.makeText(ActivityMain.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
         }
 
     }

@@ -49,6 +49,23 @@ public class PermissionManager {
         return true;
     }
 
+    public static boolean isManagedPermission(int requestCode) {
+
+        switch (requestCode) {
+            case Constants.MY_PERMISSIONS_REQUEST_FINE_LOCATION:
+            case Constants.MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
+            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH:
+            case Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN:
+            case Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
+            case Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE:
+            case Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE:
+                return true;
+            default:
+                return false;
+        }
+
+    }
+
     private static boolean requestPermission(Activity activity, String permission, int requestCode, boolean requestIfNotGranted) {
         if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
             Log.d(Constants.PERMISSIONS, "Got " + permission + " permission");
