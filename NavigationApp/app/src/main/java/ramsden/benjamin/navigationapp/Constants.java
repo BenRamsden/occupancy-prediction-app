@@ -8,6 +8,8 @@ public class Constants {
     public static final long DEFAULT_MIN_TIME = 15;
     public static final float DEFAULT_MIN_DISTANCE = 1f;
 
+    public static final long START_ALL_CLASSES_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
+
     public static final long DEFAULT_ACCELEROMETER_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
     public static final long DEFAULT_AUDIO_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
     public static final long DEFAULT_BLUETOOTH_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;

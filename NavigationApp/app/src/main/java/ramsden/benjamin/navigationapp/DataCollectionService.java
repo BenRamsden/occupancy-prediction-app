@@ -20,6 +20,9 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Manages the applications LocationListener
  * Ensures that the location listener continues to provide the content provider with information
@@ -42,20 +45,16 @@ public class DataCollectionService extends Service {
 
     private MyLocationListener locationListener;
 
+    private Location lastLocation = null;
+
     class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
             Log.d(Constants.MY_LOCATION_LISTENER,"onLocationChanged: " + location.toString());
 
-            sensorAccelerometerManager.startAccelerometer(location);
+            startAllSensors(location);
 
-            sensorAudioManager.startAudio(location);
-
-            sensorBluetoothManager.startBluetooth(location);
-
-            sensorCrowdManager.startCrowd(location);
-
-            sensorHotspotManager.startHotspot(location);
+            lastLocation = location;
         }
 
         @Override
@@ -141,6 +140,50 @@ public class DataCollectionService extends Service {
         /* TODO: Experiment with calling locationListener.locationChanged(location)
          * With the last received location, if no update has been provided by system for a period
          * Meaning we get up to date data at the current location */
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if(lastLocation != null) {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Started all sensors with lastLocation");
+                    startAllSensors(lastLocation);
+                } else {
+                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Could not start all sensors, lastLocation is null");
+                }
+            }
+        }, Constants.START_ALL_CLASSES_INTERVAL, Constants.START_ALL_CLASSES_INTERVAL);
+
+    }
+
+    private Timer timer = new Timer();
+
+    private long lastStartAllSensors = 0;
+
+    private void startAllSensors(Location location) {
+
+        if(lastStartAllSensors < System.currentTimeMillis() - Constants.START_ALL_CLASSES_INTERVAL) {
+            lastStartAllSensors = System.currentTimeMillis();
+
+            if(sensorAccelerometerManager != null) {
+                sensorAccelerometerManager.startAccelerometer(location);
+            }
+
+            if(sensorAudioManager != null) {
+                sensorAudioManager.startAudio(location);
+            }
+
+            if(sensorBluetoothManager != null) {
+                sensorBluetoothManager.startBluetooth(location);
+            }
+
+            if(sensorCrowdManager != null) {
+                sensorCrowdManager.startCrowd(location);
+            }
+
+            if(sensorHotspotManager != null) {
+                sensorHotspotManager.startHotspot(location);
+            }
+        }
 
     }
 
