@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.RatingBar;
 import android.widget.Toast;
 
 public class ActivityConfigure extends AppCompatActivity {
@@ -18,22 +19,31 @@ public class ActivityConfigure extends AppCompatActivity {
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(Constants.NAVIGATION_APP, "Service Connected to ActivityConfigure");
+            Log.d(Constants.ACTIVITY_CONFIGURE, "Service Connected to ActivityConfigure");
 
             DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
             dataCollectionService = binder.getService();
+
+            service_connection_ratingbar.setRating(1);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(Constants.ACTIVITY_CONFIGURE, "Service Disconnected from ActivityConfigure");
             dataCollectionService = null;
+
+            service_connection_ratingbar.setRating(0);
         }
     };
+
+    private RatingBar service_connection_ratingbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configure);
+
+        service_connection_ratingbar = (RatingBar) findViewById(R.id.service_connection_ratingbar);
 
         /* Do not ask user for permissions in this activity, just let them know they are needed or wont work */
         checkPermissionsStartService(false);

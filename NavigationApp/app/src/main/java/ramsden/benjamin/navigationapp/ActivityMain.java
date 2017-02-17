@@ -43,6 +43,8 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(Constants.NAVIGATION_APP, "Service Disconnected from ActivityMain");
+
             dataCollectionService = null;
         }
     };
