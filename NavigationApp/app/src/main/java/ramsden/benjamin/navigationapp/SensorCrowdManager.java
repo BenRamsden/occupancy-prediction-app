@@ -21,13 +21,13 @@ public class SensorCrowdManager {
     public void startCrowd(Location location) {
         if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
 
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_CROWD + " should be called, but does not yet exist");
+            Log.d(Constants.SENSOR_CROWD_MANAGER, "Sensor: " + Constants.SENSOR_CROWD + " should be called, but does not yet exist");
 
             // TODO: Crowd observations
 
             lastCrowdObservation = System.currentTimeMillis();
         } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_CROWD + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_CROWD_MANAGER, "Sensor: " + Constants.SENSOR_CROWD + " got location update, but minIntevalMillis not passed yet");
         }
     }
 

@@ -25,15 +25,15 @@ public class SensorHotspotManager {
         if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
 
             if(sensorHotspot != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " started taking a reading");
+                Log.d(Constants.SENSOR_HOTSPOT_MANAGER, "Sensor: " + Constants.SENSOR_HOTSPOT + " started taking a reading");
                 sensorHotspot.start(location);
             } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
+                Log.d(Constants.SENSOR_HOTSPOT_MANAGER, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
             }
 
             lastHotspotObservation = System.currentTimeMillis();
         } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_HOTSPOT_MANAGER, "Sensor: " + Constants.SENSOR_HOTSPOT + " got location update, but minIntevalMillis not passed yet");
         }
     }
 

@@ -30,10 +30,10 @@ public class SensorAccelerometerManager {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorAccelerometer = new SensorAccelerometer(mDataCollectionService);
             mSensorManager.registerListener(sensorAccelerometer, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Accelerometer Sensor SUCCESS (Subscribed)");
+            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Accelerometer Sensor SUCCESS (Subscribed)");
         } else {
             mAccelerometer = null;
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Accelerometer Sensor FAILED (NoDefaultSensor)");
+            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Accelerometer Sensor FAILED (NoDefaultSensor)");
         }
     }
 
@@ -41,15 +41,15 @@ public class SensorAccelerometerManager {
         if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
 
             if(sensorAccelerometer != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
+                Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
                 sensorAccelerometer.start(location);
             } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
+                Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
             }
 
             lastAccelerometerObservation = System.currentTimeMillis();
         } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " got location update, but minIntevalMillis not passed yet");
         }
     }
 

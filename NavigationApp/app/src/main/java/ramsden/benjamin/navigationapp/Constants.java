@@ -19,6 +19,13 @@ public class Constants {
     public static final String NAVIGATION_APP = "NavigationApp";
     public static final String DATA_COLLECTION_SERVICE = "DataCollectionService";
     public static final String MY_LOCATION_LISTENER = "MyLocationListener";
+
+    public static final String SENSOR_ACCELEROMETER_MANAGER = "SensorAccelerometerMan";
+    public static final String SENSOR_AUDIO_MANAGER = "SensorAudioManager";
+    public static final String SENSOR_BLUETOOTH_MANAGER = "SensorBluetoothManager";
+    public static final String SENSOR_HOTSPOT_MANAGER = "SensorHotspotManager";
+    public static final String SENSOR_CROWD_MANAGER = "SensorCrowdManager";
+
     public static final String SENSOR_ACCELEROMETER = "SensorAccelerometer";
     public static final String SENSOR_AUDIO = "SensorAudio";
     public static final String SENSOR_BLUETOOTH = "SensorBluetooth";
