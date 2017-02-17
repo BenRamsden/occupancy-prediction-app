@@ -1,6 +1,7 @@
 package ramsden.benjamin.navigationapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -116,59 +117,11 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         stopService(new Intent(this, DataCollectionService.class));
     }
 
-
-    public boolean requestPermission(String permission, int requestCode, boolean requestIfNotGranted) {
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-            Log.d(Constants.PERMISSIONS, "Got " + permission + " permission");
-            return true;
-        } else if(requestIfNotGranted) {
-            Log.d(Constants.PERMISSIONS, "Requesting " + permission + " permission");
-
-            ActivityCompat.requestPermissions(this, new String[]{ permission }, Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE);
-            return false;
-        } else {
-            Log.d(Constants.PERMISSIONS, "User denied " + permission + " permission");
-
-            Toast.makeText(this, "This application cannot function without the " + permission + " permission, restart the app if you change your mind", Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-    }
-
-
     /* Shows and hides the location text prompt in the Main Activity
      * Based on whether the permission have been granted or not to access location */
     private void checkPermissionsStartService(boolean requestIfNotGranted) {
 
-        if(! requestPermission( Manifest.permission.ACCESS_FINE_LOCATION, Constants.MY_PERMISSIONS_REQUEST_FINE_LOCATION, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.RECORD_AUDIO, Constants.MY_PERMISSIONS_REQUEST_RECORD_AUDIO, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.BLUETOOTH, Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.BLUETOOTH_ADMIN, Constants.MY_PERMISSIONS_REQUEST_BLUETOOTH_ADMIN, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.ACCESS_WIFI_STATE, Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE, requestIfNotGranted)) {
-            return;
-        };
-
-        if(! requestPermission(Manifest.permission.CHANGE_WIFI_STATE, Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE, requestIfNotGranted)) {
-            return;
-        };
-
-        if(dataCollectionService == null) {
+        if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && dataCollectionService == null) {
             Log.d(Constants.PERMISSIONS, "All permissions granted: Launching dataCollectionService");
 
             enableMapMyLocation();
@@ -195,7 +148,11 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
             case Constants.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
             case Constants.MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE:
             case Constants.MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE:
-                checkPermissionsStartService(true);
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    checkPermissionsStartService(true);
+                } else {
+                    checkPermissionsStartService(false);
+                }
                 break;
             default:
                 Toast.makeText(ActivityMain.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
