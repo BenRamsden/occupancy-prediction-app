@@ -77,6 +77,14 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        Button configure_button = (Button) findViewById(R.id.configure_button);
+        configure_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ActivityMain.this, ActivityConfigure.class));
+            }
+        });
+
         checkPermissionsStartService(true);
     }
 
@@ -85,8 +93,8 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        LatLng sydney = new LatLng(52.953357, -1.18736);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker at Computer Science, Nottingham University"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         enableMapMyLocation();

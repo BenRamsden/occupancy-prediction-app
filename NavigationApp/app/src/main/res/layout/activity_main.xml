@@ -43,11 +43,11 @@
         android:id="@+id/sent_log_button" />
 
     <Button
-        android:text="Spectrum"
+        android:text="Configure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/sent_log_button"
         android:layout_toEndOf="@+id/sent_log_button"
-        android:id="@+id/spectrum_button" />
+        android:id="@+id/configure_button" />
 
 </RelativeLayout>
