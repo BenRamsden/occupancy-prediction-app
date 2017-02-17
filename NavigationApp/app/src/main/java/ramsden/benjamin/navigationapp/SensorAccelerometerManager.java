@@ -23,9 +23,7 @@ public class SensorAccelerometerManager {
 
     public SensorAccelerometerManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;
-    }
 
-    public void initAccelerometer() {
         mSensorManager = (SensorManager) mDataCollectionService.getSystemService(Context.SENSOR_SERVICE);
 
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {

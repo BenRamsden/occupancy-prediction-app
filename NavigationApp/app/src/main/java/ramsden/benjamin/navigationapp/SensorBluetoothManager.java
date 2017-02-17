@@ -19,9 +19,6 @@ public class SensorBluetoothManager {
 
     public SensorBluetoothManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;
-    }
-
-    public void initBluetooth() {
         sensorBluetooth = new SensorBluetooth(mDataCollectionService);
     }
 

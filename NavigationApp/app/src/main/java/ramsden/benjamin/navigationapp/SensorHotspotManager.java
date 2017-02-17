@@ -18,9 +18,6 @@ public class SensorHotspotManager {
 
     public SensorHotspotManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;
-    }
-
-    public void initWifi() {
         sensorHotspot = new SensorHotspot(mDataCollectionService);
     }
 

@@ -18,9 +18,6 @@ public class SensorAudioManager {
 
     public SensorAudioManager(DataCollectionService dataCollectionService) {
         mDataCollectionService = dataCollectionService;
-    }
-
-    public void initMicrophone() {
         sensorAudio = new SensorAudio(mDataCollectionService);
     }
 

@@ -150,16 +150,12 @@ public class DataCollectionService extends Service {
         foregroundNotif = builder.build();
 
         sensorAccelerometerManager = new SensorAccelerometerManager(this);
-        sensorAccelerometerManager.initAccelerometer();
 
         sensorAudioManager = new SensorAudioManager(this);
-        sensorAudioManager.initMicrophone();
 
         sensorBluetoothManager = new SensorBluetoothManager(this);
-        sensorBluetoothManager.initBluetooth();
 
         sensorHotspotManager = new SensorHotspotManager(this);
-        sensorHotspotManager.initWifi();
 
         sensorCrowdManager = new SensorCrowdManager(this);
 
