@@ -42,40 +42,11 @@ public class DataCollectionService extends Service {
 
     /*************** Accelerometer */
 
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-    private SensorAccelerometer sensorAccelerometer;
-
-    private long lastAccelerometerObservation = 0;
-    private long accelerometerMinIntervalMillis = 60000;
-
-    private void initAccelerometer() {
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorAccelerometer = new SensorAccelerometer(DataCollectionService.this);
-            mSensorManager.registerListener(sensorAccelerometer, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Accelerometer Sensor SUCCESS (Subscribed)");
-        } else {
-            mAccelerometer = null;
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Accelerometer Sensor FAILED (NoDefaultSensor)");
-        }
-    }
+    private SensorAccelerometerManager sensorAccelerometerManager;
 
     public void startAccelerometer(Location location) {
-        if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
-
-            if(sensorAccelerometer != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
-                sensorAccelerometer.start(location);
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
-            }
-
-            lastAccelerometerObservation = System.currentTimeMillis();
-        } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " got location update, but minIntevalMillis not passed yet");
+        if(sensorAccelerometerManager != null) {
+            sensorAccelerometerManager.startAccelerometer(location);
         }
     }
 
@@ -83,28 +54,11 @@ public class DataCollectionService extends Service {
 
     /*************** Microphone */
 
-    private SensorAudio sensorAudio;
-
-    private long lastAudioObservation = 0;
-    private long audioMinIntervalMillis = 60000;
-
-    private void initMicrophone() {
-        sensorAudio = new SensorAudio(this);
-    }
+    private SensorAudioManager sensorAudioManager;
 
     public void startAudio(Location location) {
-        if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
-
-            if(sensorAudio != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " started taking a reading");
-                sensorAudio.start(location);
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
-            }
-
-            lastAudioObservation = System.currentTimeMillis();
-        } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_AUDIO + " got location update, but minIntevalMillis not passed yet");
+        if(sensorAudioManager != null) {
+            sensorAudioManager.startAudio(location);
         }
     }
 
@@ -112,28 +66,11 @@ public class DataCollectionService extends Service {
 
     /*************** Bluetooth */
 
-    private SensorBluetooth sensorBluetooth;
-
-    private long lastBluetoothObservation = 0;
-    private long bluetoothMinIntervalMillis = 60000;
-
-    private void initBluetooth() {
-        sensorBluetooth = new SensorBluetooth(this);
-    }
+    private SensorBluetoothManager sensorBluetoothManager;
 
     public void startBluetooth(Location location) {
-        if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
-
-            if(sensorBluetooth != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " started taking a reading");
-                sensorBluetooth.start(location);
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-            }
-
-            lastBluetoothObservation = System.currentTimeMillis();
-        } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_BLUETOOTH + " got location update, but minIntevalMillis not passed yet");
+        if(sensorBluetoothManager != null) {
+            sensorBluetoothManager.startBluetooth(location);
         }
     }
 
@@ -141,28 +78,11 @@ public class DataCollectionService extends Service {
 
     /*************** Wifi */
 
-    private SensorHotspot sensorHotspot;
-
-    private long lastHotspotObservation = 0;
-    private long hotspotMinIntervalMillis = 60000;
-
-    private void initWifi() {
-        sensorHotspot = new SensorHotspot(this);
-    }
+    private SensorHotspotManager sensorHotspotManager;
 
     public void startHotspot(Location location) {
-        if(lastHotspotObservation < System.currentTimeMillis() - hotspotMinIntervalMillis) {
-
-            if(sensorHotspot != null) {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " started taking a reading");
-                sensorHotspot.start(location);
-            } else {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " is null");
-            }
-
-            lastHotspotObservation = System.currentTimeMillis();
-        } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_HOTSPOT + " got location update, but minIntevalMillis not passed yet");
+        if(sensorHotspotManager != null) {
+            sensorHotspotManager.startHotspot(location);
         }
     }
 
@@ -170,17 +90,11 @@ public class DataCollectionService extends Service {
 
     /*************** Crowd */
 
-    private long lastCrowdObservation = 0;
-    private long crowdMinIntervalMillis = 60000;
+    private SensorCrowdManager sensorCrowdManager;
 
     public void startCrowd(Location location) {
-        if(lastCrowdObservation < System.currentTimeMillis() - crowdMinIntervalMillis) {
-
-            // TODO: Crowd observations
-
-            lastCrowdObservation = System.currentTimeMillis();
-        } else {
-            Log.d(Constants.DATA_COLLECTION_SERVICE, "Sensor: " + Constants.SENSOR_CROWD + " got location update, but minIntevalMillis not passed yet");
+        if(sensorCrowdManager != null) {
+            sensorCrowdManager.startCrowd(location);
         }
     }
 
@@ -235,13 +149,19 @@ public class DataCollectionService extends Service {
         builder.setContentIntent(resultPendingIntent);
         foregroundNotif = builder.build();
 
-        initAccelerometer();
+        sensorAccelerometerManager = new SensorAccelerometerManager(this);
+        sensorAccelerometerManager.initAccelerometer();
 
-        initMicrophone();
+        sensorAudioManager = new SensorAudioManager(this);
+        sensorAudioManager.initMicrophone();
 
-        initBluetooth();
+        sensorBluetoothManager = new SensorBluetoothManager(this);
+        sensorBluetoothManager.initBluetooth();
 
-        initWifi();
+        sensorHotspotManager = new SensorHotspotManager(this);
+        sensorHotspotManager.initWifi();
+
+        sensorCrowdManager = new SensorCrowdManager(this);
 
         initLocationListener();
 
@@ -335,12 +255,12 @@ public class DataCollectionService extends Service {
             }
         }
 
-        if(sensorBluetooth != null) {
-            sensorBluetooth.unregisterReceiver();
+        if(sensorBluetoothManager != null) {
+            sensorBluetoothManager.unregisterReceiver();
         }
 
-        if(sensorHotspot != null) {
-            sensorHotspot.unregisterReceiver();
+        if(sensorHotspotManager != null) {
+            sensorHotspotManager.unregisterReceiver();
         }
 
         super.onDestroy();
