@@ -34,7 +34,7 @@ public class Constants {
 
     public static final String PERMISSIONS = "Permissions";
     public static final String CONTENT_PROVIDER = "ContentProvider";
-    public static final String SENT_LOG_ACTIVITY = "SentLogActivity";
+    public static final String SENT_LOG_ACTIVITY = "ActivitySentLog";
 
 
 }

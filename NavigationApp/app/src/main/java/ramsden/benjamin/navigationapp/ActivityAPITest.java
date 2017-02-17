@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 
-public class APITestActivity extends AppCompatActivity {
+public class ActivityAPITest extends AppCompatActivity {
 
     private final Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
         @Override
@@ -115,7 +115,7 @@ public class APITestActivity extends AppCompatActivity {
     }
 
     private void API_GET_Observations(String observation) {
-        Toast.makeText(APITestActivity.this, "Requesting GET observation: "+observation, Toast.LENGTH_SHORT).show();
+        Toast.makeText(ActivityAPITest.this, "Requesting GET observation: "+observation, Toast.LENGTH_SHORT).show();
 
         getContentResolver().query(Uri.parse(NavigationContentProvider.CONTENT_URI+"/"+observation+"_observations"), null, null, null, null);
     }

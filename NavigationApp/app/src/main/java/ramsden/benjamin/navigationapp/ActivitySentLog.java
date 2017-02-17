@@ -10,7 +10,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class SentLogActivity extends AppCompatActivity {
+public class ActivitySentLog extends AppCompatActivity {
 
     public static final String SENT_LOG_RECEIVER = "ramsden.benjamin.navigationapp.SentLogReceiver";
     public static final String SENT_EXTRA_FIELD = "sent";

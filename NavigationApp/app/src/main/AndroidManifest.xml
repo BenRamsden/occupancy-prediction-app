@@ -22,7 +22,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".ActivityMain">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,8 +48,9 @@
             android:name=".NavigationContentProvider"
             android:authorities="ramsden.benjamin.navigationapp.NavigationContentProvider" />
 
-        <activity android:name=".APITestActivity" />
-        <activity android:name=".SentLogActivity" />
+        <activity android:name=".ActivityAPITest" />
+        <activity android:name=".ActivitySentLog" />
+        <activity android:name=".ActivityConfigure"></activity>
     </application>
 
 </manifest>
