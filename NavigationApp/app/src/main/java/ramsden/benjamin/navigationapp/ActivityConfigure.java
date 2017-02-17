@@ -9,7 +9,10 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RatingBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 public class ActivityConfigure extends AppCompatActivity {
@@ -24,7 +27,8 @@ public class ActivityConfigure extends AppCompatActivity {
             DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
             dataCollectionService = binder.getService();
 
-            service_connection_ratingbar.setRating(1);
+            service_connected_checkbox.setChecked(true);
+            foreground_service_switch.setChecked(dataCollectionService.isForegroundNotification());
         }
 
         @Override
@@ -32,18 +36,39 @@ public class ActivityConfigure extends AppCompatActivity {
             Log.d(Constants.ACTIVITY_CONFIGURE, "Service Disconnected from ActivityConfigure");
             dataCollectionService = null;
 
-            service_connection_ratingbar.setRating(0);
+            service_connected_checkbox.setChecked(false);
+            foreground_service_switch.setChecked(false);
         }
     };
 
-    private RatingBar service_connection_ratingbar;
+    private CheckBox service_connected_checkbox;
+    private Switch foreground_service_switch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configure);
 
-        service_connection_ratingbar = (RatingBar) findViewById(R.id.service_connection_ratingbar);
+        service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
+
+        foreground_service_switch = (Switch) findViewById(R.id.foreground_service_switch);
+        foreground_service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if(dataCollectionService == null) {
+                    Toast.makeText(ActivityConfigure.this, "Cannot adjust service settings, service not connected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(isChecked) {
+                    dataCollectionService.startForegroundNotification();
+                } else {
+                    dataCollectionService.stopForegroundNotification();
+                }
+
+            }
+        });
 
         /* Do not ask user for permissions in this activity, just let them know they are needed or wont work */
         checkPermissionsStartService(false);
@@ -58,9 +83,6 @@ public class ActivityConfigure extends AppCompatActivity {
         if(dataCollectionService != null) {
             unbindService(locationServiceConnection);
         }
-
-        /* TODO: Stop service stopping if it is foregrounded (recording background data) */
-        stopService(new Intent(this, DataCollectionService.class));
     }
 
     /* Shows and hides the location text prompt in the Main Activity

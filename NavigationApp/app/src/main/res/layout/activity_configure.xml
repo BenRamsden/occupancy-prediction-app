@@ -10,12 +10,47 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ramsden.benjamin.navigationapp.ActivityConfigure">
 
-    <RatingBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/service_connection_ratingbar"
-        android:numStars="1"
-        android:rating="0"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <CheckBox
+                android:text="DataCollectionService Connected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/service_connected_checkbox"
+                android:clickable="false"
+                android:focusable="false"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <Switch
+                android:text="Backgroud Data Collection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/foreground_service_switch"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </TableLayout>
+
 </RelativeLayout>

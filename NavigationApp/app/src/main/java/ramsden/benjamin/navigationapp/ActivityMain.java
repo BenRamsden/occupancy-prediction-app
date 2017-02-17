@@ -119,12 +119,17 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     public void onDestroy() {
         super.onDestroy();
 
+        boolean foreground_service = false;
+
         if(dataCollectionService != null) {
+            foreground_service = dataCollectionService.isForegroundNotification();
+
             unbindService(locationServiceConnection);
         }
-
-        /* TODO: Stop service stopping if it is foregrounded (recording background data) */
-        stopService(new Intent(this, DataCollectionService.class));
+        
+        if(!foreground_service) {
+            stopService(new Intent(this, DataCollectionService.class));
+        }
     }
 
     /* Shows and hides the location text prompt in the Main Activity
