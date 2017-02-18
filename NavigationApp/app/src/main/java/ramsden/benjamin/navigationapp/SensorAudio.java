@@ -122,17 +122,19 @@ public class SensorAudio {
 
             for (int bin = 0; bin < progress[0].length; bin++) {
 
-                JSONObject this_bin = new JSONObject();
+                //JSONObject this_bin = new JSONObject();
 
                 double vl = Math.abs(progress[0][bin]) * 10;
 
                 //Log.d(Constants.SENSOR_AUDIO, "bin: " + bin + " lo: " + HzPerBin*bin + " hi: " + (HzPerBin*(bin+1)-1) + " vl: " + vl);
 
                 try {
-                    this_bin.put("lo", String.valueOf(HzPerBin*bin));
-                    this_bin.put("hi", String.valueOf(HzPerBin*(bin+1)-1));
-                    this_bin.put("vl", String.valueOf(vl));
-                    histogram.put(String.valueOf(bin), this_bin);
+                    //this_bin.put("lo", String.valueOf(HzPerBin*bin));
+                    //this_bin.put("hi", String.valueOf(HzPerBin*(bin+1)-1));
+                    //this_bin.put("vl", String.valueOf(vl));
+
+                    /* Put value directly at bin index, hz can be calculated if needed */
+                    histogram.put(String.valueOf(bin), vl);
                 } catch (JSONException ex) {
                     Log.d(Constants.SENSOR_AUDIO, "JSONException putting values into this_bin ex: " + ex.toString());
                 }
