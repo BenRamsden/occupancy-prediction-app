@@ -36,7 +36,7 @@ import org.json.JSONObject;
 public class NavigationContentProvider extends ContentProvider {
     public static final String AUTHORITY = "ramsden.benjamin.navigationapp.NavigationContentProvider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-    private final String api_root = "http://54.154.109.216:3000";
+    private final String api_root = "http://54.154.109.216:80";
 
     /* TODO make dynamic */
     public String my_api_token = "koH6a1UC71rTDM1LKppXeKYJ54cjc8nIfuJAKPly1GDYpjMMLLCuK5LBp3fXAEkCcID1jCh5pCQp9D8DmCWhJHQlLcUcy4gD68Qy";
@@ -55,7 +55,7 @@ public class NavigationContentProvider extends ContentProvider {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.d(Constants.CONTENT_PROVIDER, "ERROR: " + error);
-            //Toast.makeText(getContext(), "NET_ERROR: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "NET_ERROR: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
             //error.printStackTrace(System.out);
         }
     };
