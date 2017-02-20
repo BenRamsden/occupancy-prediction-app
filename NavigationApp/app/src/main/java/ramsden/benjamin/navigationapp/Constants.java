@@ -5,16 +5,16 @@ package ramsden.benjamin.navigationapp;
  */
 
 public class Constants {
-    public static final long DEFAULT_MIN_TIME = 15;
-    public static final float DEFAULT_MIN_DISTANCE = 1f;
+    public static final long DEFAULT_MIN_GPS_TIME = 15;
+    public static final float DEFAULT_MIN_GPS_DISTANCE = 1f;
 
-    public static final long START_ALL_CLASSES_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
+    public static final long START_ALL_SENSORS_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
 
-    public static final long DEFAULT_ACCELEROMETER_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
-    public static final long DEFAULT_AUDIO_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
-    public static final long DEFAULT_BLUETOOTH_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
-    public static final long DEFAULT_CROWD_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
-    public static final long DEFAULT_HOTSPOT_INTERVAL = DEFAULT_MIN_TIME * 2 * 1000;
+    public static final long DEFAULT_ACCELEROMETER_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
+    public static final long DEFAULT_AUDIO_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
+    public static final long DEFAULT_BLUETOOTH_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
+    public static final long DEFAULT_CROWD_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
+    public static final long DEFAULT_HOTSPOT_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
 
     public static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
@@ -28,6 +28,7 @@ public class Constants {
     public static final String DATA_COLLECTION_SERVICE = "DataCollectionService";
     public static final String MY_LOCATION_LISTENER = "MyLocationListener";
     public static final String ACTIVITY_CONFIGURE = "ActivityConfigure";
+    public static final String GOOGLE_API_CLIENT = "GoogleApiClient";
 
     public static final String SENSOR_ACCELEROMETER_MANAGER = "SensorAccelerometerMan";
     public static final String SENSOR_AUDIO_MANAGER = "SensorAudioManager";

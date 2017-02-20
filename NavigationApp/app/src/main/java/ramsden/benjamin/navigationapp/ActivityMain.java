@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +19,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,9 +59,29 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
+    GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+            Toast.makeText(ActivityMain.this, "Connection to GoogleApiClient failed", Toast.LENGTH_SHORT).show();
+            mGoogleApiClient = null;
+        }
+    };
 
+    GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnected");
+        }
 
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnectionSuspended");
+        }
+    };
+    
     private GoogleMap mMap;
+
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +118,16 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         checkPermissionsStartService(true);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */,
+                        onConnectionFailedListener)
+                .addConnectionCallbacks(connectionCallbacks)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -106,13 +146,55 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     public void enableMapMyLocation() {
         /* Try enable mMap location now user has responded to permission request
         * If not, error will be caught and dealt with here */
-        if(mMap != null && !mMap.isMyLocationEnabled()) {
+        if (mMap != null && !mMap.isMyLocationEnabled()) {
             try {
                 mMap.setMyLocationEnabled(true);
             } catch (SecurityException e) {
                 Log.d(Constants.NAVIGATION_APP, e.getMessage());
             }
         }
+    }
+
+    public void findLikelyPlaces(View v) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(ActivityMain.this, "Cannot findLikelyPlaces, no ACCESS_FINE_LOCATION permission", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(mGoogleApiClient == null) {
+            Toast.makeText(ActivityMain.this, "Cannot find likely places, mGoogleApiClient is null", Toast.LENGTH_SHORT).show();
+            Log.d(Constants.GOOGLE_API_CLIENT, "Cannot find likely places, mGoogleApiClient is null");
+            return;
+        }
+
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+
+        final int mMaxEntries = 5;
+
+        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+            @Override
+            public void onResult(@NonNull PlaceLikelihoodBuffer likelyPlaces) {
+                Toast.makeText(ActivityMain.this, "onResult", Toast.LENGTH_SHORT).show();
+                int i = 0;
+
+                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                    // Build a list of likely places to show the user. Max 5.
+                    Toast.makeText(ActivityMain.this, "Got likely place " + placeLikelihood.getPlace().toString(), Toast.LENGTH_SHORT).show();
+
+                    i++;
+                    if (i > (mMaxEntries - 1)) {
+                        break;
+                    }
+                }
+                // Release the place likelihood buffer, to avoid memory leaks.
+                likelyPlaces.release();
+
+                if(likelyPlaces.getCount() == 0) {
+                    Toast.makeText(ActivityMain.this, "Likely Places are 0, not a public destination", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     @Override
@@ -129,6 +211,10 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
 
         if(!foreground_service) {
             stopService(new Intent(this, DataCollectionService.class));
+        }
+
+        if(mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
         }
     }
 

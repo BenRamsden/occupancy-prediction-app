@@ -50,4 +50,13 @@
         android:layout_toEndOf="@+id/sent_log_button"
         android:id="@+id/configure_button" />
 
+    <Button
+        android:text="FindLikelyPlaces"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button2"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="findLikelyPlaces" />
+
 </RelativeLayout>

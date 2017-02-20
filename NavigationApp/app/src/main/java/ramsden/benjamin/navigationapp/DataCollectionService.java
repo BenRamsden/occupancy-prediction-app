@@ -51,38 +51,26 @@ public class DataCollectionService extends Service {
         @Override
         public void onLocationChanged(Location location) {
             Log.d(Constants.MY_LOCATION_LISTENER,"onLocationChanged: " + location.toString());
-
-            startAllSensors(location);
-
             lastLocation = location;
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onStatusChanged: " + status);
-
-        }
+        public void onStatusChanged(String provider, int status, Bundle extras) { Log.d(Constants.MY_LOCATION_LISTENER,"onStatusChanged: " + status); }
 
         @Override
-        public void onProviderEnabled(String provider) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderEnabled: " + provider);
-
-        }
+        public void onProviderEnabled(String provider) { Log.d(Constants.MY_LOCATION_LISTENER,"onProviderEnabled: " + provider); }
 
         @Override
-        public void onProviderDisabled(String provider) {
-            Log.d(Constants.MY_LOCATION_LISTENER,"onProviderDisabled: " + provider);
-
-        }
+        public void onProviderDisabled(String provider) { Log.d(Constants.MY_LOCATION_LISTENER,"onProviderDisabled: " + provider); }
     }
 
     /* Provides the activities using the service the ability to
      * Retreive and Change the paramaters given to the location listener
      */
-    private long minTime = Constants.DEFAULT_MIN_TIME;  //minimum time different between 2 location updates
+    private long minTime = Constants.DEFAULT_MIN_GPS_TIME;  //minimum time different between 2 location updates
     public long getMinTime() { return minTime; }
 
-    private float minDistance = Constants.DEFAULT_MIN_DISTANCE;   //minimum distance between 2 location updates
+    private float minDistance = Constants.DEFAULT_MIN_GPS_DISTANCE;   //minimum distance between 2 location updates
     public float getMinDistance() { return minDistance; }
 
     public void updateLocationListenerOptions(long minTime, float minDistance) {
@@ -151,7 +139,7 @@ public class DataCollectionService extends Service {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Could not start all sensors, lastLocation is null");
                 }
             }
-        }, Constants.START_ALL_CLASSES_INTERVAL, Constants.START_ALL_CLASSES_INTERVAL);
+        }, Constants.START_ALL_SENSORS_INTERVAL, Constants.START_ALL_SENSORS_INTERVAL);
 
     }
 
@@ -161,7 +149,7 @@ public class DataCollectionService extends Service {
 
     private void startAllSensors(Location location) {
 
-        if(lastStartAllSensors < System.currentTimeMillis() - Constants.START_ALL_CLASSES_INTERVAL) {
+        if(lastStartAllSensors < System.currentTimeMillis() - Constants.START_ALL_SENSORS_INTERVAL) {
             lastStartAllSensors = System.currentTimeMillis();
 
             if(sensorAccelerometerManager != null) {
