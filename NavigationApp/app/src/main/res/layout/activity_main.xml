@@ -11,12 +11,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ramsden.benjamin.navigationapp.ActivityMain">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/textView" />
-
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -51,12 +45,21 @@
         android:id="@+id/configure_button" />
 
     <Button
-        android:text="FindLikelyPlaces"
+        android:text="Likely"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button2"
+        android:onClick="findLikelyPlaces"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="findLikelyPlaces" />
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Crowd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button3"
+        android:onClick="giveCrowdObservation"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

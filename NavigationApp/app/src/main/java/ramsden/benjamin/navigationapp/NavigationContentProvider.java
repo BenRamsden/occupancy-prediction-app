@@ -7,6 +7,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -43,7 +44,7 @@ public class NavigationContentProvider extends ContentProvider {
 
     private RequestQueue apiRequestQueue;
 
-    private final Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
+    private final Response.Listener<JSONObject> DEFAULT_RESPONSE_LISTENER = new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
             //Toast.makeText(getContext(), "NET_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
@@ -51,7 +52,7 @@ public class NavigationContentProvider extends ContentProvider {
         }
     };
 
-    private final Response.ErrorListener errorListener = new Response.ErrorListener() {
+    private final Response.ErrorListener DEFAULT_ERROR_LISTENER = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.d(Constants.CONTENT_PROVIDER, "ERROR: " + error);
@@ -69,6 +70,7 @@ public class NavigationContentProvider extends ContentProvider {
     private static final int CROWD_OBSERVATIONS = 55;
     private static final int BLUETOOTH_OBSERVATIONS = 56;
     private static final int ACCELEROMETER_OBSERVATIONS = 57;
+    private static final int OCCUPANCY_ESTIMATE = 58;
 
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -79,6 +81,7 @@ public class NavigationContentProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.CrowdObservations.TABLE_NAME, CROWD_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.BluetoothObservations.TABLE_NAME, BLUETOOTH_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.AccelerometerObservations.TABLE_NAME, ACCELEROMETER_OBSERVATIONS);
+        URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE", OCCUPANCY_ESTIMATE);
     }
 
     @Override
@@ -139,8 +142,8 @@ public class NavigationContentProvider extends ContentProvider {
                 Request.Method.GET,
                 api_root+api_sub+"?apitoken="+my_api_token,
                 null,
-                responseListener,
-                errorListener
+                DEFAULT_RESPONSE_LISTENER,
+                DEFAULT_ERROR_LISTENER
         );
 
         apiRequestQueue.add(jsonRequest);
@@ -165,8 +168,9 @@ public class NavigationContentProvider extends ContentProvider {
         int uriType = URI_MATCHER.match(uri);
 
         String api_sub = null;
+        Response.Listener<JSONObject> responseListener = DEFAULT_RESPONSE_LISTENER;
 
-        JSONObject insertJSON = new JSONObject();
+        final JSONObject insertJSON = new JSONObject();
 
         try {
             switch (uriType) {
@@ -223,6 +227,31 @@ public class NavigationContentProvider extends ContentProvider {
                     insertJSON.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, new JSONObject(values.getAsString(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE)));  //parse back into json to prevent triple slashes
                     insertJSON.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, values.get(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE));
                     break;
+                case OCCUPANCY_ESTIMATE:
+                    api_sub = "/occupancy";
+                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, values.get(NavigationContract.AccelerometerObservations.KEY_LATITUDE));
+                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, values.get(NavigationContract.AccelerometerObservations.KEY_LONGITUDE));
+
+                    responseListener = new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            //Toast.makeText(getContext(), "OCCUPANCY_ESTIMATE_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
+
+                            String occupancy_estimate = "ERROR";
+
+                            try {
+                                occupancy_estimate = response.getString("occupancy");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            Intent intent = new Intent(ActivityMain.OCCUPANCY_ESTIMATE_RECEIVER);
+                            intent.putExtra("occupancy_estimate",occupancy_estimate);
+                            getContext().sendBroadcast(intent);
+                        }
+                    };
+
+                    break;
                 default:
                     throw new Error("Query: Couldn't match URI: " + uri);
             }
@@ -244,7 +273,7 @@ public class NavigationContentProvider extends ContentProvider {
                 api_root+api_sub+"?apitoken="+my_api_token,
                 insertJSON,
                 responseListener,
-                errorListener
+                DEFAULT_ERROR_LISTENER
         );
 
         apiRequestQueue.add(jsonRequest);

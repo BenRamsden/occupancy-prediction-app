@@ -2,21 +2,31 @@ package ramsden.benjamin.navigationapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -78,6 +88,19 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnectionSuspended");
         }
     };
+
+    public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityMain.occupancyEstimateReceiver";
+
+    private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(ActivityMain.this, "OccupancyEstimateReceiver onReceive", Toast.LENGTH_SHORT).show();
+
+            String occupancy_estimate = intent.getStringExtra("occupancy_estimate");
+
+            showCrowdObservationAlertDialog(occupancy_estimate);
+        }
+    };
     
     private GoogleMap mMap;
 
@@ -128,6 +151,9 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
                 .addApi(Places.PLACE_DETECTION_API)
                 .build();
         mGoogleApiClient.connect();
+
+        /* Get response from request for occupancy estimation */
+        registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
     }
 
     @Override
@@ -197,6 +223,61 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    public void giveCrowdObservation(View v) {
+
+        if(dataCollectionService == null) {
+            Toast.makeText(ActivityMain.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Location lastLocation = dataCollectionService.getLastLocation();
+
+        if(lastLocation == null) {
+            Toast.makeText(ActivityMain.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Uri uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("lat",lastLocation.getLatitude());
+        contentValues.put("lng",lastLocation.getLongitude());
+        getContentResolver().insert(uri, contentValues);
+
+        /* Broadcast Receiver calls showCrowdObservationsAlertDialog if server returns occupancy estimate */
+    }
+
+    private void showCrowdObservationAlertDialog(String occupancy_estimate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Crowd Observation");
+
+        builder.setTitle("We estimate " + occupancy_estimate + " are at your current location, please enter your estimate");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String mString = input.getText().toString();
+                Integer mInteger = Integer.parseInt(mString);
+
+                Toast.makeText(ActivityMain.this, "Thank you for your estimate of " + mInteger + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -216,6 +297,8 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         if(mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
+
+        unregisterReceiver(occupancyEstimateReceiver);
     }
 
     /* Shows and hides the location text prompt in the Main Activity

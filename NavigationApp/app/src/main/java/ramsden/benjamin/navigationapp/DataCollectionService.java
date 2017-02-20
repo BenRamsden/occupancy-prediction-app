@@ -73,6 +73,8 @@ public class DataCollectionService extends Service {
     private float minDistance = Constants.DEFAULT_MIN_GPS_DISTANCE;   //minimum distance between 2 location updates
     public float getMinDistance() { return minDistance; }
 
+    public Location getLastLocation() { return lastLocation; };
+
     public void updateLocationListenerOptions(long minTime, float minDistance) {
         this.minTime = minTime;
         this.minDistance = minDistance;
