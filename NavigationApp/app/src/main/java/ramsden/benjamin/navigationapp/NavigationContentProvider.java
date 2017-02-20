@@ -237,7 +237,7 @@ public class NavigationContentProvider extends ContentProvider {
                         public void onResponse(JSONObject response) {
                             //Toast.makeText(getContext(), "OCCUPANCY_ESTIMATE_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
 
-                            String occupancy_estimate = "ERROR";
+                            String occupancy_estimate = "NO_DATA";
 
                             try {
                                 occupancy_estimate = response.getString("occupancy");

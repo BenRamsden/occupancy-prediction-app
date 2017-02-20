@@ -3,6 +3,7 @@ package ramsden.benjamin.navigationapp;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,6 +22,8 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,7 +45,6 @@ public class DataCollectionService extends Service {
     private SensorAudioManager sensorAudioManager;
     private SensorBluetoothManager sensorBluetoothManager;
     private SensorHotspotManager sensorHotspotManager;
-    private SensorCrowdManager sensorCrowdManager;
 
     private MyLocationListener locationListener;
 
@@ -123,8 +126,6 @@ public class DataCollectionService extends Service {
 
         sensorHotspotManager = new SensorHotspotManager(this);
 
-        sensorCrowdManager = new SensorCrowdManager(this);
-
         initLocationListener();
 
         /* TODO: Experiment with calling locationListener.locationChanged(location)
@@ -166,15 +167,29 @@ public class DataCollectionService extends Service {
                 sensorBluetoothManager.startBluetooth(location);
             }
 
-            if(sensorCrowdManager != null) {
-                sensorCrowdManager.startCrowd(location);
-            }
-
             if(sensorHotspotManager != null) {
                 sensorHotspotManager.startHotspot(location);
             }
         }
 
+    }
+
+    public boolean sendCrowdObservation(Integer user_estimate) {
+        if(lastLocation == null) {
+            return false;
+        }
+
+        String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+        Uri uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.CrowdObservations.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NavigationContract.CrowdObservations.KEY_LATITUDE, lastLocation.getLatitude());
+        contentValues.put(NavigationContract.CrowdObservations.KEY_LONGITUDE, lastLocation.getLongitude());
+        contentValues.put(NavigationContract.CrowdObservations.KEY_OCCUPANCY_ESTIMATE, user_estimate);
+        contentValues.put(NavigationContract.CrowdObservations.KEY_OBSERVATION_DATE, current_date);
+        getContentResolver().insert(uri, contentValues);
+
+        return true;
     }
 
     @Override

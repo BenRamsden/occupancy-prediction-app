@@ -262,9 +262,14 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String mString = input.getText().toString();
-                Integer mInteger = Integer.parseInt(mString);
+                Integer user_estimate = Integer.parseInt(mString);
 
-                Toast.makeText(ActivityMain.this, "Thank you for your estimate of " + mInteger + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
+                if(dataCollectionService != null && dataCollectionService.sendCrowdObservation(user_estimate)) {
+                    Toast.makeText(ActivityMain.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ActivityMain.this, "Error sending your estimate, Data Collection Service is not initialized", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
