@@ -262,7 +262,14 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String mString = input.getText().toString();
-                Integer user_estimate = Integer.parseInt(mString);
+                Integer user_estimate;
+
+                try {
+                    user_estimate = Integer.parseInt(mString);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityMain.this, "Error sending your estimate, not a valid number", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 if(dataCollectionService != null && dataCollectionService.sendCrowdObservation(user_estimate)) {
                     Toast.makeText(ActivityMain.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
