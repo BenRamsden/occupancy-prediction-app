@@ -186,6 +186,7 @@ public class ActivityNavigation extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, ActivityConfigure.class));
             return true;
         }
 
@@ -206,8 +207,6 @@ public class ActivityNavigation extends AppCompatActivity
             giveCrowdObservation();
         } else if (id == R.id.nav_likely_place) {
             findLikelyPlaces();
-        } else if (id == R.id.nav_configure) {
-            startActivity(new Intent(this, ActivityConfigure.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
