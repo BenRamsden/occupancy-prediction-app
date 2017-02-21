@@ -17,60 +17,10 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         tools:context="ramsden.benjamin.navigationapp.ActivityNavigation"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:layout_height="370dp" />
-
-    <Button
-        android:text="API Test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/api_test_button" />
-
-    <Button
-        android:text="Sent Log"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/api_test_button"
-        android:id="@+id/sent_log_button" />
-
-    <Button
-        android:text="Configure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/sent_log_button"
-        android:layout_toEndOf="@+id/sent_log_button"
-        android:id="@+id/configure_button" />
-
-    <Button
-        android:text="Likely"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button2"
-        android:onClick="findLikelyPlaces"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentStart="true" />
 
-    <Button
-        android:text="Crowd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button3"
-        android:onClick="giveCrowdObservation"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:text="Nav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/button5"
-        android:onClick="openNav" />
 
 </RelativeLayout>

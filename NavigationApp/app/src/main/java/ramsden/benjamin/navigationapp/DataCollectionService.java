@@ -112,7 +112,9 @@ public class DataCollectionService extends Service {
                 .setSmallIcon(R.drawable.ic_runner_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_runner_icon))
                 .setContentText("NavigationApp");
-        Intent resultIntent = new Intent(this, ActivityMain.class);
+
+        /* TODO: Fire generic request for launcher instead?? SEE AndroidManifest intent filter */
+        Intent resultIntent = new Intent(this, ActivityNavigation.class);
         resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, pendingIntentCode, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(resultPendingIntent);

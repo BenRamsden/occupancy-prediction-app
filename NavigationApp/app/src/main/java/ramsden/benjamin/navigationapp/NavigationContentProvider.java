@@ -245,7 +245,7 @@ public class NavigationContentProvider extends ContentProvider {
                                 e.printStackTrace();
                             }
 
-                            Intent intent = new Intent(ActivityMain.OCCUPANCY_ESTIMATE_RECEIVER);
+                            Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
                             intent.putExtra("occupancy_estimate",occupancy_estimate);
                             getContext().sendBroadcast(intent);
                         }

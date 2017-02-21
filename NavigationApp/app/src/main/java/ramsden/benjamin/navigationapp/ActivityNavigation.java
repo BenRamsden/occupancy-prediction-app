@@ -144,30 +144,6 @@ public class ActivityNavigation extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Button api_test_button = (Button) findViewById(R.id.api_test_button);
-        api_test_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(ActivityNavigation.this, ActivityAPITest.class));
-            }
-        });
-
-        Button sent_log_button = (Button) findViewById(R.id.sent_log_button);
-        sent_log_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(ActivityNavigation.this, ActivitySentLog.class));
-            }
-        });
-
-        Button configure_button = (Button) findViewById(R.id.configure_button);
-        configure_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(ActivityNavigation.this, ActivityConfigure.class));
-            }
-        });
-
         checkPermissionsStartService(true);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)

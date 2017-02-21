@@ -22,13 +22,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActivityMain">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -48,13 +41,22 @@
             android:name=".NavigationContentProvider"
             android:authorities="ramsden.benjamin.navigationapp.NavigationContentProvider" />
 
-        <activity android:name=".ActivityAPITest" />
-        <activity android:name=".ActivitySentLog" />
-        <activity android:name=".ActivityConfigure" />
         <activity
             android:name=".ActivityNavigation"
             android:label="@string/title_activity_navigation"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ActivityAPITest" />
+        <activity android:name=".ActivitySentLog" />
+        <activity android:name=".ActivityConfigure" />
+
+
     </application>
 
 </manifest>
