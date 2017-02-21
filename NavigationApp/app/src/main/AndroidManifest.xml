@@ -50,7 +50,11 @@
 
         <activity android:name=".ActivityAPITest" />
         <activity android:name=".ActivitySentLog" />
-        <activity android:name=".ActivityConfigure"></activity>
+        <activity android:name=".ActivityConfigure" />
+        <activity
+            android:name=".ActivityNavigation"
+            android:label="@string/title_activity_navigation"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

@@ -1,7 +1,6 @@
 package ramsden.benjamin.navigationapp;
 
-import android.Manifest;
-import android.app.Activity;
+import android.*;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -13,18 +12,25 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -44,18 +50,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class ActivityMain extends AppCompatActivity implements OnMapReadyCallback {
+public class ActivityNavigation extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     /* Connection to the DataCollectionService
-     * In the main activity this is purely used to ensure the DataCollectionService
-     * Is destroyed upon exiting the application
-     * Unless the user has specified the location tracking continue (foreground)
-     * Through the options menu */
+ * In the main activity this is purely used to ensure the DataCollectionService
+ * Is destroyed upon exiting the application
+ * Unless the user has specified the location tracking continue (foreground)
+ * Through the options menu */
     private DataCollectionService dataCollectionService = null;
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(Constants.NAVIGATION_APP, "Service Connected to ActivityMain");
+            Log.d(Constants.NAVIGATION_APP, "Service Connected to ActivityNavigation");
 
             DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
             dataCollectionService = binder.getService();
@@ -63,7 +70,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(Constants.NAVIGATION_APP, "Service Disconnected from ActivityMain");
+            Log.d(Constants.NAVIGATION_APP, "Service Disconnected from ActivityNavigation");
 
             dataCollectionService = null;
         }
@@ -72,7 +79,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Toast.makeText(ActivityMain.this, "Connection to GoogleApiClient failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityNavigation.this, "Connection to GoogleApiClient failed", Toast.LENGTH_SHORT).show();
             mGoogleApiClient = null;
         }
     };
@@ -89,19 +96,19 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
-    public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityMain.occupancyEstimateReceiver";
+    public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(ActivityMain.this, "OccupancyEstimateReceiver onReceive", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive", Toast.LENGTH_SHORT).show();
 
             String occupancy_estimate = intent.getStringExtra("occupancy_estimate");
 
             showCrowdObservationAlertDialog(occupancy_estimate);
         }
     };
-    
+
     private GoogleMap mMap;
 
     private GoogleApiClient mGoogleApiClient;
@@ -109,7 +116,28 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_navigation);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -120,6 +148,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         api_test_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startActivity(new Intent(ActivityNavigation.this, ActivityAPITest.class));
             }
         });
 
@@ -127,6 +156,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         sent_log_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startActivity(new Intent(ActivityNavigation.this, ActivitySentLog.class));
             }
         });
 
@@ -134,6 +164,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         configure_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startActivity(new Intent(ActivityNavigation.this, ActivityConfigure.class));
             }
         });
 
@@ -152,6 +183,63 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
     }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_navigation, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_api_test) {
+            startActivity(new Intent(this, ActivityAPITest.class));
+        } else if (id == R.id.nav_sent_log) {
+            startActivity(new Intent(this, ActivitySentLog.class));
+        } else if (id == R.id.nav_crowd_observation) {
+            giveCrowdObservation();
+        } else if (id == R.id.nav_likely_place) {
+            findLikelyPlaces();
+        } else if (id == R.id.nav_configure) {
+            startActivity(new Intent(this, ActivityConfigure.class));
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -178,14 +266,14 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void findLikelyPlaces(View v) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(ActivityMain.this, "Cannot findLikelyPlaces, no ACCESS_FINE_LOCATION permission", Toast.LENGTH_SHORT).show();
+    public void findLikelyPlaces() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(ActivityNavigation.this, "Cannot findLikelyPlaces, no ACCESS_FINE_LOCATION permission", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if(mGoogleApiClient == null) {
-            Toast.makeText(ActivityMain.this, "Cannot find likely places, mGoogleApiClient is null", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityNavigation.this, "Cannot find likely places, mGoogleApiClient is null", Toast.LENGTH_SHORT).show();
             Log.d(Constants.GOOGLE_API_CLIENT, "Cannot find likely places, mGoogleApiClient is null");
             return;
         }
@@ -197,12 +285,12 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult(@NonNull PlaceLikelihoodBuffer likelyPlaces) {
-                Toast.makeText(ActivityMain.this, "onResult", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ActivityNavigation.this, "onResult", Toast.LENGTH_SHORT).show();
                 int i = 0;
 
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
                     // Build a list of likely places to show the user. Max 5.
-                    Toast.makeText(ActivityMain.this, "Got likely place " + placeLikelihood.getPlace().toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Got likely place " + placeLikelihood.getPlace().toString(), Toast.LENGTH_SHORT).show();
 
                     i++;
                     if (i > (mMaxEntries - 1)) {
@@ -213,7 +301,7 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
                 likelyPlaces.release();
 
                 if(likelyPlaces.getCount() == 0) {
-                    Toast.makeText(ActivityMain.this, "Likely Places are 0, not a public destination", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Likely Places are 0, not a public destination", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -225,17 +313,17 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
         startActivity(new Intent(this, ActivityNavigation.class));
     }
 
-    public void giveCrowdObservation(View v) {
+    public void giveCrowdObservation() {
 
         if(dataCollectionService == null) {
-            Toast.makeText(ActivityMain.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Location lastLocation = dataCollectionService.getLastLocation();
 
         if(lastLocation == null) {
-            Toast.makeText(ActivityMain.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -269,14 +357,14 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
                 try {
                     user_estimate = Integer.parseInt(mString);
                 } catch(NumberFormatException ex) {
-                    Toast.makeText(ActivityMain.this, "Error sending your estimate, not a valid number", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Error sending your estimate, not a valid number", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if(dataCollectionService != null && dataCollectionService.sendCrowdObservation(user_estimate)) {
-                    Toast.makeText(ActivityMain.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(ActivityMain.this, "Error sending your estimate, Data Collection Service is not initialized", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Error sending your estimate, Data Collection Service is not initialized", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -346,8 +434,11 @@ public class ActivityMain extends AppCompatActivity implements OnMapReadyCallbac
                 checkPermissionsStartService(false);
             }
         } else {
-            Toast.makeText(ActivityMain.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
+            Toast.makeText(ActivityNavigation.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
         }
 
     }
+
+
+
 }

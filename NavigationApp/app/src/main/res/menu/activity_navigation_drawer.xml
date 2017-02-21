@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_api_test"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="API Test" />
+        <item
+            android:id="@+id/nav_sent_log"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Sent Log" />
+        <item
+            android:id="@+id/nav_crowd_observation"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Send Crowd Observation" />
+        <item
+            android:id="@+id/nav_likely_place"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Likely Place" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_configure"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Configure" />
+
+        </menu>
+    </item>
+
+</menu>
