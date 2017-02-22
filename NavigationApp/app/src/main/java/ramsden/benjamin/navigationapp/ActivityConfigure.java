@@ -4,8 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,33 +13,32 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RatingBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
 public class ActivityConfigure extends AppCompatActivity {
 
-    private DataCollectionService dataCollectionService = null;
+    private ServiceDataCollection serviceDataCollection = null;
 
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(Constants.ACTIVITY_CONFIGURE, "Service Connected to ActivityConfigure");
 
-            DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
-            dataCollectionService = binder.getService();
+            ServiceDataCollection.MyBinder binder = (ServiceDataCollection.MyBinder) service;
+            serviceDataCollection = binder.getService();
 
             service_connected_checkbox.setChecked(true);
-            foreground_service_switch.setChecked(dataCollectionService.isForegroundNotification());
-            minimum_location_distance_edittext.setText(String.valueOf( (int) dataCollectionService.getMinDistance()));
-            minimum_location_time_edittext.setText(String.valueOf(dataCollectionService.getMinTime()));
+            foreground_service_switch.setChecked(serviceDataCollection.isForegroundNotification());
+            minimum_location_distance_edittext.setText(String.valueOf( (int) serviceDataCollection.getMinDistance()));
+            minimum_location_time_edittext.setText(String.valueOf(serviceDataCollection.getMinTime()));
 
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(Constants.ACTIVITY_CONFIGURE, "Service Disconnected from ActivityConfigure");
-            dataCollectionService = null;
+            serviceDataCollection = null;
 
             service_connected_checkbox.setChecked(false);
             foreground_service_switch.setChecked(false);
@@ -79,7 +76,7 @@ public class ActivityConfigure extends AppCompatActivity {
                     return;
                 }
 
-                dataCollectionService.updateLocationListenerOptions(dataCollectionService.getMinTime(), min_distance);
+                serviceDataCollection.updateLocationListenerOptions(serviceDataCollection.getMinTime(), min_distance);
 
                 Toast.makeText(ActivityConfigure.this, "Minimum location distance updated to " + min_distance, Toast.LENGTH_SHORT).show();
             }
@@ -101,7 +98,7 @@ public class ActivityConfigure extends AppCompatActivity {
                     return;
                 }
 
-                dataCollectionService.updateLocationListenerOptions(min_time, dataCollectionService.getMinDistance());
+                serviceDataCollection.updateLocationListenerOptions(min_time, serviceDataCollection.getMinDistance());
 
                 Toast.makeText(ActivityConfigure.this, "Minimum location time updated to " + min_time, Toast.LENGTH_SHORT).show();
 
@@ -113,17 +110,17 @@ public class ActivityConfigure extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if(dataCollectionService == null) {
+                if(serviceDataCollection == null) {
                     Toast.makeText(ActivityConfigure.this, "Cannot adjust service settings, service not connected", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if(isChecked) {
                     Toast.makeText(ActivityConfigure.this, "Service foregrounded", Toast.LENGTH_SHORT).show();
-                    dataCollectionService.startForegroundNotification();
+                    serviceDataCollection.startForegroundNotification();
                 } else {
                     Toast.makeText(ActivityConfigure.this, "Service backgrounded", Toast.LENGTH_SHORT).show();
-                    dataCollectionService.stopForegroundNotification();
+                    serviceDataCollection.stopForegroundNotification();
                 }
 
             }
@@ -139,7 +136,7 @@ public class ActivityConfigure extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        if(dataCollectionService != null) {
+        if(serviceDataCollection != null) {
             unbindService(locationServiceConnection);
         }
     }
@@ -148,11 +145,11 @@ public class ActivityConfigure extends AppCompatActivity {
      * Based on whether the permission have been granted or not to access location */
     private void checkPermissionsStartService(boolean requestIfNotGranted) {
 
-        if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && dataCollectionService == null) {
-            Log.d(Constants.PERMISSIONS, "All permissions granted: Launching dataCollectionService");
+        if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && serviceDataCollection == null) {
+            Log.d(Constants.PERMISSIONS, "All permissions granted: Launching serviceDataCollection");
 
             /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
-            Intent locationServiceIntent = new Intent(this, DataCollectionService.class);
+            Intent locationServiceIntent = new Intent(this, ServiceDataCollection.class);
             startService(locationServiceIntent);
             bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
         }

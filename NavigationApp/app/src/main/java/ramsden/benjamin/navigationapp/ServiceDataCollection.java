@@ -34,7 +34,7 @@ import java.util.TimerTask;
  * It is assumed that when this is called the Location permission has been granted
  */
 
-public class DataCollectionService extends Service {
+public class ServiceDataCollection extends Service {
 
     private static final int pendingIntentCode = 333;
     private static final int foregroudCode = 343;
@@ -87,15 +87,15 @@ public class DataCollectionService extends Service {
     private final IBinder myBinder = new MyBinder();
 
     public class MyBinder extends Binder {
-        DataCollectionService getService() {
-            return DataCollectionService.this;
+        ServiceDataCollection getService() {
+            return ServiceDataCollection.this;
         }
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(Constants.DATA_COLLECTION_SERVICE,"DataCollectionService onBind");
+        Log.d(Constants.DATA_COLLECTION_SERVICE,"ServiceDataCollection onBind");
         return myBinder;
     }
 
@@ -104,7 +104,7 @@ public class DataCollectionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(Constants.DATA_COLLECTION_SERVICE, "DataCollectionService onCreate");
+        Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onCreate");
 
         /* Create notification ready to create foreground Service notification on event user plays music */
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
@@ -209,7 +209,7 @@ public class DataCollectionService extends Service {
     /* creates the foreground notification to keep the service alive
      * ensures the notification is not already active */
     public void startForegroundNotification() {
-        Log.d(Constants.DATA_COLLECTION_SERVICE, "DataCollectionService startForegroundNotification");
+        Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection startForegroundNotification");
         if(!notifActive) {
             startForeground(foregroudCode, foregroundNotif);
             notifActive = true;
@@ -218,7 +218,7 @@ public class DataCollectionService extends Service {
 
     /* removes the foreground notificaiton if it does exist  */
     public void stopForegroundNotification() {
-        Log.d(Constants.DATA_COLLECTION_SERVICE, "DataCollectionService stopForegroundNotification");
+        Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection stopForegroundNotification");
         if(notifActive) {
             stopForeground(true);
             notifActive = false;
@@ -233,7 +233,7 @@ public class DataCollectionService extends Service {
     private void initLocationListener() {
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Err: DataCollectionService instantiated, without ACCESS_FINE_LOCATION Permission",Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Err: ServiceDataCollection instantiated, without ACCESS_FINE_LOCATION Permission",Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -266,12 +266,12 @@ public class DataCollectionService extends Service {
      * If the location service has been destroyed */
     @Override
     public void onDestroy() {
-        Log.d(Constants.DATA_COLLECTION_SERVICE, "DataCollectionService onDestroy");
+        Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onDestroy");
 
         if(locationListener != null) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             try {
-                Log.d(Constants.DATA_COLLECTION_SERVICE, "onDestroy (DataCollectionService) removed updates from locationListener");
+                Log.d(Constants.DATA_COLLECTION_SERVICE, "onDestroy (ServiceDataCollection) removed updates from locationListener");
                 locationManager.removeUpdates(locationListener);
             } catch(SecurityException e) {
                 Log.d(Constants.DATA_COLLECTION_SERVICE, e.toString());

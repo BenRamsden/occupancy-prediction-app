@@ -25,7 +25,7 @@ public class Constants {
     public static final int MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE = 797;
 
     public static final String NAVIGATION_APP = "NavigationApp";
-    public static final String DATA_COLLECTION_SERVICE = "DataCollectionService";
+    public static final String DATA_COLLECTION_SERVICE = "ServiceDataCollection";
     public static final String MY_LOCATION_LISTENER = "MyLocationListener";
     public static final String ACTIVITY_CONFIGURE = "ActivityConfigure";
     public static final String GOOGLE_API_CLIENT = "GoogleApiClient";

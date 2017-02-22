@@ -35,7 +35,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <service android:name=".DataCollectionService" />
+        <service android:name=".ServiceDataCollection" />
 
         <provider
             android:name=".NavigationContentProvider"

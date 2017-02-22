@@ -1,7 +1,6 @@
 package ramsden.benjamin.navigationapp;
 
 import android.location.Location;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 /**
@@ -10,16 +9,16 @@ import android.util.Log;
 
 public class SensorBluetoothManager {
 
-    private DataCollectionService mDataCollectionService;
+    private ServiceDataCollection mServiceDataCollection;
 
     private SensorBluetooth sensorBluetooth;
 
     private long lastBluetoothObservation = 0;
     private long bluetoothMinIntervalMillis = Constants.DEFAULT_BLUETOOTH_INTERVAL;
 
-    public SensorBluetoothManager(DataCollectionService dataCollectionService) {
-        mDataCollectionService = dataCollectionService;
-        sensorBluetooth = new SensorBluetooth(mDataCollectionService);
+    public SensorBluetoothManager(ServiceDataCollection serviceDataCollection) {
+        mServiceDataCollection = serviceDataCollection;
+        sensorBluetooth = new SensorBluetooth(mServiceDataCollection);
     }
 
     public void startBluetooth(Location location) {

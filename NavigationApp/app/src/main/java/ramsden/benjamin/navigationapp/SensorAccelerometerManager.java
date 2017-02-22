@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class SensorAccelerometerManager {
 
-    private DataCollectionService mDataCollectionService;
+    private ServiceDataCollection mServiceDataCollection;
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
@@ -21,14 +21,14 @@ public class SensorAccelerometerManager {
     private long lastAccelerometerObservation = 0;
     private long accelerometerMinIntervalMillis = Constants.DEFAULT_ACCELEROMETER_INTERVAL;
 
-    public SensorAccelerometerManager(DataCollectionService dataCollectionService) {
-        mDataCollectionService = dataCollectionService;
+    public SensorAccelerometerManager(ServiceDataCollection serviceDataCollection) {
+        mServiceDataCollection = serviceDataCollection;
 
-        mSensorManager = (SensorManager) mDataCollectionService.getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = (SensorManager) mServiceDataCollection.getSystemService(Context.SENSOR_SERVICE);
 
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorAccelerometer = new SensorAccelerometer(mDataCollectionService);
+            sensorAccelerometer = new SensorAccelerometer(mServiceDataCollection);
             mSensorManager.registerListener(sensorAccelerometer, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Accelerometer Sensor SUCCESS (Subscribed)");
         } else {

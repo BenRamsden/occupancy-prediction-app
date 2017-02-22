@@ -60,26 +60,26 @@ import java.util.TimerTask;
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
-    /* Connection to the DataCollectionService
- * In the main activity this is purely used to ensure the DataCollectionService
+    /* Connection to the ServiceDataCollection
+ * In the main activity this is purely used to ensure the ServiceDataCollection
  * Is destroyed upon exiting the application
  * Unless the user has specified the location tracking continue (foreground)
  * Through the options menu */
-    private DataCollectionService dataCollectionService = null;
+    private ServiceDataCollection serviceDataCollection = null;
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(Constants.NAVIGATION_APP, "Service Connected to ActivityNavigation");
 
-            DataCollectionService.MyBinder binder = (DataCollectionService.MyBinder) service;
-            dataCollectionService = binder.getService();
+            ServiceDataCollection.MyBinder binder = (ServiceDataCollection.MyBinder) service;
+            serviceDataCollection = binder.getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(Constants.NAVIGATION_APP, "Service Disconnected from ActivityNavigation");
 
-            dataCollectionService = null;
+            serviceDataCollection = null;
         }
     };
 
@@ -406,12 +406,12 @@ public class ActivityNavigation extends AppCompatActivity
 
         /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
 
-        if(dataCollectionService == null) {
+        if(serviceDataCollection == null) {
             if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Location lastLocation = dataCollectionService.getLastLocation();
+        Location lastLocation = serviceDataCollection.getLastLocation();
 
         if(lastLocation == null) {
             if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
@@ -489,7 +489,7 @@ public class ActivityNavigation extends AppCompatActivity
                     return;
                 }
 
-                if(dataCollectionService != null && dataCollectionService.sendCrowdObservation(user_estimate)) {
+                if(serviceDataCollection != null && serviceDataCollection.sendCrowdObservation(user_estimate)) {
                     Toast.makeText(ActivityNavigation.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(ActivityNavigation.this, "Error sending your estimate, Data Collection Service is not initialized", Toast.LENGTH_SHORT).show();
@@ -514,14 +514,14 @@ public class ActivityNavigation extends AppCompatActivity
 
         boolean foreground_service = false;
 
-        if(dataCollectionService != null) {
-            foreground_service = dataCollectionService.isForegroundNotification();
+        if(serviceDataCollection != null) {
+            foreground_service = serviceDataCollection.isForegroundNotification();
 
             unbindService(locationServiceConnection);
         }
 
         if(!foreground_service) {
-            stopService(new Intent(this, DataCollectionService.class));
+            stopService(new Intent(this, ServiceDataCollection.class));
         }
 
         if(mGoogleApiClient != null) {
@@ -535,13 +535,13 @@ public class ActivityNavigation extends AppCompatActivity
      * Based on whether the permission have been granted or not to access location */
     private void checkPermissionsStartService(boolean requestIfNotGranted) {
 
-        if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && dataCollectionService == null) {
-            Log.d(Constants.PERMISSIONS, "All permissions granted: Launching dataCollectionService");
+        if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && serviceDataCollection == null) {
+            Log.d(Constants.PERMISSIONS, "All permissions granted: Launching serviceDataCollection");
 
             enableMapMyLocation();
 
             /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
-            Intent locationServiceIntent = new Intent(this, DataCollectionService.class);
+            Intent locationServiceIntent = new Intent(this, ServiceDataCollection.class);
             startService(locationServiceIntent);
             bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
         }

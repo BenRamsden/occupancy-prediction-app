@@ -9,16 +9,16 @@ import android.util.Log;
 
 public class SensorHotspotManager {
 
-    private DataCollectionService mDataCollectionService;
+    private ServiceDataCollection mServiceDataCollection;
 
     private SensorHotspot sensorHotspot;
 
     private long lastHotspotObservation = 0;
     private long hotspotMinIntervalMillis = Constants.DEFAULT_HOTSPOT_INTERVAL;
 
-    public SensorHotspotManager(DataCollectionService dataCollectionService) {
-        mDataCollectionService = dataCollectionService;
-        sensorHotspot = new SensorHotspot(mDataCollectionService);
+    public SensorHotspotManager(ServiceDataCollection serviceDataCollection) {
+        mServiceDataCollection = serviceDataCollection;
+        sensorHotspot = new SensorHotspot(mServiceDataCollection);
     }
 
     public void startHotspot(Location location) {

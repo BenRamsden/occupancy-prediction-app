@@ -9,16 +9,16 @@ import android.util.Log;
 
 public class SensorAudioManager {
 
-    private DataCollectionService mDataCollectionService;
+    private ServiceDataCollection mServiceDataCollection;
 
     private SensorAudio sensorAudio;
 
     private long lastAudioObservation = 0;
     private long audioMinIntervalMillis = Constants.DEFAULT_AUDIO_INTERVAL;
 
-    public SensorAudioManager(DataCollectionService dataCollectionService) {
-        mDataCollectionService = dataCollectionService;
-        sensorAudio = new SensorAudio(mDataCollectionService);
+    public SensorAudioManager(ServiceDataCollection serviceDataCollection) {
+        mServiceDataCollection = serviceDataCollection;
+        sensorAudio = new SensorAudio(mServiceDataCollection);
     }
 
     public void startAudio(Location location) {
