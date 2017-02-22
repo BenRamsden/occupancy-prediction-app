@@ -162,7 +162,7 @@ public class NavigationContentProvider extends ContentProvider {
      * into the SQLite Database */
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, final ContentValues values) {
         Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with insert");
 
         int uriType = URI_MATCHER.match(uri);
@@ -229,8 +229,10 @@ public class NavigationContentProvider extends ContentProvider {
                     break;
                 case OCCUPANCY_ESTIMATE:
                     api_sub = "/occupancy";
-                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, values.get(NavigationContract.AccelerometerObservations.KEY_LATITUDE));
-                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, values.get(NavigationContract.AccelerometerObservations.KEY_LONGITUDE));
+                    final Double lat = (Double) values.get(NavigationContract.AccelerometerObservations.KEY_LATITUDE);
+                    final Double lng = (Double) values.get(NavigationContract.AccelerometerObservations.KEY_LONGITUDE);
+                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, lat);
+                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, lng);
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
@@ -243,10 +245,14 @@ public class NavigationContentProvider extends ContentProvider {
                                 occupancy_estimate = response.getString("occupancy");
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                                return;
                             }
 
                             Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
                             intent.putExtra("occupancy_estimate",occupancy_estimate);
+                            intent.putExtra("mode", values.getAsString("mode"));
+                            intent.putExtra("lat", lat);
+                            intent.putExtra("lng", lng);
                             getContext().sendBroadcast(intent);
                         }
                     };

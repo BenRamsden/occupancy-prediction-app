@@ -1,6 +1,5 @@
 package ramsden.benjamin.navigationapp;
 
-import android.*;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -10,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,7 +31,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -47,8 +46,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -101,17 +104,57 @@ public class ActivityNavigation extends AppCompatActivity
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive", Toast.LENGTH_SHORT).show();
+            String mode = intent.getStringExtra("mode");
 
-            String occupancy_estimate = intent.getStringExtra("occupancy_estimate");
+            //Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive, mode: " + mode, Toast.LENGTH_SHORT).show();
 
-            showCrowdObservationAlertDialog(occupancy_estimate);
+            Float occupancy_estimate = 0f;
+
+            try {
+                occupancy_estimate = Float.parseFloat(intent.getStringExtra("occupancy_estimate"));
+            } catch(NumberFormatException ex) {
+                //Log.e(Constants.NAVIGATION_APP, "occupancy_estimate not a float");
+                return;
+            }
+
+            switch (mode) {
+                case CROWD_OBSERVATION_MODE:
+                    showCrowdObservationAlertDialog(String.valueOf(occupancy_estimate));
+                    break;
+                case MAP_POLL_MODE:
+                    Double lat = intent.getDoubleExtra("lat", Double.NaN);
+                    Double lng = intent.getDoubleExtra("lng", Double.NaN);
+
+                    if(Double.isNaN(lat) || Double.isNaN(lng)) {
+                        Log.e(Constants.NAVIGATION_APP, "Didnt get lat lng back in MAP_POLL_MODE");
+                        return;
+                    }
+
+                    if(mMap != null) {
+                        Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
+
+                        CircleOptions circleOptions = new CircleOptions();
+                        circleOptions.center(new LatLng(lat, lng));
+                        circleOptions.fillColor(Color.GREEN);
+                        circleOptions.radius(occupancy_estimate/2);
+
+                        mMap.addCircle(circleOptions);
+                    } else {
+                        Log.e(Constants.NAVIGATION_APP, "Map null cant add occupancy circle");
+                        return;
+                    }
+
+                    break;
+            }
+
         }
     };
 
     private GoogleMap mMap;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private Timer mapPollTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +201,15 @@ public class ActivityNavigation extends AppCompatActivity
 
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
+
+        mapPollTimer = new Timer();
+        mapPollTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d(Constants.NAVIGATION_APP, "Requesting map poll");
+                requestOccupancyEstimate(MAP_POLL_MODE);
+            }
+        },10000,10000);
     }
 
     @Override
@@ -204,7 +256,7 @@ public class ActivityNavigation extends AppCompatActivity
         } else if (id == R.id.nav_sent_log) {
             startActivity(new Intent(this, ActivitySentLog.class));
         } else if (id == R.id.nav_crowd_observation) {
-            giveCrowdObservation();
+            requestOccupancyEstimate(CROWD_OBSERVATION_MODE);
         } else if (id == R.id.nav_likely_place) {
             findLikelyPlaces();
         }
@@ -288,25 +340,36 @@ public class ActivityNavigation extends AppCompatActivity
         startActivity(new Intent(this, ActivityNavigation.class));
     }
 
-    public void giveCrowdObservation() {
+    public static final String CROWD_OBSERVATION_MODE = "CROWD_OBSERVATION_MODE";
+    public static final String MAP_POLL_MODE = "MAP_POLL_MODE";
+
+    public void requestOccupancyEstimate(String mode) {
+
+        /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
 
         if(dataCollectionService == null) {
-            Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
+            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Location lastLocation = dataCollectionService.getLastLocation();
 
         if(lastLocation == null) {
-            Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
+            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Uri uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("lat",lastLocation.getLatitude());
-        contentValues.put("lng",lastLocation.getLongitude());
-        getContentResolver().insert(uri, contentValues);
+
+        for(double lat_offset = -0.002f; lat_offset < 0.002f; lat_offset += 0.0005f) {
+            for(double lng_offset = -0.002f; lng_offset < 0.002f; lng_offset += 0.0005f) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("lat",lastLocation.getLatitude()+lat_offset);
+                contentValues.put("lng",lastLocation.getLongitude()+lng_offset);
+                contentValues.put("mode", mode);
+                getContentResolver().insert(uri, contentValues);
+            }
+        }
 
         /* Broadcast Receiver calls showCrowdObservationsAlertDialog if server returns occupancy estimate */
     }
