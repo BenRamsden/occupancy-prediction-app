@@ -50,6 +50,10 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -108,44 +112,87 @@ public class ActivityNavigation extends AppCompatActivity
 
             //Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive, mode: " + mode, Toast.LENGTH_SHORT).show();
 
-            Float occupancy_estimate = 0f;
-
-            try {
-                occupancy_estimate = Float.parseFloat(intent.getStringExtra("occupancy_estimate"));
-            } catch(NumberFormatException ex) {
-                //Log.e(Constants.NAVIGATION_APP, "occupancy_estimate not a float");
-                return;
-            }
-
             switch (mode) {
                 case CROWD_OBSERVATION_MODE:
-                    showCrowdObservationAlertDialog(String.valueOf(occupancy_estimate));
-                    break;
-                case MAP_POLL_MODE:
-                    Double lat = intent.getDoubleExtra("lat", Double.NaN);
-                    Double lng = intent.getDoubleExtra("lng", Double.NaN);
+                    Float occupancy_estimate = 0f;
 
-                    if(Double.isNaN(lat) || Double.isNaN(lng)) {
-                        Log.e(Constants.NAVIGATION_APP, "Didnt get lat lng back in MAP_POLL_MODE");
+                    try {
+                        occupancy_estimate = Float.parseFloat(intent.getStringExtra("occupancy_estimate"));
+                    } catch(NumberFormatException ex) {
+                        //Log.e(Constants.NAVIGATION_APP, "occupancy_estimate not a float");
                         return;
                     }
 
-                    if(mMap != null) {
+                    showCrowdObservationAlertDialog(String.valueOf(occupancy_estimate));
+                    break;
+                case MAP_POLL_MODE:
+                    if(mMap == null) {
+                        Toast.makeText(ActivityNavigation.this, "Cannot draw occupancy, map is null", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    mMap.clear();
+
+                    String lat_lng_occupancy_list = intent.getStringExtra("lat_lng_occupancy_list");
+                    JSONObject jsonObject;
+
+                    try {
+                        jsonObject = new JSONObject(lat_lng_occupancy_list);
+                    } catch (JSONException e) {
+                        Toast.makeText(ActivityNavigation.this, "lat_lng_occupancy_list was invalid JSON", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Toast.makeText(ActivityNavigation.this, "Got map poll back", Toast.LENGTH_SHORT).show();
+
+                    Iterator<String> iterator = jsonObject.keys();
+
+                    while(iterator.hasNext()) {
+                        JSONObject lat_lng_occupancy;
+
+                        try {
+                            lat_lng_occupancy = jsonObject.getJSONObject(iterator.next());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            continue;
+                        }
+
+                        //Toast.makeText(ActivityNavigation.this, "Got json object: " + lat_lng_occupancy.toString(), Toast.LENGTH_SHORT).show();
+                        Double lat, lng;
+                        String occupancy_str;
+                        try {
+                            lat = lat_lng_occupancy.getDouble("lat");
+                            lng = lat_lng_occupancy.getDouble("lng");
+                            occupancy_str = lat_lng_occupancy.getString("occupancy");
+                        } catch (JSONException e) {
+                            Log.d(Constants.NAVIGATION_APP, "Doubles lat, lng, occupancy could not all be parsed; possibly occupancy was null");
+                            continue;
+                        }
+
+                        Float occupancy;
+                        try {
+                            occupancy = Float.parseFloat(occupancy_str);
+                        } catch(NumberFormatException ex) {
+                            Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
+                            continue;
+                        }
+
                         Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
 
                         CircleOptions circleOptions = new CircleOptions();
                         circleOptions.center(new LatLng(lat, lng));
-                        circleOptions.fillColor(Color.GREEN);
-                        circleOptions.radius(occupancy_estimate/2);
+                        circleOptions.strokeColor(Color.DKGRAY);
+                        circleOptions.fillColor(Color.LTGRAY);
+                        circleOptions.radius(occupancy);
 
                         mMap.addCircle(circleOptions);
-                    } else {
-                        Log.e(Constants.NAVIGATION_APP, "Map null cant add occupancy circle");
-                        return;
-                    }
 
+                    }
                     break;
+
             }
+
+
 
         }
     };
@@ -359,17 +406,48 @@ public class ActivityNavigation extends AppCompatActivity
             return;
         }
 
-        Uri uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+        Uri uri;
+        ContentValues contentValues;
 
-        for(double lat_offset = -0.002f; lat_offset < 0.002f; lat_offset += 0.0005f) {
-            for(double lng_offset = -0.002f; lng_offset < 0.002f; lng_offset += 0.0005f) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("lat",lastLocation.getLatitude()+lat_offset);
-                contentValues.put("lng",lastLocation.getLongitude()+lng_offset);
-                contentValues.put("mode", mode);
+        switch(mode) {
+            case ActivityNavigation.MAP_POLL_MODE:
+                uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE_BULK");
+
+                JSONObject jsonObject = new JSONObject();
+                int index_count = 0;
+
+                double base_lat = lastLocation.getLatitude();
+                double base_lng = lastLocation.getLongitude();
+
+                for(double lat_offset = -0.002f; lat_offset < 0.002f; lat_offset += 0.0005f) {
+                    for(double lng_offset = -0.002f; lng_offset < 0.002f; lng_offset += 0.0005f) {
+                        try {
+                            jsonObject.put(
+                                    String.valueOf( index_count++ ),
+                                    new JSONObject()
+                                            .put("lat", base_lat+lat_offset)
+                                            .put("lng", base_lng+lng_offset)
+                            );
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                contentValues = new ContentValues();
+                contentValues.put("latlng_list", jsonObject.toString());
                 getContentResolver().insert(uri, contentValues);
-            }
+                break;
+            case ActivityNavigation.CROWD_OBSERVATION_MODE:
+                uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+
+                contentValues = new ContentValues();
+                contentValues.put("lat", lastLocation.getLatitude());
+                contentValues.put("lng", lastLocation.getLongitude());
+                getContentResolver().insert(uri, contentValues);
+                break;
         }
+
 
         /* Broadcast Receiver calls showCrowdObservationsAlertDialog if server returns occupancy estimate */
     }

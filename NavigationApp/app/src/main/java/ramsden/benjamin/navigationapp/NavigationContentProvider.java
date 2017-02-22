@@ -71,6 +71,7 @@ public class NavigationContentProvider extends ContentProvider {
     private static final int BLUETOOTH_OBSERVATIONS = 56;
     private static final int ACCELEROMETER_OBSERVATIONS = 57;
     private static final int OCCUPANCY_ESTIMATE = 58;
+    private static final int OCCUPANCY_ESTIMATE_BULK = 59;
 
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -82,6 +83,7 @@ public class NavigationContentProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.BluetoothObservations.TABLE_NAME, BLUETOOTH_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.AccelerometerObservations.TABLE_NAME, ACCELEROMETER_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE", OCCUPANCY_ESTIMATE);
+        URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE_BULK", OCCUPANCY_ESTIMATE_BULK);
     }
 
     @Override
@@ -229,17 +231,13 @@ public class NavigationContentProvider extends ContentProvider {
                     break;
                 case OCCUPANCY_ESTIMATE:
                     api_sub = "/occupancy";
-                    final Double lat = (Double) values.get(NavigationContract.AccelerometerObservations.KEY_LATITUDE);
-                    final Double lng = (Double) values.get(NavigationContract.AccelerometerObservations.KEY_LONGITUDE);
-                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LATITUDE, lat);
-                    insertJSON.put(NavigationContract.AccelerometerObservations.KEY_LONGITUDE, lng);
+                    insertJSON.put("lat", values.get("lat"));
+                    insertJSON.put("lng", values.get("lng"));
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            //Toast.makeText(getContext(), "OCCUPANCY_ESTIMATE_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
-
-                            String occupancy_estimate = "NO_DATA";
+                            String occupancy_estimate;
 
                             try {
                                 occupancy_estimate = response.getString("occupancy");
@@ -250,25 +248,45 @@ public class NavigationContentProvider extends ContentProvider {
 
                             Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
                             intent.putExtra("occupancy_estimate",occupancy_estimate);
-                            intent.putExtra("mode", values.getAsString("mode"));
-                            intent.putExtra("lat", lat);
-                            intent.putExtra("lng", lng);
+                            intent.putExtra("mode", ActivityNavigation.CROWD_OBSERVATION_MODE);
                             getContext().sendBroadcast(intent);
                         }
                     };
+                    break;
+                case OCCUPANCY_ESTIMATE_BULK:
+                    api_sub = "/occupancy/bulk";
+                    insertJSON.put("latlng_list", new JSONObject(values.getAsString("latlng_list")) );
 
+                    responseListener = new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            String lat_lng_occupancy_list;
+
+                            try {
+                                lat_lng_occupancy_list = response.getString("lat_lng_occupancy_list");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                return;
+                            }
+
+                            Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
+                            intent.putExtra("lat_lng_occupancy_list", lat_lng_occupancy_list);
+                            intent.putExtra("mode", ActivityNavigation.MAP_POLL_MODE);
+                            getContext().sendBroadcast(intent);
+                        }
+                    };
                     break;
                 default:
                     throw new Error("Query: Couldn't match URI: " + uri);
             }
 
         } catch(JSONException ex) {
-            Toast.makeText(getContext(), "JSON_EXCEPTION: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "JSON_EXCEPTION: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
             ex.printStackTrace(System.out);
         }
 
         if(api_sub == null) {
-            Toast.makeText(getContext(), "ContentProvider insert: api_sub string not set, cannot send", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "ContentProvider insert: api_sub string not set, cannot send", Toast.LENGTH_SHORT).show();
             return null;
         }
 
