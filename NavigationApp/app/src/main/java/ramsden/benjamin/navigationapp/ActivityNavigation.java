@@ -419,8 +419,8 @@ public class ActivityNavigation extends AppCompatActivity
                 double base_lat = lastLocation.getLatitude();
                 double base_lng = lastLocation.getLongitude();
 
-                for(double lat_offset = -0.002f; lat_offset < 0.002f; lat_offset += 0.0005f) {
-                    for(double lng_offset = -0.002f; lng_offset < 0.002f; lng_offset += 0.0005f) {
+                for(double lat_offset = -0.0003f; lat_offset < 0.0003f; lat_offset += 0.00005f) {
+                    for(double lng_offset = -0.0003f; lng_offset < 0.0003f; lng_offset += 0.00005f) {
                         try {
                             jsonObject.put(
                                     String.valueOf( index_count++ ),
