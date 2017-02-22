@@ -105,6 +105,10 @@ public class ActivityNavigation extends AppCompatActivity
 
     public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
+    final int color_amplification = 300;
+    final double latlng_offset = 0.001d;
+    final double latlng_increment = 0.0001d;
+
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -179,10 +183,18 @@ public class ActivityNavigation extends AppCompatActivity
 
                         Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
 
+
+                        Integer color = Math.round(occupancy* color_amplification);
+                        if(color > 255) {
+                            color = 255;
+                        }
+
+                        Log.d("Color", String.valueOf(color));
+
                         CircleOptions circleOptions = new CircleOptions();
                         circleOptions.center(new LatLng(lat, lng));
-                        circleOptions.strokeColor(Color.DKGRAY);
-                        circleOptions.fillColor(Color.LTGRAY);
+                        circleOptions.strokeColor(Color.argb(color,255,0,0));
+                        circleOptions.fillColor(Color.argb(color,255,0,0));
                         circleOptions.radius(occupancy);
 
                         mMap.addCircle(circleOptions);
@@ -419,8 +431,8 @@ public class ActivityNavigation extends AppCompatActivity
                 double base_lat = lastLocation.getLatitude();
                 double base_lng = lastLocation.getLongitude();
 
-                for(double lat_offset = -0.0003f; lat_offset < 0.0003f; lat_offset += 0.00005f) {
-                    for(double lng_offset = -0.0003f; lng_offset < 0.0003f; lng_offset += 0.00005f) {
+                for(double lat_offset = -latlng_offset; lat_offset < latlng_offset; lat_offset += latlng_increment) {
+                    for(double lng_offset = -latlng_offset; lng_offset < latlng_offset; lng_offset += latlng_increment) {
                         try {
                             jsonObject.put(
                                     String.valueOf( index_count++ ),
