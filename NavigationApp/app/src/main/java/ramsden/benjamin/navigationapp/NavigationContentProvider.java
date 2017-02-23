@@ -231,8 +231,8 @@ public class NavigationContentProvider extends ContentProvider {
                     break;
                 case OCCUPANCY_ESTIMATE:
                     api_sub = "/occupancy";
-                    insertJSON.put("lat", values.get("lat"));
-                    insertJSON.put("lng", values.get("lng"));
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LAT, values.get(NavigationContract.OccupancyEstimate.ARG_LAT));
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LNG, values.get(NavigationContract.OccupancyEstimate.ARG_LNG));
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
@@ -240,22 +240,22 @@ public class NavigationContentProvider extends ContentProvider {
                             String occupancy_estimate;
 
                             try {
-                                occupancy_estimate = response.getString("occupancy");
+                                occupancy_estimate = response.getString(NavigationContract.OccupancyEstimate.RESPONSE_OCCUPANCY);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 return;
                             }
 
                             Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
-                            intent.putExtra("occupancy_estimate",occupancy_estimate);
-                            intent.putExtra("mode", ActivityNavigation.CROWD_OBSERVATION_MODE);
+                            intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE,occupancy_estimate);
+                            intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_MODE, ActivityNavigation.CROWD_OBSERVATION_MODE);
                             getContext().sendBroadcast(intent);
                         }
                     };
                     break;
                 case OCCUPANCY_ESTIMATE_BULK:
                     api_sub = "/occupancy/bulk";
-                    insertJSON.put("latlng_list", new JSONObject(values.getAsString("latlng_list")) );
+                    insertJSON.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, new JSONObject(values.getAsString(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST)) );
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
@@ -263,15 +263,15 @@ public class NavigationContentProvider extends ContentProvider {
                             String lat_lng_occupancy_list;
 
                             try {
-                                lat_lng_occupancy_list = response.getString("lat_lng_occupancy_list");
+                                lat_lng_occupancy_list = response.getString(NavigationContract.OccupancyEstimateBulk.RESPONSE_LAT_LNG_OCCUPANCY_LIST);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 return;
                             }
 
                             Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
-                            intent.putExtra("lat_lng_occupancy_list", lat_lng_occupancy_list);
-                            intent.putExtra("mode", ActivityNavigation.MAP_POLL_MODE);
+                            intent.putExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_LAT_LNG_OCCUPANCY_LIST, lat_lng_occupancy_list);
+                            intent.putExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_MODE, ActivityNavigation.MAP_POLL_MODE);
                             getContext().sendBroadcast(intent);
                         }
                     };

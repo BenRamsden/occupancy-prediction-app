@@ -112,7 +112,7 @@ public class ActivityNavigation extends AppCompatActivity
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String mode = intent.getStringExtra("mode");
+            String mode = intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_MODE);
 
             //Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive, mode: " + mode, Toast.LENGTH_SHORT).show();
 
@@ -121,7 +121,7 @@ public class ActivityNavigation extends AppCompatActivity
                     Float occupancy_estimate = 0f;
 
                     try {
-                        occupancy_estimate = Float.parseFloat(intent.getStringExtra("occupancy_estimate"));
+                        occupancy_estimate = Float.parseFloat(intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE));
                     } catch(NumberFormatException ex) {
                         //Log.e(Constants.NAVIGATION_APP, "occupancy_estimate not a float");
                         return;
@@ -137,7 +137,7 @@ public class ActivityNavigation extends AppCompatActivity
 
                     mMap.clear();
 
-                    String lat_lng_occupancy_list = intent.getStringExtra("lat_lng_occupancy_list");
+                    String lat_lng_occupancy_list = intent.getStringExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_LAT_LNG_OCCUPANCY_LIST);
                     JSONObject jsonObject;
 
                     try {
@@ -165,8 +165,8 @@ public class ActivityNavigation extends AppCompatActivity
                         Double lat, lng;
                         String occupancy_str;
                         try {
-                            lat = lat_lng_occupancy.getDouble("lat");
-                            lng = lat_lng_occupancy.getDouble("lng");
+                            lat = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LAT);
+                            lng = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LNG);
                             occupancy_str = lat_lng_occupancy.getString("occupancy");
                         } catch (JSONException e) {
                             Log.d(Constants.NAVIGATION_APP, "Doubles lat, lng, occupancy could not all be parsed; possibly occupancy was null");
@@ -447,7 +447,7 @@ public class ActivityNavigation extends AppCompatActivity
                 }
 
                 contentValues = new ContentValues();
-                contentValues.put("latlng_list", jsonObject.toString());
+                contentValues.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, jsonObject.toString());
                 getContentResolver().insert(uri, contentValues);
                 break;
             case ActivityNavigation.CROWD_OBSERVATION_MODE:

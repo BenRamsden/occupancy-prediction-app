@@ -103,4 +103,24 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_ACCELERATION_TIMELINE = "acceleration_timeline";
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
+
+    public static class OccupancyEstimate {
+        public static final String ARG_LAT = "lat";
+        public static final String ARG_LNG = "lng";
+
+        public static final String RESPONSE_OCCUPANCY = "occupancy";
+
+        public static final String EXTRA_OCCUPANCY_ESTIMATE = "occupancy_estimate";
+        public static final String EXTRA_MODE = "mode";
+    }
+
+    public static class OccupancyEstimateBulk {
+        public static final String ARG_LAT_LNG_LIST = "lat_lng_list";
+
+        public static final String RESPONSE_LAT_LNG_OCCUPANCY_LIST = "lat_lng_occupancy_list";
+
+        public static final String EXTRA_LAT_LNG_OCCUPANCY_LIST = "lat_lng_occupancy_list";
+        public static final String EXTRA_MODE = "mode";
+
+    }
 }
