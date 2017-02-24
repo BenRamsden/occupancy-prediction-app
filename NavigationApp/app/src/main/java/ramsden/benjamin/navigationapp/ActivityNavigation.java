@@ -105,9 +105,11 @@ public class ActivityNavigation extends AppCompatActivity
 
     public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
-    final int color_amplification = 300;
-    final double latlng_offset = 0.001d;
-    final double latlng_increment = 0.0001d;
+    final int opacity_multiplier = 25;
+    final double lat_target_offset = 0.0005d;
+    final double lng_target_offset = 0.0007d;
+    final double lat_increment = 0.00018d;
+    final double lng_increment = 0.0003d;
 
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
@@ -184,18 +186,18 @@ public class ActivityNavigation extends AppCompatActivity
                         Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
 
 
-                        Integer color = Math.round(occupancy* color_amplification);
-                        if(color > 255) {
-                            color = 255;
+                        Integer opacity = Math.round(occupancy* opacity_multiplier);
+                        if(opacity > 150) {
+                            opacity = 150;
                         }
 
-                        Log.d("Color", String.valueOf(color));
+                        //Log.d("Color", String.valueOf(opacity));
 
                         CircleOptions circleOptions = new CircleOptions();
                         circleOptions.center(new LatLng(lat, lng));
-                        circleOptions.strokeColor(Color.argb(color,255,0,0));
-                        circleOptions.fillColor(Color.argb(color,255,0,0));
-                        circleOptions.radius(occupancy);
+                        circleOptions.strokeColor(Color.argb(opacity,255,0,0));
+                        circleOptions.fillColor(Color.argb(opacity,255,0,0));
+                        circleOptions.radius(10);
 
                         mMap.addCircle(circleOptions);
 
@@ -428,17 +430,17 @@ public class ActivityNavigation extends AppCompatActivity
                 JSONObject jsonObject = new JSONObject();
                 int index_count = 0;
 
-                double base_lat = lastLocation.getLatitude();
-                double base_lng = lastLocation.getLongitude();
+                double lat = lastLocation.getLatitude();
+                double lng = lastLocation.getLongitude();
 
-                for(double lat_offset = -latlng_offset; lat_offset < latlng_offset; lat_offset += latlng_increment) {
-                    for(double lng_offset = -latlng_offset; lng_offset < latlng_offset; lng_offset += latlng_increment) {
+                for(double lat_offset = -lat_target_offset; lat_offset < lat_target_offset; lat_offset += lat_increment) {
+                    for(double lng_offset = -lng_target_offset; lng_offset < lng_target_offset; lng_offset += lng_increment) {
                         try {
                             jsonObject.put(
                                     String.valueOf( index_count++ ),
                                     new JSONObject()
-                                            .put("lat", base_lat+lat_offset)
-                                            .put("lng", base_lng+lng_offset)
+                                            .put("lat", lat+lat_offset)
+                                            .put("lng", lng+lng_offset)
                             );
                         } catch (JSONException e) {
                             e.printStackTrace();
