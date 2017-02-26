@@ -348,7 +348,7 @@ public class ActivityNavigation extends AppCompatActivity
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new mapPollTimer");
         mapPollTimer = new Timer();
 
-        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling mapPollTimer at fixed rate");
+        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling mapPollTimer at fixed rate " + mMapPollInterval);
         mapPollTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -360,7 +360,7 @@ public class ActivityNavigation extends AppCompatActivity
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new cameraCenterTimer");
         cameraCenterTimer = new Timer();
 
-        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling cameraCenterTimer at fixed rate");
+        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling cameraCenterTimer at fixed rate " + mCameraCenterInterval);
         cameraCenterTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
