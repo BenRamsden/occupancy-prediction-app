@@ -72,7 +72,7 @@
                 android:layout_weight="1">
 
                 <TextView
-                    android:text="Minimum Location Distance"
+                    android:text="Minimum Location Distance (svc)"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView3"
                     android:layout_weight="1"
@@ -86,6 +86,13 @@
                     android:layout_weight="1"
                     android:layout_width="match_parent" />
 
+                <Button
+                    android:text="UPDATE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/location_distance_submit"
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -95,7 +102,7 @@
                 android:layout_weight="1">
 
                 <TextView
-                    android:text="Minimum Location Time"
+                    android:text="Minimum Location Time (svc)"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView6"
                     android:layout_weight="1"
@@ -109,14 +116,14 @@
                     android:layout_weight="1"
                     android:layout_width="match_parent" />
 
-            </LinearLayout>
+                <Button
+                    android:text="UPDATE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/location_time_submit"
+                    android:layout_weight="1" />
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/update_data_collection_service_button"
-                android:layout_weight="1"
-                android:text="Update" />
+            </LinearLayout>
 
             <Space
                 android:layout_width="match_parent"
@@ -190,6 +197,19 @@
                     android:layout_weight="1" />
 
             </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="20dp" />
+
+            <Button
+                android:text="Reset All Preferences"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/reset_all_prefs_button"
+                android:layout_weight="1" />
 
         </LinearLayout>
     </ScrollView>

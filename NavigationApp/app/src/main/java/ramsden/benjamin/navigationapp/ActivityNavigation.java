@@ -263,17 +263,17 @@ public class ActivityNavigation extends AppCompatActivity
 
     private SharedPreferences sharedPreferences;
 
-    private void refreshSharedPreferences(boolean print_out) {
-        //if(print_out) Toast.makeText(this, "refreshSharedPreferences called with print_out", Toast.LENGTH_SHORT).show();
-
-        long mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
-
-        if(this.mMapPollInterval != mMapPollInterval) {
-            if(print_out) Toast.makeText(this, "mMapPollInterval: Changed to " + mMapPollInterval, Toast.LENGTH_SHORT).show();
-            this.mMapPollInterval = mMapPollInterval;
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            switch(key) {
+                case Constants.PREFERENCE_MAP_POLL_INTERVAL:
+                    mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
+                    Toast.makeText(ActivityNavigation.this, "ActivityNavigation onSharedPreferenceChanged mMapPollInterval:" + mMapPollInterval, Toast.LENGTH_SHORT).show();
+                    break;
+            }
         }
-
-    }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -285,6 +285,10 @@ public class ActivityNavigation extends AppCompatActivity
         /***** SHARED PREFERENCES SET UP */
 
         sharedPreferences = this.getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
 
         /***** DRAWER SET UP */
 
@@ -341,8 +345,6 @@ public class ActivityNavigation extends AppCompatActivity
     public void onResume() {
         super.onResume();
 
-        refreshSharedPreferences(true);
-
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new mapPollTimer");
         mapPollTimer = new Timer();
 
@@ -365,7 +367,7 @@ public class ActivityNavigation extends AppCompatActivity
                 ActivityNavigation.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(Constants.NAVIGATION_APP, "Camera Center Timer: Setting last_camera_center on UI Thread");
+                        //Log.d(Constants.NAVIGATION_APP, "Camera Center Timer: Setting last_camera_center on UI Thread");
                         last_camera_center = mMap.getCameraPosition().target;
                     }
                 });

@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -78,12 +79,6 @@ public class ServiceDataCollection extends Service {
 
     public Location getLastLocation() { return lastLocation; };
 
-    public void updateLocationListenerOptions(long minTime, float minDistance) {
-        this.minTime = minTime;
-        this.minDistance = minDistance;
-        initLocationListener();
-    }
-
     private final IBinder myBinder = new MyBinder();
 
     public class MyBinder extends Binder {
@@ -99,12 +94,40 @@ public class ServiceDataCollection extends Service {
         return myBinder;
     }
 
+    private SharedPreferences sharedPreferences;
+
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            switch(key) {
+                case Constants.PREFERENCE_MIN_DISTANCE:
+                    minDistance = sharedPreferences.getFloat(Constants.PREFERENCE_MIN_DISTANCE, Constants.DEFAULT_MIN_GPS_DISTANCE);
+                    initLocationListener();
+                    Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged minDistance:" + minDistance, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.PREFERENCE_MIN_TIME:
+                    minTime = sharedPreferences.getLong(Constants.PREFERENCE_MIN_TIME, Constants.DEFAULT_MIN_GPS_TIME);
+                    initLocationListener();
+                    Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged minTime:" + minTime, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+        }
+    };
+
     /* Sets up the notification, and saves it in a variable ready to be used
      * Initializes the location listener */
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onCreate");
+
+        sharedPreferences = getBaseContext().getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        minDistance = sharedPreferences.getFloat(Constants.PREFERENCE_MIN_DISTANCE, Constants.DEFAULT_MIN_GPS_DISTANCE);
+        minTime = sharedPreferences.getLong(Constants.PREFERENCE_MIN_TIME, Constants.DEFAULT_MIN_GPS_TIME);
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
 
         /* Create notification ready to create foreground Service notification on event user plays music */
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)

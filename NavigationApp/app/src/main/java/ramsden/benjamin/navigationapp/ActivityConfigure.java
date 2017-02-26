@@ -86,35 +86,57 @@ public class ActivityConfigure extends AppCompatActivity {
                     return;
                 }
 
-                if ( sharedPreferences.edit().putLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, map_polling_interval).commit() ) {
-                    Toast.makeText(ActivityConfigure.this, "Success, updated " + Constants.PREFERENCE_MAP_POLL_INTERVAL, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ActivityConfigure.this, "Fail, could not update " + Constants.PREFERENCE_MAP_POLL_INTERVAL, Toast.LENGTH_SHORT).show();
-                }
+                sharedPreferences.edit().putLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, map_polling_interval).commit();
             }
         });
 
-        final Button update_data_collection_service_button = (Button) findViewById(R.id.update_data_collection_service_button);
-        update_data_collection_service_button.setOnClickListener(new View.OnClickListener() {
+        final Button reset_all_prefs_button = (Button) findViewById(R.id.reset_all_prefs_button);
+        reset_all_prefs_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedPreferences.edit().clear().commit();
+                Toast.makeText(ActivityConfigure.this, "All user preferences cleared", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        final Button location_distance_submit = (Button) findViewById(R.id.location_distance_submit);
+        location_distance_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String min_distance_str = minimum_location_distance_edittext.getText().toString();
-                String min_time_str = minimum_location_time_edittext.getText().toString();
-
                 Float min_distance;
-                Long min_time;
 
                 try {
                     min_distance = Float.parseFloat(min_distance_str);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityConfigure.this, "One of the parameters is invalid, cannot update", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                sharedPreferences.edit()
+                        .putFloat(Constants.PREFERENCE_MIN_DISTANCE, min_distance)
+                        .commit();
+
+            }
+        });
+
+        final Button location_time_submit = (Button) findViewById(R.id.location_time_submit);
+        location_time_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String min_time_str = minimum_location_time_edittext.getText().toString();
+                Long min_time;
+
+                try {
                     min_time = Long.parseLong(min_time_str);
                 } catch(NumberFormatException ex) {
                     Toast.makeText(ActivityConfigure.this, "One of the parameters is invalid, cannot update", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                serviceDataCollection.updateLocationListenerOptions(min_time, min_distance);
-
-                Toast.makeText(ActivityConfigure.this, "Success: MinDistance: " + min_distance + " MinTime: " + min_time, Toast.LENGTH_SHORT).show();
+                sharedPreferences.edit()
+                        .putLong(Constants.PREFERENCE_MIN_TIME, min_time)
+                        .commit();
 
             }
         });

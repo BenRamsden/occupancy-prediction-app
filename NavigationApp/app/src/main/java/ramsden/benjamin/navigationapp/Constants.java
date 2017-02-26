@@ -20,6 +20,8 @@ public class Constants {
 
     public static final String PREFERENCE_FILE_KEY = "ramsden.benjamin.navigationapp.PREF_FILE_1";
     public static final String PREFERENCE_MAP_POLL_INTERVAL = "MAP_POLL_INTERVAL";
+    public static final String PREFERENCE_MIN_TIME = "LOCATION_MIN_TIME";
+    public static final String PREFERENCE_MIN_DISTANCE = "LOCATION_MIN_DISTANCE";
 
     public static final long DEFAULT_MAP_POLL_INTERVAL = 2000;
 
