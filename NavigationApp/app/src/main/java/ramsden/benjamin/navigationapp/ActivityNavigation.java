@@ -62,6 +62,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -122,9 +123,9 @@ public class ActivityNavigation extends AppCompatActivity
     final double circle_radius = 15d;
     final int max_opacity = 150;
 
-    private ArrayList<Polygon> occupancy_squares = new ArrayList<>();
+    private HashMap<String, Float> occupancy_square_id_to_occupancy = new HashMap<>();
 
-    private ArrayList<Circle> occupancy_bounds_circles = new ArrayList<>();
+    private ArrayList<Polygon> occupancy_squares = new ArrayList<>();
 
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
@@ -150,11 +151,7 @@ public class ActivityNavigation extends AppCompatActivity
                         drawn_square.remove();
                     }
                     occupancy_squares.clear();
-
-                    for(Circle circle : occupancy_bounds_circles) {
-                        circle.remove();
-                    }
-                    occupancy_bounds_circles.clear();
+                    occupancy_square_id_to_occupancy.clear();
 
                     String lat_lng_occupancy_list = intent.getStringExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_LAT_LNG_OCCUPANCY_LIST);
                     JSONObject jsonObject;
@@ -199,8 +196,7 @@ public class ActivityNavigation extends AppCompatActivity
                         } catch (NumberFormatException ex) {
                             //Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
                             //Expected to happen if occupancy estimate for that region is null
-                            occupancy_bounds_circles.add(mMap.addCircle(new CircleOptions().center(new LatLng(lat, lng))
-                                    .radius(2).strokeColor(Color.argb(0,0,0,0)).fillColor(Color.argb(50,100,100,100))));
+                            //occupancy_bounds_circles.add(mMap.addCircle(new CircleOptions().center(new LatLng(lat, lng)).radius(2).strokeColor(Color.argb(0,0,0,0)).fillColor(Color.argb(50,100,100,100))));
                             continue;
                         }
 
@@ -230,7 +226,10 @@ public class ActivityNavigation extends AppCompatActivity
                             .add(new LatLng(lat+(square_size*lat_increment), lng-(square_size*lng_increment)))
                             .add(new LatLng(lat-(square_size*lat_increment), lng-(square_size*lng_increment)))
                             .strokeColor(Color.argb(0,0,0,0))
-                            .fillColor(Color.argb(opacity, red, green, blue)));
+                            .fillColor(Color.argb(opacity, red, green, blue))
+                            .clickable(true));
+
+                        occupancy_square_id_to_occupancy.put(polygon.getId(), occupancy);
 
                         occupancy_squares.add(polygon);
 
@@ -438,6 +437,15 @@ public class ActivityNavigation extends AppCompatActivity
                     last_user_marker.remove();
                 }
                 last_user_marker = mMap.addMarker(new MarkerOptions().position(latLng).title("Destination").snippet("Occupancy Loading.."));
+            }
+        });
+
+        mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+            @Override
+            public void onPolygonClick(Polygon polygon) {
+                Float occupancy = occupancy_square_id_to_occupancy.get(polygon.getId());
+
+                Toast.makeText(ActivityNavigation.this, "Occupancy " + occupancy, Toast.LENGTH_SHORT).show();
             }
         });
     }
