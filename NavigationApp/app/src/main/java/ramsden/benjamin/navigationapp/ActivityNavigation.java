@@ -10,7 +10,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -46,8 +48,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
@@ -120,19 +124,12 @@ public class ActivityNavigation extends AppCompatActivity
 
             switch (mode) {
                 case CROWD_OBSERVATION_MODE:
-                    Float occupancy_estimate = 0f;
+                    String occupancy_estimate = intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE);
 
-                    try {
-                        occupancy_estimate = Float.parseFloat(intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE));
-                    } catch(NumberFormatException ex) {
-                        //Log.e(Constants.NAVIGATION_APP, "occupancy_estimate not a float");
-                        return;
-                    }
-
-                    showCrowdObservationAlertDialog(String.valueOf(occupancy_estimate));
+                    showCrowdObservationAlertDialog(occupancy_estimate);
                     break;
                 case MAP_POLL_MODE:
-                    if(mMap == null) {
+                    if (mMap == null) {
                         Toast.makeText(ActivityNavigation.this, "Cannot draw occupancy, map is null", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -149,11 +146,12 @@ public class ActivityNavigation extends AppCompatActivity
                         return;
                     }
 
-                    Toast.makeText(ActivityNavigation.this, "Got map poll back", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(ActivityNavigation.this, "Got map poll back", Toast.LENGTH_SHORT).show();
+                    Log.d(Constants.NAVIGATION_APP, "Got map poll back");
 
                     Iterator<String> iterator = jsonObject.keys();
 
-                    while(iterator.hasNext()) {
+                    while (iterator.hasNext()) {
                         JSONObject lat_lng_occupancy;
 
                         try {
@@ -178,16 +176,17 @@ public class ActivityNavigation extends AppCompatActivity
                         Float occupancy;
                         try {
                             occupancy = Float.parseFloat(occupancy_str);
-                        } catch(NumberFormatException ex) {
-                            Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
+                        } catch (NumberFormatException ex) {
+                            //Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
+                            //Expected to happen if occupancy estimate for that region is null
                             continue;
                         }
 
                         Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
 
 
-                        Integer opacity = Math.round(occupancy* opacity_multiplier);
-                        if(opacity > 150) {
+                        Integer opacity = Math.round(occupancy * opacity_multiplier);
+                        if (opacity > 150) {
                             opacity = 150;
                         }
 
@@ -195,8 +194,8 @@ public class ActivityNavigation extends AppCompatActivity
 
                         CircleOptions circleOptions = new CircleOptions();
                         circleOptions.center(new LatLng(lat, lng));
-                        circleOptions.strokeColor(Color.argb(opacity,255,0,0));
-                        circleOptions.fillColor(Color.argb(opacity,255,0,0));
+                        circleOptions.strokeColor(Color.argb(opacity, 255, 0, 0));
+                        circleOptions.fillColor(Color.argb(opacity, 255, 0, 0));
                         circleOptions.radius(10);
 
                         mMap.addCircle(circleOptions);
@@ -205,7 +204,6 @@ public class ActivityNavigation extends AppCompatActivity
                     break;
 
             }
-
 
 
         }
@@ -263,14 +261,39 @@ public class ActivityNavigation extends AppCompatActivity
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
 
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Log.d(Constants.NAVIGATION_APP, "onPause, cancelling mapPollTimer");
+        mapPollTimer.cancel();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d(Constants.NAVIGATION_APP, "onResume, creating new mapPollTimer");
         mapPollTimer = new Timer();
+
+        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling mapPollTimer at fixed rate");
         mapPollTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 Log.d(Constants.NAVIGATION_APP, "Requesting map poll");
                 requestOccupancyEstimate(MAP_POLL_MODE);
             }
-        },10000,10000);
+        }, 5000, 15000);
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(Constants.NAVIGATION_APP, "onStop");
+        super.onStop();
     }
 
     @Override
@@ -328,17 +351,38 @@ public class ActivityNavigation extends AppCompatActivity
     }
 
 
+    Marker last_user_marker;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+            Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(new Criteria(), false));
+
+            if (location != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+            }
+        }
+
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(52.953357, -1.18736);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker at Computer Science, Nottingham University"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        LatLng computer_science = new LatLng(52.953357, -1.18736);
+//        last_user_marker = mMap.addMarker(new MarkerOptions().position(computer_science).title("Default Destination").snippet("Occupancy Loading.."));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(computer_science,15));
 
         enableMapMyLocation();
+
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                if(last_user_marker != null) {
+                    last_user_marker.remove();
+                }
+                last_user_marker = mMap.addMarker(new MarkerOptions().position(latLng).title("Destination").snippet("Occupancy Loading.."));
+            }
+        });
     }
 
 
@@ -368,37 +412,21 @@ public class ActivityNavigation extends AppCompatActivity
 
         PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
 
-        final int mMaxEntries = 5;
-
         result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult(@NonNull PlaceLikelihoodBuffer likelyPlaces) {
-                Toast.makeText(ActivityNavigation.this, "onResult", Toast.LENGTH_SHORT).show();
-                int i = 0;
-
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    // Build a list of likely places to show the user. Max 5.
-                    Toast.makeText(ActivityNavigation.this, "Got likely place " + placeLikelihood.getPlace().toString(), Toast.LENGTH_SHORT).show();
-
-                    i++;
-                    if (i > (mMaxEntries - 1)) {
-                        break;
-                    }
+                    Toast.makeText(ActivityNavigation.this, "Place Name: " + placeLikelihood.getPlace().getName(), Toast.LENGTH_SHORT).show();
+                    break;
                 }
-                // Release the place likelihood buffer, to avoid memory leaks.
-                likelyPlaces.release();
 
                 if(likelyPlaces.getCount() == 0) {
-                    Toast.makeText(ActivityNavigation.this, "Likely Places are 0, not a public destination", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityNavigation.this, "Sorry, I could not identify the name of this place!", Toast.LENGTH_SHORT).show();
                 }
 
+                likelyPlaces.release();
             }
         });
-    }
-
-
-    public void openNav(View view) {
-        startActivity(new Intent(this, ActivityNavigation.class));
     }
 
     public static final String CROWD_OBSERVATION_MODE = "CROWD_OBSERVATION_MODE";
@@ -470,7 +498,13 @@ public class ActivityNavigation extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Crowd Observation");
 
-        builder.setTitle("We estimate " + occupancy_estimate + " are at your current location, please enter your estimate");
+        builder.setTitle("Occupancy Estimation");
+
+        if(occupancy_estimate.equals("null")) {
+            builder.setMessage("We have no data for your location, please enter your estimate");
+        } else {
+            builder.setMessage("We predict " + occupancy_estimate + " people are at your current location, please enter your estimate");
+        }
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);

@@ -56,7 +56,7 @@ public class NavigationContentProvider extends ContentProvider {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.d(Constants.CONTENT_PROVIDER, "ERROR: " + error);
-            Toast.makeText(getContext(), "NET_ERROR: Printed to Stack Trace", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "NET_ERROR: " + error, Toast.LENGTH_SHORT).show();
             //error.printStackTrace(System.out);
         }
     };
@@ -303,7 +303,7 @@ public class NavigationContentProvider extends ContentProvider {
         apiRequestQueue.add(jsonRequest);
 
         Intent sent_log_intent = new Intent(ActivitySentLog.SENT_LOG_RECEIVER);
-        sent_log_intent.putExtra(ActivitySentLog.SENT_EXTRA_FIELD, "To: " + api_sub + "\nBody: " + insertJSON.toString());
+        sent_log_intent.putExtra(ActivitySentLog.SENT_EXTRA_FIELD, "To: " + api_sub); //+ "\nBody: " + insertJSON.toString());
         getContext().sendBroadcast(sent_log_intent);
         Log.d(Constants.CONTENT_PROVIDER, "Sent sent_log_intent");
 
