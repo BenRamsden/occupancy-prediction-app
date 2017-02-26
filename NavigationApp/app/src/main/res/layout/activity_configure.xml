@@ -73,18 +73,18 @@
 
                 <TextView
                     android:text="Minimum Location Distance"
-                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView3"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:layout_width="match_parent" />
 
                 <EditText
-                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:ems="10"
                     android:id="@+id/minimum_location_distance_edittext"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:layout_width="match_parent" />
 
             </LinearLayout>
 
@@ -99,15 +99,15 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/textView6"
                     android:layout_weight="1"
-                    android:layout_width="200dp" />
+                    android:layout_width="match_parent" />
 
                 <EditText
-                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:ems="10"
                     android:id="@+id/minimum_location_time_edittext"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:layout_width="match_parent" />
 
             </LinearLayout>
 
@@ -117,6 +117,79 @@
                 android:id="@+id/update_data_collection_service_button"
                 android:layout_weight="1"
                 android:text="Update" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="20dp" />
+
+            <TextView
+                android:text="Polling Intervals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView11"
+                android:layout_weight="1"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="Map Polling (ms)"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView12"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/map_polling_edittext"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:text="Update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/map_polling_submit"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="Sensor Polling (ms)"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView13"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/sensor_polling_edittext"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:text="Update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sensor_polling_submit"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

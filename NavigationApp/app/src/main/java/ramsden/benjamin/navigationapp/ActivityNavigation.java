@@ -120,7 +120,6 @@ public class ActivityNavigation extends AppCompatActivity
     final double lng_target_offset = 0.0010d;
     final double lat_increment = 0.00023d;
     final double lng_increment = 0.00035d;
-    final double circle_radius = 15d;
     final int max_opacity = 150;
 
     private HashMap<String, Float> occupancy_square_id_to_occupancy = new HashMap<>();
@@ -190,13 +189,26 @@ public class ActivityNavigation extends AppCompatActivity
                             continue;
                         }
 
+                        final double square_size = 0.4d;
+
+                        LatLng point1 = new LatLng(lat-(square_size*lat_increment), lng+(square_size*lng_increment));
+                        LatLng point2 = new LatLng(lat+(square_size*lat_increment), lng+(square_size*lng_increment));
+                        LatLng point3 = new LatLng(lat+(square_size*lat_increment), lng-(square_size*lng_increment));
+                        LatLng point4 = new LatLng(lat-(square_size*lat_increment), lng-(square_size*lng_increment));
+
                         Float occupancy;
                         try {
                             occupancy = Float.parseFloat(occupancy_str);
                         } catch (NumberFormatException ex) {
                             //Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
                             //Expected to happen if occupancy estimate for that region is null
-                            //occupancy_bounds_circles.add(mMap.addCircle(new CircleOptions().center(new LatLng(lat, lng)).radius(2).strokeColor(Color.argb(0,0,0,0)).fillColor(Color.argb(50,100,100,100))));
+//                            Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
+//                                    .strokeColor(Color.TRANSPARENT)
+//                                    .fillColor(Color.argb(50, 100, 100, 100))
+//                                    .clickable(true));
+//
+//                            occupancy_squares.add(polygon);
+
                             continue;
                         }
 
@@ -218,14 +230,8 @@ public class ActivityNavigation extends AppCompatActivity
 
                         //Log.d("Color", String.valueOf(opacity));
 
-                        final double square_size = 0.4d;
-
-                        Polygon polygon = mMap.addPolygon(new PolygonOptions()
-                            .add(new LatLng(lat-(square_size*lat_increment), lng+(square_size*lng_increment)))
-                            .add(new LatLng(lat+(square_size*lat_increment), lng+(square_size*lng_increment)))
-                            .add(new LatLng(lat+(square_size*lat_increment), lng-(square_size*lng_increment)))
-                            .add(new LatLng(lat-(square_size*lat_increment), lng-(square_size*lng_increment)))
-                            .strokeColor(Color.argb(0,0,0,0))
+                        Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
+                            .strokeColor(Color.TRANSPARENT)
                             .fillColor(Color.argb(opacity, red, green, blue))
                             .clickable(true));
 
@@ -258,15 +264,6 @@ public class ActivityNavigation extends AppCompatActivity
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -331,7 +328,6 @@ public class ActivityNavigation extends AppCompatActivity
                 requestOccupancyEstimate(MAP_POLL_MODE);
             }
         }, 2000, 2000);
-
 
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new cameraCenterTimer");
         cameraCenterTimer = new Timer();
@@ -443,6 +439,11 @@ public class ActivityNavigation extends AppCompatActivity
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
             @Override
             public void onPolygonClick(Polygon polygon) {
+                if(!occupancy_square_id_to_occupancy.containsKey(polygon.getId())) {
+                    Toast.makeText(ActivityNavigation.this, "This is a debug square, has no occupancy", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Float occupancy = occupancy_square_id_to_occupancy.get(polygon.getId());
 
                 Toast.makeText(ActivityNavigation.this, "Occupancy " + occupancy, Toast.LENGTH_SHORT).show();
