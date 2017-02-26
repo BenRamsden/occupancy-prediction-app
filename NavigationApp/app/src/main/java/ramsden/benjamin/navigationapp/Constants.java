@@ -8,7 +8,7 @@ public class Constants {
     public static final long DEFAULT_MIN_GPS_TIME = 15;
     public static final float DEFAULT_MIN_GPS_DISTANCE = 1f;
 
-    public static final long START_ALL_SENSORS_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
+    public static final long DEFAULT_START_ALL_SENSORS_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
 
     public static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
@@ -22,6 +22,7 @@ public class Constants {
     public static final String PREFERENCE_MAP_POLL_INTERVAL = "MAP_POLL_INTERVAL";
     public static final String PREFERENCE_MIN_TIME = "LOCATION_MIN_TIME";
     public static final String PREFERENCE_MIN_DISTANCE = "LOCATION_MIN_DISTANCE";
+    public static final String PREFERENCE_START_ALL_SENSORS_INTERVAL = "DEFAULT_START_ALL_SENSORS_INTERVAL";
 
     public static final long DEFAULT_MAP_POLL_INTERVAL = 2000;
 

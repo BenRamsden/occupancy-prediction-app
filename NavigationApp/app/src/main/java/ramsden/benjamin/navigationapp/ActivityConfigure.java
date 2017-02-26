@@ -56,6 +56,7 @@ public class ActivityConfigure extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
 
     private EditText map_polling_edittext;
+    private EditText sensor_polling_edittext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +88,27 @@ public class ActivityConfigure extends AppCompatActivity {
                 }
 
                 sharedPreferences.edit().putLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, map_polling_interval).commit();
+            }
+        });
+
+        sensor_polling_edittext = (EditText) findViewById(R.id.sensor_polling_edittext);
+        sensor_polling_edittext.setText( String.valueOf( sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL) ) );
+
+        final Button sensor_polling_submit = (Button) findViewById(R.id.sensor_polling_submit);
+        sensor_polling_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String sensor_polling_interval_str = sensor_polling_edittext.getText().toString();
+                Long sensor_polling_interval;
+
+                try {
+                    sensor_polling_interval = Long.valueOf(sensor_polling_interval_str);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityConfigure.this, "Sensor Polling Interval Format Invalid, not updated", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                sharedPreferences.edit().putLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, sensor_polling_interval).commit();
             }
         });
 

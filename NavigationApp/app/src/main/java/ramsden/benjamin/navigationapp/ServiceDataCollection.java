@@ -110,6 +110,11 @@ public class ServiceDataCollection extends Service {
                     initLocationListener();
                     Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged minTime:" + minTime, Toast.LENGTH_SHORT).show();
                     break;
+                case Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL:
+                    Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
+                    initSensorTimer(start_all_sensors_interval);
+                    Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged start_all_sensors_interval: " + start_all_sensors_interval, Toast.LENGTH_SHORT).show();
+                    break;
             }
 
         }
@@ -157,7 +162,23 @@ public class ServiceDataCollection extends Service {
          * With the last received location, if no update has been provided by system for a period
          * Meaning we get up to date data at the current location */
 
-        timer.scheduleAtFixedRate(new TimerTask() {
+        Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
+
+        initSensorTimer(start_all_sensors_interval);
+
+    }
+
+    private Timer sensor_timer;
+
+    private void initSensorTimer(long start_all_sensors_interval) {
+        if(sensor_timer != null) {
+            sensor_timer.cancel();
+            sensor_timer = null;
+        }
+
+        sensor_timer = new Timer();
+
+        sensor_timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 if(lastLocation != null) {
@@ -167,11 +188,8 @@ public class ServiceDataCollection extends Service {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Could not start all sensors, lastLocation is null");
                 }
             }
-        }, Constants.START_ALL_SENSORS_INTERVAL, Constants.START_ALL_SENSORS_INTERVAL);
-
+        }, start_all_sensors_interval, start_all_sensors_interval);
     }
-
-    private Timer timer = new Timer();
 
     private void startAllSensors(Location location) {
 
