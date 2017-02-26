@@ -60,47 +60,29 @@ public class ActivityConfigure extends AppCompatActivity {
         service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
 
         minimum_location_distance_edittext = (EditText) findViewById(R.id.minimum_location_distance_edittext);
-
-        final Button minimum_location_distance_button = (Button) findViewById(R.id.minimum_location_distance_button);
-        minimum_location_distance_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = minimum_location_distance_edittext.getText().toString();
-
-                Float min_distance;
-
-                try {
-                    min_distance = Float.parseFloat(text);
-                } catch(NumberFormatException ex) {
-                    Toast.makeText(ActivityConfigure.this, "Minimum Distance entered is invalid", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                serviceDataCollection.updateLocationListenerOptions(serviceDataCollection.getMinTime(), min_distance);
-
-                Toast.makeText(ActivityConfigure.this, "Minimum location distance updated to " + min_distance, Toast.LENGTH_SHORT).show();
-            }
-        });
-
         minimum_location_time_edittext = (EditText) findViewById(R.id.minimum_location_time_edittext);
 
-        final Button minimum_location_time_button = (Button) findViewById(R.id.minimum_location_time_button);
-        minimum_location_time_button.setOnClickListener(new View.OnClickListener() {
+        final Button update_data_collection_service_button = (Button) findViewById(R.id.update_data_collection_service_button);
+        update_data_collection_service_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String text = minimum_location_time_edittext.getText().toString();
+                String min_distance_str = minimum_location_distance_edittext.getText().toString();
+                String min_time_str = minimum_location_time_edittext.getText().toString();
+
+                Float min_distance;
                 Long min_time;
 
                 try {
-                    min_time = Long.parseLong(text);
+                    min_distance = Float.parseFloat(min_distance_str);
+                    min_time = Long.parseLong(min_time_str);
                 } catch(NumberFormatException ex) {
-                    Toast.makeText(ActivityConfigure.this, "Minimum Time entered is invalid", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityConfigure.this, "One of the parameters is invalid, cannot update", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                serviceDataCollection.updateLocationListenerOptions(min_time, serviceDataCollection.getMinDistance());
+                serviceDataCollection.updateLocationListenerOptions(min_time, min_distance);
 
-                Toast.makeText(ActivityConfigure.this, "Minimum location time updated to " + min_time, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ActivityConfigure.this, "Success: MinDistance: " + min_distance + " MinTime: " + min_time, Toast.LENGTH_SHORT).show();
 
             }
         });

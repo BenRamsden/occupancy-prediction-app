@@ -150,28 +150,22 @@ public class ServiceDataCollection extends Service {
 
     private Timer timer = new Timer();
 
-    private long lastStartAllSensors = 0;
-
     private void startAllSensors(Location location) {
 
-        if(lastStartAllSensors < System.currentTimeMillis() - Constants.START_ALL_SENSORS_INTERVAL) {
-            lastStartAllSensors = System.currentTimeMillis();
+        if(sensorAccelerometerManager != null) {
+            sensorAccelerometerManager.startAccelerometer(location);
+        }
 
-            if(sensorAccelerometerManager != null) {
-                sensorAccelerometerManager.startAccelerometer(location);
-            }
+        if(sensorAudioManager != null) {
+            sensorAudioManager.startAudio(location);
+        }
 
-            if(sensorAudioManager != null) {
-                sensorAudioManager.startAudio(location);
-            }
+        if(sensorBluetoothManager != null) {
+            sensorBluetoothManager.startBluetooth(location);
+        }
 
-            if(sensorBluetoothManager != null) {
-                sensorBluetoothManager.startBluetooth(location);
-            }
-
-            if(sensorHotspotManager != null) {
-                sensorHotspotManager.startHotspot(location);
-            }
+        if(sensorHotspotManager != null) {
+            sensorHotspotManager.startHotspot(location);
         }
 
     }
