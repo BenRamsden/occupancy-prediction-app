@@ -48,15 +48,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -109,11 +114,17 @@ public class ActivityNavigation extends AppCompatActivity
 
     public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
-    final int opacity_multiplier = 25;
-    final double lat_target_offset = 0.0005d;
-    final double lng_target_offset = 0.0007d;
-    final double lat_increment = 0.00018d;
-    final double lng_increment = 0.0003d;
+    final int opacity_multiplier = 3;
+    final double lat_target_offset = 0.0007d;
+    final double lng_target_offset = 0.0010d;
+    final double lat_increment = 0.00023d;
+    final double lng_increment = 0.00035d;
+    final double circle_radius = 15d;
+    final int max_opacity = 150;
+
+    private ArrayList<Polygon> occupancy_squares = new ArrayList<>();
+
+    private ArrayList<Circle> occupancy_bounds_circles = new ArrayList<>();
 
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
@@ -134,7 +145,16 @@ public class ActivityNavigation extends AppCompatActivity
                         return;
                     }
 
-                    mMap.clear();
+                    for (Polygon drawn_square : occupancy_squares) {
+                        //Log.d(Constants.NAVIGATION_APP, "Drawn Circles Array: Removing circle " + drawn_circle.getId());
+                        drawn_square.remove();
+                    }
+                    occupancy_squares.clear();
+
+                    for(Circle circle : occupancy_bounds_circles) {
+                        circle.remove();
+                    }
+                    occupancy_bounds_circles.clear();
 
                     String lat_lng_occupancy_list = intent.getStringExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_LAT_LNG_OCCUPANCY_LIST);
                     JSONObject jsonObject;
@@ -179,26 +199,40 @@ public class ActivityNavigation extends AppCompatActivity
                         } catch (NumberFormatException ex) {
                             //Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
                             //Expected to happen if occupancy estimate for that region is null
+                            occupancy_bounds_circles.add(mMap.addCircle(new CircleOptions().center(new LatLng(lat, lng))
+                                    .radius(2).strokeColor(Color.argb(0,0,0,0)).fillColor(Color.argb(50,100,100,100))));
                             continue;
                         }
 
-                        Log.d(Constants.NAVIGATION_APP, "Drawing circle, lat: " + lat + " lng: " + lng);
+                        int red = 0;
+                        int green = 0;
+                        int blue = 0;
+                        int opacity = 0;
 
-
-                        Integer opacity = Math.round(occupancy * opacity_multiplier);
-                        if (opacity > 150) {
-                            opacity = 150;
+                        if (occupancy > 30) {
+                            red = 255;
+                        } else if(occupancy > 15) {
+                            red = 255;
+                            green = 165;
+                        } else {
+                            green = 150;
                         }
+
+                        opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
 
                         //Log.d("Color", String.valueOf(opacity));
 
-                        CircleOptions circleOptions = new CircleOptions();
-                        circleOptions.center(new LatLng(lat, lng));
-                        circleOptions.strokeColor(Color.argb(opacity, 255, 0, 0));
-                        circleOptions.fillColor(Color.argb(opacity, 255, 0, 0));
-                        circleOptions.radius(10);
+                        final double square_size = 0.4d;
 
-                        mMap.addCircle(circleOptions);
+                        Polygon polygon = mMap.addPolygon(new PolygonOptions()
+                            .add(new LatLng(lat-(square_size*lat_increment), lng+(square_size*lng_increment)))
+                            .add(new LatLng(lat+(square_size*lat_increment), lng+(square_size*lng_increment)))
+                            .add(new LatLng(lat+(square_size*lat_increment), lng-(square_size*lng_increment)))
+                            .add(new LatLng(lat-(square_size*lat_increment), lng-(square_size*lng_increment)))
+                            .strokeColor(Color.argb(0,0,0,0))
+                            .fillColor(Color.argb(opacity, red, green, blue)));
+
+                        occupancy_squares.add(polygon);
 
                     }
                     break;
@@ -214,6 +248,10 @@ public class ActivityNavigation extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
 
     private Timer mapPollTimer;
+
+    private Timer cameraCenterTimer;
+
+    private LatLng last_camera_center;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,9 +306,15 @@ public class ActivityNavigation extends AppCompatActivity
     public void onPause() {
         super.onPause();
 
-        Log.d(Constants.NAVIGATION_APP, "onPause, cancelling mapPollTimer");
-        mapPollTimer.cancel();
+        if(mapPollTimer != null) {
+            Log.d(Constants.NAVIGATION_APP, "onPause, cancelling mapPollTimer");
+            mapPollTimer.cancel();
+        }
 
+        if(cameraCenterTimer != null) {
+            Log.d(Constants.NAVIGATION_APP, "onPause, cancelling cameraCenterTimer");
+            cameraCenterTimer.cancel();
+        }
     }
 
     @Override
@@ -284,10 +328,28 @@ public class ActivityNavigation extends AppCompatActivity
         mapPollTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Log.d(Constants.NAVIGATION_APP, "Requesting map poll");
+                Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: Requesting map poll");
                 requestOccupancyEstimate(MAP_POLL_MODE);
             }
-        }, 5000, 15000);
+        }, 2000, 2000);
+
+
+        Log.d(Constants.NAVIGATION_APP, "onResume, creating new cameraCenterTimer");
+        cameraCenterTimer = new Timer();
+
+        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling cameraCenterTimer at fixed rate");
+        cameraCenterTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                ActivityNavigation.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(Constants.NAVIGATION_APP, "Camera Center Timer: Setting last_camera_center on UI Thread");
+                        last_camera_center = mMap.getCameraPosition().target;
+                    }
+                });
+            }
+        }, 1000, 1000);
     }
 
     @Override
@@ -363,14 +425,9 @@ public class ActivityNavigation extends AppCompatActivity
             Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(new Criteria(), false));
 
             if (location != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17));
             }
         }
-
-        // Add a marker in Sydney and move the camera
-//        LatLng computer_science = new LatLng(52.953357, -1.18736);
-//        last_user_marker = mMap.addMarker(new MarkerOptions().position(computer_science).title("Default Destination").snippet("Occupancy Loading.."));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(computer_science,15));
 
         enableMapMyLocation();
 
@@ -433,20 +490,12 @@ public class ActivityNavigation extends AppCompatActivity
     public static final String MAP_POLL_MODE = "MAP_POLL_MODE";
 
     public void requestOccupancyEstimate(String mode) {
-
         /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
 
-        if(serviceDataCollection == null) {
-            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Location lastLocation = serviceDataCollection.getLastLocation();
-
-        if(lastLocation == null) {
-            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        if(serviceDataCollection == null) {
+//            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
 
         Uri uri;
         ContentValues contentValues;
@@ -455,20 +504,30 @@ public class ActivityNavigation extends AppCompatActivity
             case ActivityNavigation.MAP_POLL_MODE:
                 uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE_BULK");
 
+                /* TODO: Concurrency issue?? */
+                if(last_camera_center == null) {
+                    Log.d(Constants.NAVIGATION_APP, "Checked for last_camera_center, null, cannot map poll");
+                    return;
+                }
+
                 JSONObject jsonObject = new JSONObject();
                 int index_count = 0;
 
-                double lat = lastLocation.getLatitude();
-                double lng = lastLocation.getLongitude();
+                double lat = last_camera_center.latitude;
+                double lng = last_camera_center.longitude;
 
-                for(double lat_offset = -lat_target_offset; lat_offset < lat_target_offset; lat_offset += lat_increment) {
-                    for(double lng_offset = -lng_target_offset; lng_offset < lng_target_offset; lng_offset += lng_increment) {
+                for(double lat_offset = -lat_target_offset; lat_offset < lat_target_offset + lat_increment; lat_offset += lat_increment) {
+                    for(double lng_offset = -lng_target_offset; lng_offset < lng_target_offset + lat_increment; lng_offset += lng_increment) {
                         try {
+                            double this_lat = lat + lat_offset;
+                            this_lat -= this_lat % lat_increment; //align to fixed grid (wont move around as map does)
+
+                            double this_lng = lng + lng_offset;
+                            this_lng -= this_lng % lng_increment; //align to fixed grid (wont move around as map does)
+
                             jsonObject.put(
                                     String.valueOf( index_count++ ),
-                                    new JSONObject()
-                                            .put("lat", lat+lat_offset)
-                                            .put("lng", lng+lng_offset)
+                                    new JSONObject().put("lat", this_lat).put("lng", this_lng)
                             );
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -482,6 +541,13 @@ public class ActivityNavigation extends AppCompatActivity
                 break;
             case ActivityNavigation.CROWD_OBSERVATION_MODE:
                 uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+
+                Location lastLocation = serviceDataCollection.getLastLocation();
+
+                if(lastLocation == null) {
+                    if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 contentValues = new ContentValues();
                 contentValues.put("lat", lastLocation.getLatitude());
