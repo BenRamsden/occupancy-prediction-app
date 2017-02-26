@@ -55,6 +55,8 @@ public class ActivityConfigure extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
 
+    private EditText map_polling_edittext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +68,31 @@ public class ActivityConfigure extends AppCompatActivity {
 
         minimum_location_distance_edittext = (EditText) findViewById(R.id.minimum_location_distance_edittext);
         minimum_location_time_edittext = (EditText) findViewById(R.id.minimum_location_time_edittext);
+
+        map_polling_edittext = (EditText) findViewById(R.id.map_polling_edittext);
+        map_polling_edittext.setText( String.valueOf(sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL)) );
+
+        final Button map_polling_submit = (Button) findViewById(R.id.map_polling_submit);
+        map_polling_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String map_polling_interval_str = map_polling_edittext.getText().toString();
+                Long map_polling_interval;
+
+                try {
+                    map_polling_interval = Long.valueOf(map_polling_interval_str);
+                } catch(NumberFormatException ex) {
+                    Toast.makeText(ActivityConfigure.this, "Map Polling Interval Format Invalid, not updated", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if ( sharedPreferences.edit().putLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, map_polling_interval).commit() ) {
+                    Toast.makeText(ActivityConfigure.this, "Success, updated " + Constants.PREFERENCE_MAP_POLL_INTERVAL, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ActivityConfigure.this, "Fail, could not update " + Constants.PREFERENCE_MAP_POLL_INTERVAL, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         final Button update_data_collection_service_button = (Button) findViewById(R.id.update_data_collection_service_button);
         update_data_collection_service_button.setOnClickListener(new View.OnClickListener() {

@@ -264,7 +264,7 @@ public class ActivityNavigation extends AppCompatActivity
     private SharedPreferences sharedPreferences;
 
     private void refreshSharedPreferences(boolean print_out) {
-        if(print_out) Toast.makeText(this, "refreshSharedPreferences called with print_out", Toast.LENGTH_SHORT).show();
+        //if(print_out) Toast.makeText(this, "refreshSharedPreferences called with print_out", Toast.LENGTH_SHORT).show();
 
         long mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
 
