@@ -18,9 +18,6 @@ public class SensorAccelerometerManager {
     private Sensor mAccelerometer;
     private SensorAccelerometer sensorAccelerometer;
 
-    private long lastAccelerometerObservation = 0;
-    private long accelerometerMinIntervalMillis = Constants.DEFAULT_ACCELEROMETER_INTERVAL;
-
     public SensorAccelerometerManager(ServiceDataCollection serviceDataCollection) {
         mServiceDataCollection = serviceDataCollection;
 
@@ -38,18 +35,11 @@ public class SensorAccelerometerManager {
     }
 
     public void startAccelerometer(Location location) {
-        if(lastAccelerometerObservation < System.currentTimeMillis() - accelerometerMinIntervalMillis) {
-
-            if(sensorAccelerometer != null) {
-                Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
-                sensorAccelerometer.start(location);
-            } else {
-                Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
-            }
-
-            lastAccelerometerObservation = System.currentTimeMillis();
+        if(sensorAccelerometer != null) {
+            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " started taking a reading");
+            sensorAccelerometer.start(location);
         } else {
-            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_ACCELEROMETER_MANAGER, "Sensor: " + Constants.SENSOR_ACCELEROMETER + " is null");
         }
     }
 

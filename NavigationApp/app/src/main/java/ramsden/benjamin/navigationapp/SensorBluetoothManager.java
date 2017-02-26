@@ -13,27 +13,17 @@ public class SensorBluetoothManager {
 
     private SensorBluetooth sensorBluetooth;
 
-    private long lastBluetoothObservation = 0;
-    private long bluetoothMinIntervalMillis = Constants.DEFAULT_BLUETOOTH_INTERVAL;
-
     public SensorBluetoothManager(ServiceDataCollection serviceDataCollection) {
         mServiceDataCollection = serviceDataCollection;
         sensorBluetooth = new SensorBluetooth(mServiceDataCollection);
     }
 
     public void startBluetooth(Location location) {
-        if(lastBluetoothObservation < System.currentTimeMillis() - bluetoothMinIntervalMillis) {
-
-            if(sensorBluetooth != null) {
-                Log.d(Constants.SENSOR_BLUETOOTH_MANAGER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " started taking a reading");
-                sensorBluetooth.start(location);
-            } else {
-                Log.d(Constants.SENSOR_BLUETOOTH_MANAGER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
-            }
-
-            lastBluetoothObservation = System.currentTimeMillis();
+        if(sensorBluetooth != null) {
+            Log.d(Constants.SENSOR_BLUETOOTH_MANAGER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " started taking a reading");
+            sensorBluetooth.start(location);
         } else {
-            Log.d(Constants.SENSOR_BLUETOOTH_MANAGER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_BLUETOOTH_MANAGER, "Sensor: " + Constants.SENSOR_BLUETOOTH + " is null");
         }
     }
 

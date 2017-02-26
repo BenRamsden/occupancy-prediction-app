@@ -13,27 +13,17 @@ public class SensorAudioManager {
 
     private SensorAudio sensorAudio;
 
-    private long lastAudioObservation = 0;
-    private long audioMinIntervalMillis = Constants.DEFAULT_AUDIO_INTERVAL;
-
     public SensorAudioManager(ServiceDataCollection serviceDataCollection) {
         mServiceDataCollection = serviceDataCollection;
         sensorAudio = new SensorAudio(mServiceDataCollection);
     }
 
     public void startAudio(Location location) {
-        if(lastAudioObservation < System.currentTimeMillis() - audioMinIntervalMillis) {
-
-            if(sensorAudio != null) {
-                Log.d(Constants.SENSOR_AUDIO_MANAGER, "Sensor: " + Constants.SENSOR_AUDIO + " started taking a reading");
-                sensorAudio.start(location);
-            } else {
-                Log.d(Constants.SENSOR_AUDIO_MANAGER, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
-            }
-
-            lastAudioObservation = System.currentTimeMillis();
+        if(sensorAudio != null) {
+            Log.d(Constants.SENSOR_AUDIO_MANAGER, "Sensor: " + Constants.SENSOR_AUDIO + " started taking a reading");
+            sensorAudio.start(location);
         } else {
-            Log.d(Constants.SENSOR_AUDIO_MANAGER, "Sensor: " + Constants.SENSOR_AUDIO + " got location update, but minIntevalMillis not passed yet");
+            Log.d(Constants.SENSOR_AUDIO_MANAGER, "Sensor: " + Constants.SENSOR_AUDIO + " is null");
         }
     }
 

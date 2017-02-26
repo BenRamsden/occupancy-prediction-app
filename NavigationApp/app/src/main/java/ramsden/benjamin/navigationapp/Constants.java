@@ -10,12 +10,6 @@ public class Constants {
 
     public static final long START_ALL_SENSORS_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
 
-    public static final long DEFAULT_ACCELEROMETER_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
-    public static final long DEFAULT_AUDIO_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
-    public static final long DEFAULT_BLUETOOTH_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
-    public static final long DEFAULT_CROWD_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
-    public static final long DEFAULT_HOTSPOT_INTERVAL = DEFAULT_MIN_GPS_TIME * 2 * 1000;
-
     public static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 734;
     public static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 747;
     public static final int MY_PERMISSIONS_REQUEST_BLUETOOTH = 757;
@@ -23,6 +17,11 @@ public class Constants {
     public static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 777;
     public static final int MY_PERMISSIONS_REQUEST_ACCESS_WIFI_STATE = 787;
     public static final int MY_PERMISSIONS_REQUEST_CHANGE_WIFI_STATE = 797;
+
+    public static final String PREFERENCE_FILE_KEY = "ramsden.benjamin.navigationapp.PREF_FILE_1";
+    public static final String PREFERENCE_MAP_POLL_INTERVAL = "MAP_POLL_INTERVAL";
+
+    public static final long DEFAULT_MAP_POLL_INTERVAL = 2000;
 
     public static final String NAVIGATION_APP = "NavigationApp";
     public static final String DATA_COLLECTION_SERVICE = "ServiceDataCollection";
@@ -45,6 +44,5 @@ public class Constants {
     public static final String PERMISSIONS = "Permissions";
     public static final String CONTENT_PROVIDER = "ContentProvider";
     public static final String SENT_LOG_ACTIVITY = "ActivitySentLog";
-
 
 }

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -253,10 +254,26 @@ public class ActivityNavigation extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
 
     private Timer mapPollTimer;
+    private long mMapPollInterval;
 
     private Timer cameraCenterTimer;
+    private long mCameraCenterInterval = 1000;
 
     private LatLng last_camera_center;
+
+    private SharedPreferences sharedPreferences;
+
+    private void refreshSharedPreferences(boolean print_out) {
+        if(print_out) Toast.makeText(this, "refreshSharedPreferences called with print_out", Toast.LENGTH_SHORT).show();
+
+        long mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
+
+        if(this.mMapPollInterval != mMapPollInterval) {
+            if(print_out) Toast.makeText(this, "mMapPollInterval: Changed to " + mMapPollInterval, Toast.LENGTH_SHORT).show();
+            this.mMapPollInterval = mMapPollInterval;
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -264,6 +281,12 @@ public class ActivityNavigation extends AppCompatActivity
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /***** SHARED PREFERENCES SET UP */
+
+        sharedPreferences = this.getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        /***** DRAWER SET UP */
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -274,6 +297,7 @@ public class ActivityNavigation extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        /***** GOOGLE MAP SET UP */
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -317,6 +341,8 @@ public class ActivityNavigation extends AppCompatActivity
     public void onResume() {
         super.onResume();
 
+        refreshSharedPreferences(true);
+
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new mapPollTimer");
         mapPollTimer = new Timer();
 
@@ -327,7 +353,7 @@ public class ActivityNavigation extends AppCompatActivity
                 Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: Requesting map poll");
                 requestOccupancyEstimate(MAP_POLL_MODE);
             }
-        }, 2000, 2000);
+        }, mMapPollInterval, mMapPollInterval);
 
         Log.d(Constants.NAVIGATION_APP, "onResume, creating new cameraCenterTimer");
         cameraCenterTimer = new Timer();
@@ -344,7 +370,7 @@ public class ActivityNavigation extends AppCompatActivity
                     }
                 });
             }
-        }, 1000, 1000);
+        }, mCameraCenterInterval, mCameraCenterInterval);
     }
 
     @Override
