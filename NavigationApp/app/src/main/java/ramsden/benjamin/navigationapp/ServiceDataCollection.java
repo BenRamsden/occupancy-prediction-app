@@ -313,6 +313,10 @@ public class ServiceDataCollection extends Service {
             }
         }
 
+        if(sensor_timer != null) {
+            sensor_timer.cancel();
+        }
+
         if(sensorBluetoothManager != null) {
             sensorBluetoothManager.unregisterReceiver();
         }
