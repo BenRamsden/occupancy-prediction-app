@@ -416,7 +416,7 @@ public class ActivityNavigation extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_graph_web) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://benramsden.me/graph.html"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://benramsden.me/graph"));
             startActivity(intent);
         } else if (id == R.id.nav_sent_log) {
             startActivity(new Intent(this, ActivitySentLog.class));
