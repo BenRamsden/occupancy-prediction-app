@@ -19,13 +19,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -49,19 +46,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.TileOverlayOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -409,6 +402,8 @@ public class ActivityNavigation extends AppCompatActivity
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, ActivityConfigure.class));
             return true;
+        } else if (id == R.id.action_likely_place) {
+            findLikelyPlaces();
         }
 
         return super.onOptionsItemSelected(item);
@@ -420,14 +415,13 @@ public class ActivityNavigation extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_api_test) {
-            startActivity(new Intent(this, ActivityAPITest.class));
+        if (id == R.id.nav_graph_web) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://benramsden.me/graph.html"));
+            startActivity(intent);
         } else if (id == R.id.nav_sent_log) {
             startActivity(new Intent(this, ActivitySentLog.class));
         } else if (id == R.id.nav_crowd_observation) {
             requestOccupancyEstimate(CROWD_OBSERVATION_MODE);
-        } else if (id == R.id.nav_likely_place) {
-            findLikelyPlaces();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

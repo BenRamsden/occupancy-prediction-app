@@ -52,7 +52,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ActivityAPITest" />
         <activity android:name=".ActivitySentLog" />
         <activity android:name=".ActivityConfigure" />
 

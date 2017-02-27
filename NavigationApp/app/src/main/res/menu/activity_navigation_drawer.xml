@@ -3,9 +3,9 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_api_test"
+            android:id="@+id/nav_graph_web"
             android:icon="@drawable/ic_menu_camera"
-            android:title="API Test" />
+            android:title="Web Graph" />
         <item
             android:id="@+id/nav_sent_log"
             android:icon="@drawable/ic_menu_gallery"
@@ -18,10 +18,6 @@
                 android:id="@+id/nav_crowd_observation"
                 android:icon="@drawable/ic_menu_slideshow"
                 android:title="Send Crowd Observation" />
-            <item
-                android:id="@+id/nav_likely_place"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Likely Place" />
 
         </menu>
     </item>
