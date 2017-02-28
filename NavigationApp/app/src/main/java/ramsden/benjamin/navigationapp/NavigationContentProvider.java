@@ -2,12 +2,13 @@ package ramsden.benjamin.navigationapp;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,7 +38,7 @@ import org.json.JSONObject;
 public class NavigationContentProvider extends ContentProvider {
     public static final String AUTHORITY = "ramsden.benjamin.navigationapp.NavigationContentProvider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-    private final String api_root = "http://54.154.109.216:80";
+    private String server_url;
 
     /* TODO make dynamic */
     public String my_api_token = "koH6a1UC71rTDM1LKppXeKYJ54cjc8nIfuJAKPly1GDYpjMMLLCuK5LBp3fXAEkCcID1jCh5pCQp9D8DmCWhJHQlLcUcy4gD68Qy";
@@ -86,9 +87,30 @@ public class NavigationContentProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE_BULK", OCCUPANCY_ESTIMATE_BULK);
     }
 
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            switch (key) {
+                case Constants.PREFERENCE_SERVER_URL:
+                    server_url = sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL);
+                    Toast.makeText(getContext(), "NavigationContentProvider onSharedPreferenceChanged server_url: " + server_url, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
+
+    SharedPreferences sharedPreferences;
+
     @Override
     public boolean onCreate() {
         Log.d(Constants.NAVIGATION_APP, "NavigationContentProvider onCreate");
+
+        sharedPreferences = getContext().getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        server_url = sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL);
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+
 
         Cache cache = new NoCache();
         Network network = new BasicNetwork(new HurlStack());
@@ -142,7 +164,7 @@ public class NavigationContentProvider extends ContentProvider {
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                api_root+api_sub+"?apitoken="+my_api_token,
+                server_url +api_sub+"?apitoken="+my_api_token,
                 null,
                 DEFAULT_RESPONSE_LISTENER,
                 DEFAULT_ERROR_LISTENER
@@ -294,7 +316,7 @@ public class NavigationContentProvider extends ContentProvider {
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest(
                 Request.Method.POST,
-                api_root+api_sub+"?apitoken="+my_api_token,
+                server_url +api_sub+"?apitoken="+my_api_token,
                 insertJSON,
                 responseListener,
                 DEFAULT_ERROR_LISTENER

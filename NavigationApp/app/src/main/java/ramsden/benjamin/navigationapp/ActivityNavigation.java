@@ -220,7 +220,9 @@ public class ActivityNavigation extends AppCompatActivity
                             green = 150;
                         }
 
-                        opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
+                        if(occupancy > 0.5f) {
+                            opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
+                        }
 
                         //Log.d("Color", String.valueOf(opacity));
 

@@ -23,8 +23,10 @@ public class Constants {
     public static final String PREFERENCE_MIN_TIME = "LOCATION_MIN_TIME";
     public static final String PREFERENCE_MIN_DISTANCE = "LOCATION_MIN_DISTANCE";
     public static final String PREFERENCE_START_ALL_SENSORS_INTERVAL = "DEFAULT_START_ALL_SENSORS_INTERVAL";
+    public static final String PREFERENCE_SERVER_URL = "PREFERENCE_SERVER_URL";
 
     public static final long DEFAULT_MAP_POLL_INTERVAL = 2000;
+    public static final String DEFAULT_SERVER_URL = "http://benramsden.me";
 
     public static final String NAVIGATION_APP = "NavigationApp";
     public static final String DATA_COLLECTION_SERVICE = "ServiceDataCollection";

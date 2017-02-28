@@ -57,6 +57,7 @@ public class ActivityConfigure extends AppCompatActivity {
 
     private EditText map_polling_edittext;
     private EditText sensor_polling_edittext;
+    private EditText server_url_edittext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,9 @@ public class ActivityConfigure extends AppCompatActivity {
 
         map_polling_edittext = (EditText) findViewById(R.id.map_polling_edittext);
         map_polling_edittext.setText( String.valueOf(sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL)) );
+
+        server_url_edittext = (EditText) findViewById(R.id.server_url_edittext);
+        server_url_edittext.setText(sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL));
 
         final Button map_polling_submit = (Button) findViewById(R.id.map_polling_submit);
         map_polling_submit.setOnClickListener(new View.OnClickListener() {
@@ -181,6 +185,14 @@ public class ActivityConfigure extends AppCompatActivity {
                     serviceDataCollection.stopForegroundNotification();
                 }
 
+            }
+        });
+
+        final Button server_url_submit = (Button) findViewById(R.id.server_url_submit);
+        server_url_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedPreferences.edit().putString(Constants.PREFERENCE_SERVER_URL, server_url_edittext.getText().toString()).commit();
             }
         });
 
