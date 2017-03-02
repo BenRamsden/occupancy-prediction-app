@@ -585,8 +585,12 @@ public class ActivityNavigation extends AppCompatActivity
                 Location lastLocation = serviceDataCollection.getLastLocation();
 
                 if (lastLocation == null && mGoogleApiClient != null) {
-
                     lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                }
+
+                if(lastLocation == null) {
+                    Toast.makeText(ActivityNavigation.this, "Current location, and Last location are both unavailable! Please wait until location lock is achieved", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 contentValues = new ContentValues();
