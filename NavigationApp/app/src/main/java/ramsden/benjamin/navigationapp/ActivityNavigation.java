@@ -110,8 +110,8 @@ public class ActivityNavigation extends AppCompatActivity
     public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
     final int opacity_multiplier = 3;
-    final double lat_target_offset = 0.0007d;
-    final double lng_target_offset = 0.0010d;
+    final double lat_target_offset = 0.0003d; //0.0007d
+    final double lng_target_offset = 0.0004d; //0.0010d
     final double lat_increment = 0.00023d;
     final double lng_increment = 0.00035d;
     final int max_opacity = 150;
@@ -185,10 +185,10 @@ public class ActivityNavigation extends AppCompatActivity
 
                         final double square_size = 0.4d;
 
-                        LatLng point1 = new LatLng(lat-(square_size*lat_increment), lng+(square_size*lng_increment));
-                        LatLng point2 = new LatLng(lat+(square_size*lat_increment), lng+(square_size*lng_increment));
-                        LatLng point3 = new LatLng(lat+(square_size*lat_increment), lng-(square_size*lng_increment));
-                        LatLng point4 = new LatLng(lat-(square_size*lat_increment), lng-(square_size*lng_increment));
+                        LatLng point1 = new LatLng(lat - (square_size * lat_increment), lng + (square_size * lng_increment));
+                        LatLng point2 = new LatLng(lat + (square_size * lat_increment), lng + (square_size * lng_increment));
+                        LatLng point3 = new LatLng(lat + (square_size * lat_increment), lng - (square_size * lng_increment));
+                        LatLng point4 = new LatLng(lat - (square_size * lat_increment), lng - (square_size * lng_increment));
 
                         Float occupancy;
                         try {
@@ -213,23 +213,25 @@ public class ActivityNavigation extends AppCompatActivity
 
                         if (occupancy > 30) {
                             red = 255;
-                        } else if(occupancy > 15) {
+                        } else if (occupancy > 15) {
                             red = 255;
                             green = 165;
                         } else {
                             green = 150;
                         }
 
-                        if(occupancy > 0.5f) {
+                        if (occupancy > 0.5f) {
                             opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
+                        } else {
+                            opacity = 5;
                         }
 
                         //Log.d("Color", String.valueOf(opacity));
 
                         Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
-                            .strokeColor(Color.TRANSPARENT)
-                            .fillColor(Color.argb(opacity, red, green, blue))
-                            .clickable(true));
+                                .strokeColor(Color.TRANSPARENT)
+                                .fillColor(Color.argb(opacity, red, green, blue))
+                                .clickable(true));
 
                         occupancy_square_id_to_occupancy.put(polygon.getId(), occupancy);
 
@@ -261,7 +263,7 @@ public class ActivityNavigation extends AppCompatActivity
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            switch(key) {
+            switch (key) {
                 case Constants.PREFERENCE_MAP_POLL_INTERVAL:
                     mMapPollInterval = sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL);
                     Toast.makeText(ActivityNavigation.this, "ActivityNavigation onSharedPreferenceChanged mMapPollInterval:" + mMapPollInterval, Toast.LENGTH_SHORT).show();
@@ -325,12 +327,12 @@ public class ActivityNavigation extends AppCompatActivity
     public void onPause() {
         super.onPause();
 
-        if(mapPollTimer != null) {
+        if (mapPollTimer != null) {
             Log.d(Constants.NAVIGATION_APP, "onPause, cancelling mapPollTimer");
             mapPollTimer.cancel();
         }
 
-        if(cameraCenterTimer != null) {
+        if (cameraCenterTimer != null) {
             Log.d(Constants.NAVIGATION_APP, "onPause, cancelling cameraCenterTimer");
             cameraCenterTimer.cancel();
         }
@@ -432,7 +434,7 @@ public class ActivityNavigation extends AppCompatActivity
     }
 
 
-    Marker last_user_marker;
+//    Marker last_user_marker;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -450,20 +452,20 @@ public class ActivityNavigation extends AppCompatActivity
 
         enableMapMyLocation();
 
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                if(last_user_marker != null) {
-                    last_user_marker.remove();
-                }
-                last_user_marker = mMap.addMarker(new MarkerOptions().position(latLng).title("Destination").snippet("Occupancy Loading.."));
-            }
-        });
+//        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+//            @Override
+//            public void onMapLongClick(LatLng latLng) {
+//                if(last_user_marker != null) {
+//                    last_user_marker.remove();
+//                }
+//                last_user_marker = mMap.addMarker(new MarkerOptions().position(latLng).title("Destination").snippet("Occupancy Loading.."));
+//            }
+//        });
 
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
             @Override
             public void onPolygonClick(Polygon polygon) {
-                if(!occupancy_square_id_to_occupancy.containsKey(polygon.getId())) {
+                if (!occupancy_square_id_to_occupancy.containsKey(polygon.getId())) {
                     Toast.makeText(ActivityNavigation.this, "This is a debug square, has no occupancy", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -494,7 +496,7 @@ public class ActivityNavigation extends AppCompatActivity
             return;
         }
 
-        if(mGoogleApiClient == null) {
+        if (mGoogleApiClient == null) {
             Toast.makeText(ActivityNavigation.this, "Cannot find likely places, mGoogleApiClient is null", Toast.LENGTH_SHORT).show();
             Log.d(Constants.GOOGLE_API_CLIENT, "Cannot find likely places, mGoogleApiClient is null");
             return;
@@ -510,7 +512,7 @@ public class ActivityNavigation extends AppCompatActivity
                     break;
                 }
 
-                if(likelyPlaces.getCount() == 0) {
+                if (likelyPlaces.getCount() == 0) {
                     Toast.makeText(ActivityNavigation.this, "Sorry, I could not identify the name of this place!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -525,20 +527,15 @@ public class ActivityNavigation extends AppCompatActivity
     public void requestOccupancyEstimate(String mode) {
         /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
 
-//        if(serviceDataCollection == null) {
-//            if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "Data Collection Service has not started yet, please wait", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-
         Uri uri;
         ContentValues contentValues;
 
-        switch(mode) {
+        switch (mode) {
             case ActivityNavigation.MAP_POLL_MODE:
-                uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE_BULK");
+                uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE_BULK");
 
                 /* TODO: Concurrency issue?? */
-                if(last_camera_center == null) {
+                if (last_camera_center == null) {
                     Log.d(Constants.NAVIGATION_APP, "Checked for last_camera_center, null, cannot map poll");
                     return;
                 }
@@ -549,8 +546,8 @@ public class ActivityNavigation extends AppCompatActivity
                 double lat = last_camera_center.latitude;
                 double lng = last_camera_center.longitude;
 
-                for(double lat_offset = -lat_target_offset; lat_offset < lat_target_offset + lat_increment; lat_offset += lat_increment) {
-                    for(double lng_offset = -lng_target_offset; lng_offset < lng_target_offset + lat_increment; lng_offset += lng_increment) {
+                for (double lat_offset = -lat_target_offset; lat_offset < lat_target_offset + lat_increment; lat_offset += lat_increment) {
+                    for (double lng_offset = -lng_target_offset; lng_offset < lng_target_offset + lat_increment; lng_offset += lng_increment) {
                         try {
                             double this_lat = lat + lat_offset;
                             this_lat -= this_lat % lat_increment; //align to fixed grid (wont move around as map does)
@@ -559,7 +556,7 @@ public class ActivityNavigation extends AppCompatActivity
                             this_lng -= this_lng % lng_increment; //align to fixed grid (wont move around as map does)
 
                             jsonObject.put(
-                                    String.valueOf( index_count++ ),
+                                    String.valueOf(index_count++),
                                     new JSONObject().put("lat", this_lat).put("lng", this_lng)
                             );
                         } catch (JSONException e) {
@@ -573,13 +570,23 @@ public class ActivityNavigation extends AppCompatActivity
                 getContentResolver().insert(uri, contentValues);
                 break;
             case ActivityNavigation.CROWD_OBSERVATION_MODE:
-                uri = Uri.parse( NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+                uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
+
+                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(ActivityNavigation.this, "Please provide the location permissions so we can link your estimation to your location", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(serviceDataCollection == null) {
+                    Toast.makeText(ActivityNavigation.this, "The app's service has not fully loaded for some reason, please ensure you have granted the app all required permissions", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 Location lastLocation = serviceDataCollection.getLastLocation();
 
-                if(lastLocation == null) {
-                    if(mode.equals(CROWD_OBSERVATION_MODE)) Toast.makeText(ActivityNavigation.this, "App has not received a location update yet, please wait", Toast.LENGTH_SHORT).show();
-                    return;
+                if (lastLocation == null && mGoogleApiClient != null) {
+
+                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 }
 
                 contentValues = new ContentValues();
