@@ -279,6 +279,11 @@ public class NavigationContentProvider extends ContentProvider {
                     api_sub = "/occupancy/bulk";
                     insertJSON.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, new JSONObject(values.getAsString(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST)) );
 
+                    if(values.containsKey(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE) && values.containsKey(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE)) {
+                        insertJSON.put(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE, values.get(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE));
+                        insertJSON.put(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE, values.get(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE));
+                    }
+
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

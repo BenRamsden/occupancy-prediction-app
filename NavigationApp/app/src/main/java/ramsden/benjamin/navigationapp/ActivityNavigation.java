@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -31,7 +32,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -55,11 +58,16 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -323,6 +331,49 @@ public class ActivityNavigation extends AppCompatActivity
 
     }
 
+    private boolean time_offset_enabled = false;
+    private long time_step_millis = TimeUnit.MINUTES.toMillis(15);
+
+    private Date start_date;
+    private Date end_date;
+
+    private TextView start_date_textview;
+    private TextView end_date_textview;
+
+    public void timeButtonClick(View v) {
+        int id = v.getId();
+
+        if(start_date_textview == null) start_date_textview = (TextView) findViewById(R.id.start_date_textview);
+        if(end_date_textview == null) end_date_textview = (TextView) findViewById(R.id.end_date_textview);
+        if(end_date == null) end_date = new Date();
+        if(start_date == null) start_date = new Date(end_date.getTime() - time_step_millis);
+
+        if(id == R.id.occupancy_past) {
+            end_date = new Date(end_date.getTime() - time_step_millis);
+            start_date = new Date(start_date.getTime() - time_step_millis);
+            time_offset_enabled = true;
+        } else if(id == R.id.occupancy_reset) {
+            start_date = null;
+            end_date = null;
+
+            time_offset_enabled = false;
+        } else if(id == R.id.occupancy_future) {
+            end_date = new Date(end_date.getTime() + time_step_millis);
+            start_date = new Date(start_date.getTime() + time_step_millis);            time_offset_enabled = true;
+        } else {
+            Toast.makeText(ActivityNavigation.this, "timeButtonClick, unrecognized button id", Toast.LENGTH_SHORT).show();
+        }
+
+        if(time_offset_enabled) {
+            start_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(start_date));
+            end_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(end_date));
+        } else {
+            start_date_textview.setText("");
+            end_date_textview.setText("");
+        }
+
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -566,6 +617,13 @@ public class ActivityNavigation extends AppCompatActivity
                 }
 
                 contentValues = new ContentValues();
+
+                if(time_offset_enabled) {
+                    contentValues.put("start_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", start_date).toString());
+
+                    contentValues.put("end_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", end_date).toString());
+                }
+
                 contentValues.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, jsonObject.toString());
                 getContentResolver().insert(uri, contentValues);
                 break;

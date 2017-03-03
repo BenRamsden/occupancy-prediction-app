@@ -33,12 +33,24 @@
                 android:layout_height="match_parent"
                 tools:context="ramsden.benjamin.navigationapp.ActivityNavigation" />
 
-            <TextView
-                android:text="TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/textView8"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/start_date_textview"
+                    android:textAppearance="@android:style/TextAppearance.Material.Small" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/end_date_textview"
+                    android:layout_weight="0.9" />
+            </LinearLayout>
+
         </FrameLayout>
 
         <LinearLayout
@@ -50,22 +62,25 @@
                 android:text="Past"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button6"
-                android:layout_weight="1" />
+                android:id="@+id/occupancy_past"
+                android:layout_weight="1"
+                android:onClick="timeButtonClick" />
 
             <Button
                 android:text="Reset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button5"
-                android:layout_weight="1" />
+                android:id="@+id/occupancy_reset"
+                android:layout_weight="1"
+                android:onClick="timeButtonClick" />
 
             <Button
                 android:text="Future"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button4"
-                android:layout_weight="1" />
+                android:id="@+id/occupancy_future"
+                android:layout_weight="1"
+                android:onClick="timeButtonClick" />
         </LinearLayout>
 
     </LinearLayout>
