@@ -71,12 +71,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
-
-    /* Connection to the ServiceDataCollection
- * In the main activity this is purely used to ensure the ServiceDataCollection
- * Is destroyed upon exiting the application
- * Unless the user has specified the location tracking continue (foreground)
- * Through the options menu */
+    
     private ServiceDataCollection serviceDataCollection = null;
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
