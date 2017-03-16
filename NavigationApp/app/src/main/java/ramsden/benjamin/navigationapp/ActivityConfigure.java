@@ -31,8 +31,6 @@ public class ActivityConfigure extends AppCompatActivity {
 
             service_connected_checkbox.setChecked(true);
             foreground_service_switch.setChecked(serviceDataCollection.isForegroundNotification());
-            minimum_location_distance_edittext.setText(String.valueOf( (int) serviceDataCollection.getMinDistance()));
-            minimum_location_time_edittext.setText(String.valueOf(serviceDataCollection.getMinTime()));
 
         }
 
@@ -43,15 +41,11 @@ public class ActivityConfigure extends AppCompatActivity {
 
             service_connected_checkbox.setChecked(false);
             foreground_service_switch.setChecked(false);
-            minimum_location_time_edittext.setText("");
-            minimum_location_distance_edittext.setText("");
         }
     };
 
     private CheckBox service_connected_checkbox;
     private Switch foreground_service_switch;
-    private EditText minimum_location_distance_edittext;
-    private EditText minimum_location_time_edittext;
 
     private SharedPreferences sharedPreferences;
 
@@ -67,9 +61,6 @@ public class ActivityConfigure extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
 
         service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
-
-        minimum_location_distance_edittext = (EditText) findViewById(R.id.minimum_location_distance_edittext);
-        minimum_location_time_edittext = (EditText) findViewById(R.id.minimum_location_time_edittext);
 
         map_polling_edittext = (EditText) findViewById(R.id.map_polling_edittext);
         map_polling_edittext.setText( String.valueOf(sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL)) );
@@ -122,48 +113,6 @@ public class ActivityConfigure extends AppCompatActivity {
             public void onClick(View v) {
                 sharedPreferences.edit().clear().commit();
                 Toast.makeText(ActivityConfigure.this, "All user preferences cleared", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        final Button location_distance_submit = (Button) findViewById(R.id.location_distance_submit);
-        location_distance_submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String min_distance_str = minimum_location_distance_edittext.getText().toString();
-                Float min_distance;
-
-                try {
-                    min_distance = Float.parseFloat(min_distance_str);
-                } catch(NumberFormatException ex) {
-                    Toast.makeText(ActivityConfigure.this, "One of the parameters is invalid, cannot update", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                sharedPreferences.edit()
-                        .putFloat(Constants.PREFERENCE_MIN_DISTANCE, min_distance)
-                        .commit();
-
-            }
-        });
-
-        final Button location_time_submit = (Button) findViewById(R.id.location_time_submit);
-        location_time_submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String min_time_str = minimum_location_time_edittext.getText().toString();
-                Long min_time;
-
-                try {
-                    min_time = Long.parseLong(min_time_str);
-                } catch(NumberFormatException ex) {
-                    Toast.makeText(ActivityConfigure.this, "One of the parameters is invalid, cannot update", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                sharedPreferences.edit()
-                        .putLong(Constants.PREFERENCE_MIN_TIME, min_time)
-                        .commit();
-
             }
         });
 

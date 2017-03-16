@@ -49,21 +49,6 @@ public class ServiceDataCollection extends Service {
     private SensorBluetoothManager sensorBluetoothManager;
     private SensorHotspotManager sensorHotspotManager;
 
-    /* Provides the activities using the service the ability to
-     * Retreive and Change the paramaters given to the location listener
-     */
-    private long minTime = Constants.DEFAULT_MIN_GPS_TIME;  //minimum time different between 2 location updates
-
-    public long getMinTime() {
-        return minTime;
-    }
-
-    private float minDistance = Constants.DEFAULT_MIN_GPS_DISTANCE;   //minimum distance between 2 location updates
-
-    public float getMinDistance() {
-        return minDistance;
-    }
-
     public Location getLastLocation() {
         if (mGoogleApiClient == null) {
             return null;
@@ -99,14 +84,6 @@ public class ServiceDataCollection extends Service {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             switch (key) {
-                case Constants.PREFERENCE_MIN_DISTANCE:
-                    minDistance = sharedPreferences.getFloat(Constants.PREFERENCE_MIN_DISTANCE, Constants.DEFAULT_MIN_GPS_DISTANCE);
-                    Toast.makeText(getBaseContext(), "NOT YET WHILE RUNNING: ServiceDataCollection onSharedPreferenceChanged minDistance:" + minDistance, Toast.LENGTH_SHORT).show();
-                    break;
-                case Constants.PREFERENCE_MIN_TIME:
-                    minTime = sharedPreferences.getLong(Constants.PREFERENCE_MIN_TIME, Constants.DEFAULT_MIN_GPS_TIME);
-                    Toast.makeText(getBaseContext(), "NOT YET WHILE RUNNING: ServiceDataCollection onSharedPreferenceChanged minTime:" + minTime, Toast.LENGTH_SHORT).show();
-                    break;
                 case Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL:
                     Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
                     initSensorTimer(start_all_sensors_interval);
@@ -133,19 +110,11 @@ public class ServiceDataCollection extends Service {
             Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnected");
 
             if (ActivityCompat.checkSelfPermission(ServiceDataCollection.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ServiceDataCollection.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getBaseContext(), "Insufficient permissions, can only use getLastLocation, location precision when app is closed will likely be poor", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if(mGoogleApiClient == null) {
-                return;
-            }
-
-            LocationRequest locationRequest = new LocationRequest()
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(minTime)
-                    .setSmallestDisplacement(minDistance);
-
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, locationListener);
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY), locationListener);
         }
 
         @Override
@@ -160,13 +129,6 @@ public class ServiceDataCollection extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onCreate");
-
-        sharedPreferences = getBaseContext().getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
-
-        minDistance = sharedPreferences.getFloat(Constants.PREFERENCE_MIN_DISTANCE, Constants.DEFAULT_MIN_GPS_DISTANCE);
-        minTime = sharedPreferences.getLong(Constants.PREFERENCE_MIN_TIME, Constants.DEFAULT_MIN_GPS_TIME);
-
-        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
 
         /* Create notification ready to create foreground Service notification on event user plays music */
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
@@ -198,8 +160,9 @@ public class ServiceDataCollection extends Service {
                 .build();
         mGoogleApiClient.connect();  //TODO: No auto manage, need to call connect and disconnect manually
 
+        sharedPreferences = getBaseContext().getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
         Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
-
         initSensorTimer(start_all_sensors_interval);
     }
 
@@ -222,35 +185,29 @@ public class ServiceDataCollection extends Service {
 
                 Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-                if (location != null) {
-                    Log.d(Constants.DATA_COLLECTION_SERVICE, "Started all sensors with location");
-                    startAllSensors(location);
-                } else {
+                if (location == null) {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Could not start all sensors, location is null");
+                    return;
+                }
+
+                if (sensorAccelerometerManager != null) {
+                    sensorAccelerometerManager.startAccelerometer(location);
+                }
+
+                if (sensorAudioManager != null) {
+                    sensorAudioManager.startAudio(location);
+                }
+
+                if (sensorBluetoothManager != null) {
+                    sensorBluetoothManager.startBluetooth(location);
+                }
+
+                if (sensorHotspotManager != null) {
+                    sensorHotspotManager.startHotspot(location);
                 }
 
             }
         }, start_all_sensors_interval, start_all_sensors_interval);
-    }
-
-    private void startAllSensors(Location location) {
-
-        if (sensorAccelerometerManager != null) {
-            sensorAccelerometerManager.startAccelerometer(location);
-        }
-
-        if (sensorAudioManager != null) {
-            sensorAudioManager.startAudio(location);
-        }
-
-        if (sensorBluetoothManager != null) {
-            sensorBluetoothManager.startBluetooth(location);
-        }
-
-        if (sensorHotspotManager != null) {
-            sensorHotspotManager.startHotspot(location);
-        }
-
     }
 
     @Override
