@@ -49,6 +49,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -250,6 +252,7 @@ public class ActivityNavigation extends AppCompatActivity
     };
 
     private GoogleMap mMap;
+    private Circle lastLocationCircle = null;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -396,6 +399,7 @@ public class ActivityNavigation extends AppCompatActivity
             @Override
             public void run() {
                 Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: Requesting map poll");
+
                 requestOccupancyEstimate(MAP_POLL_MODE);
             }
         }, mMapPollInterval, mMapPollInterval);
@@ -412,6 +416,27 @@ public class ActivityNavigation extends AppCompatActivity
                     public void run() {
                         //Log.d(Constants.NAVIGATION_APP, "Camera Center Timer: Setting last_camera_center on UI Thread");
                         last_camera_center = mMap.getCameraPosition().target;
+
+                        Log.d(Constants.NAVIGATION_APP, "cameraCenterTimer: Updating last location");
+
+                        if(mMap != null && serviceDataCollection != null) {
+                            Location lastLocation = serviceDataCollection.getLastLocation();
+
+                            if(lastLocationCircle != null) {
+                                lastLocationCircle.remove();
+                            }
+
+                            if(lastLocation != null) {
+                                CircleOptions circleOptions = new CircleOptions()
+                                    .center(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
+                                    .radius(3)
+                                    .strokeColor(Color.GREEN)
+                                    .fillColor(Color.GREEN);
+
+                                lastLocationCircle = mMap.addCircle(circleOptions);
+                            }
+
+                        }
                     }
                 });
             }
@@ -497,16 +522,6 @@ public class ActivityNavigation extends AppCompatActivity
         }
 
         enableMapMyLocation();
-
-//        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-//            @Override
-//            public void onMapLongClick(LatLng latLng) {
-//                if(last_user_marker != null) {
-//                    last_user_marker.remove();
-//                }
-//                last_user_marker = mMap.addMarker(new MarkerOptions().position(latLng).title("Destination").snippet("Occupancy Loading.."));
-//            }
-//        });
 
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
             @Override

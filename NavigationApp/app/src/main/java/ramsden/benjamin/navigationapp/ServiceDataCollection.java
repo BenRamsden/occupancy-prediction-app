@@ -291,7 +291,10 @@ public class ServiceDataCollection extends Service {
 
         try {
             Log.d(Constants.DATA_COLLECTION_SERVICE, "initLocationListener requested location updates with minTime: " + minTime + " minDistance: " + minDistance);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, minTime, minDistance, locationListener);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDistance, locationListener);
+
         } catch(SecurityException e) {
             Log.d(Constants.DATA_COLLECTION_SERVICE, e.toString());
         }
