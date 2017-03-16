@@ -129,6 +129,7 @@ public class ServiceDataCollection extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onCreate");
+        Toast.makeText(getBaseContext(), "ServiceDataCollection onCreate", Toast.LENGTH_SHORT).show();
 
         /* Create notification ready to create foreground Service notification on event user plays music */
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)

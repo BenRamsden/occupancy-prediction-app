@@ -234,13 +234,10 @@ public class ActivityNavigation extends AppCompatActivity
     private GoogleMap mMap;
     private Circle lastLocationCircle = null;
 
+    private LatLng last_camera_center;
+
     private Timer mapPollTimer;
     private long mMapPollInterval;
-
-    private Timer cameraCenterTimer;
-    private long mCameraCenterInterval = 1000;
-
-    private LatLng last_camera_center;
 
     private SharedPreferences sharedPreferences;
 
@@ -291,11 +288,8 @@ public class ActivityNavigation extends AppCompatActivity
 
         checkPermissionsStartService(true);
 
-
-
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
-
 
     }
 
@@ -351,10 +345,6 @@ public class ActivityNavigation extends AppCompatActivity
             mapPollTimer.cancel();
         }
 
-        if (cameraCenterTimer != null) {
-            Log.d(Constants.NAVIGATION_APP, "onPause, cancelling cameraCenterTimer");
-            cameraCenterTimer.cancel();
-        }
     }
 
     @Override
@@ -368,49 +358,52 @@ public class ActivityNavigation extends AppCompatActivity
         mapPollTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: Requesting map poll");
-
+                Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: polling");
                 requestOccupancyEstimate(MAP_POLL_MODE);
-            }
-        }, mMapPollInterval, mMapPollInterval);
 
-        Log.d(Constants.NAVIGATION_APP, "onResume, creating new cameraCenterTimer");
-        cameraCenterTimer = new Timer();
-
-        Log.d(Constants.NAVIGATION_APP, "onResume, scheduling cameraCenterTimer at fixed rate " + mCameraCenterInterval);
-        cameraCenterTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
                 ActivityNavigation.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //Log.d(Constants.NAVIGATION_APP, "Camera Center Timer: Setting last_camera_center on UI Thread");
-                        last_camera_center = mMap.getCameraPosition().target;
-
-                        Log.d(Constants.NAVIGATION_APP, "cameraCenterTimer: Updating last location");
-
-                        if(mMap != null && serviceDataCollection != null) {
-                            Location lastLocation = serviceDataCollection.getLastLocation();
-
-                            if(lastLocationCircle != null) {
-                                lastLocationCircle.remove();
-                            }
-
-                            if(lastLocation != null) {
-                                CircleOptions circleOptions = new CircleOptions()
-                                    .center(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
-                                    .radius(3)
-                                    .strokeColor(Color.GREEN)
-                                    .fillColor(Color.GREEN);
-
-                                lastLocationCircle = mMap.addCircle(circleOptions);
-                            }
-
-                        }
+                        updateLastCameraCenter();
+                        updateLastLocationCircle();
                     }
                 });
             }
-        }, mCameraCenterInterval, mCameraCenterInterval);
+        }, mMapPollInterval, mMapPollInterval);
+
+    }
+
+    private void updateLastCameraCenter() {
+        if(mMap == null) {
+            return;
+        }
+
+        Log.d(Constants.NAVIGATION_APP, "cameraCenterTimer: Updating last location");
+        last_camera_center = mMap.getCameraPosition().target;
+    }
+
+    private void updateLastLocationCircle() {
+        if(mMap == null || serviceDataCollection == null) {
+            return;
+        }
+
+        Location lastLocation = serviceDataCollection.getLastLocation();
+
+        if(lastLocation == null) {
+            return;
+        }
+
+        if(lastLocationCircle != null) {
+            lastLocationCircle.remove();
+        }
+
+        CircleOptions circleOptions = new CircleOptions()
+                .center(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
+                .radius(3)
+                .strokeColor(Color.GREEN)
+                .fillColor(Color.GREEN);
+
+        lastLocationCircle = mMap.addCircle(circleOptions);
     }
 
     @Override
@@ -660,16 +653,19 @@ public class ActivityNavigation extends AppCompatActivity
     private boolean sendCrowdObservation(Integer user_estimate) {
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Cannot send, insufficient permissions to determine location", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if(serviceDataCollection == null) {
+            Toast.makeText(this, "Cannot send, error connecting to data collection service", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         Location location = serviceDataCollection.getLastLocation();
 
         if(location == null) {
+            Toast.makeText(this, "Cannot send, service is connected but unable to determine location", Toast.LENGTH_SHORT).show();
             return false;
         }
 
