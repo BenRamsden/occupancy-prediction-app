@@ -126,11 +126,23 @@ public class ActivityConfigure extends AppCompatActivity {
                     return;
                 }
 
+                //No need to re-check permissions here, service connection will be null if permissions not granted so will return above
+
                 if(isChecked) {
                     Toast.makeText(ActivityConfigure.this, "Service foregrounded", Toast.LENGTH_SHORT).show();
+
+                    //Explicitly startService so doesn't die when no activities are bound
+                    Intent locationServiceIntent = new Intent(ActivityConfigure.this, ServiceDataCollection.class);
+                    startService(locationServiceIntent);
+
                     serviceDataCollection.startForegroundNotification();
                 } else {
                     Toast.makeText(ActivityConfigure.this, "Service backgrounded", Toast.LENGTH_SHORT).show();
+
+                    //Explicitly stopService so service dies once app closes
+                    Intent locationServiceIntent = new Intent(ActivityConfigure.this, ServiceDataCollection.class);
+                    stopService(locationServiceIntent);
+
                     serviceDataCollection.stopForegroundNotification();
                 }
 
@@ -146,7 +158,7 @@ public class ActivityConfigure extends AppCompatActivity {
         });
 
         /* Do not ask user for permissions in this activity, just let them know they are needed or wont work */
-        checkPermissionsStartService(false);
+        checkPermissionsBindService(false);
     }
 
 
@@ -162,14 +174,13 @@ public class ActivityConfigure extends AppCompatActivity {
 
     /* Shows and hides the location text prompt in the Main Activity
      * Based on whether the permission have been granted or not to access location */
-    private void checkPermissionsStartService(boolean requestIfNotGranted) {
+    private void checkPermissionsBindService(boolean requestIfNotGranted) {
 
         if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && serviceDataCollection == null) {
             Log.d(Constants.PERMISSIONS, "All permissions granted: Launching serviceDataCollection");
 
             /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
             Intent locationServiceIntent = new Intent(this, ServiceDataCollection.class);
-            startService(locationServiceIntent);
             bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
@@ -183,7 +194,7 @@ public class ActivityConfigure extends AppCompatActivity {
 
         if (PermissionManager.isManagedPermission(requestCode)) {
             /* Do not ask user for permissions in this activity, just let them know they are needed or wont work */
-            checkPermissionsStartService(false);
+            checkPermissionsBindService(false);
         } else {
             Toast.makeText(ActivityConfigure.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
         }

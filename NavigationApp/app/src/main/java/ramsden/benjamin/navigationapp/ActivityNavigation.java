@@ -17,8 +17,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
@@ -37,14 +35,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,8 +42,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
@@ -62,9 +50,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
@@ -286,11 +272,13 @@ public class ActivityNavigation extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        checkPermissionsStartService(true);
+        checkPermissionsBindService(true);
 
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
 
+        start_date_textview = (TextView) findViewById(R.id.start_date_textview);
+        end_date_textview = (TextView) findViewById(R.id.end_date_textview);
     }
 
     private boolean time_offset_enabled = false;
@@ -305,8 +293,6 @@ public class ActivityNavigation extends AppCompatActivity
     public void timeButtonClick(View v) {
         int id = v.getId();
 
-        if(start_date_textview == null) start_date_textview = (TextView) findViewById(R.id.start_date_textview);
-        if(end_date_textview == null) end_date_textview = (TextView) findViewById(R.id.end_date_textview);
         if(end_date == null) end_date = new Date();
         if(start_date == null) start_date = new Date(end_date.getTime() - time_step_millis);
 
@@ -321,7 +307,8 @@ public class ActivityNavigation extends AppCompatActivity
             time_offset_enabled = false;
         } else if(id == R.id.occupancy_future) {
             end_date = new Date(end_date.getTime() + time_step_millis);
-            start_date = new Date(start_date.getTime() + time_step_millis);            time_offset_enabled = true;
+            start_date = new Date(start_date.getTime() + time_step_millis);
+            time_offset_enabled = true;
         } else {
             Toast.makeText(ActivityNavigation.this, "timeButtonClick, unrecognized button id", Toast.LENGTH_SHORT).show();
         }
@@ -686,16 +673,8 @@ public class ActivityNavigation extends AppCompatActivity
     public void onDestroy() {
         super.onDestroy();
 
-        boolean foreground_service = false;
-
         if(serviceDataCollection != null) {
-            foreground_service = serviceDataCollection.isForegroundNotification();
-
             unbindService(locationServiceConnection);
-        }
-
-        if(!foreground_service) {
-            stopService(new Intent(this, ServiceDataCollection.class));
         }
 
         unregisterReceiver(occupancyEstimateReceiver);
@@ -703,7 +682,7 @@ public class ActivityNavigation extends AppCompatActivity
 
     /* Shows and hides the location text prompt in the Main Activity
      * Based on whether the permission have been granted or not to access location */
-    private void checkPermissionsStartService(boolean requestIfNotGranted) {
+    private void checkPermissionsBindService(boolean requestIfNotGranted) {
 
         if(PermissionManager.checkAllPermissions(this, requestIfNotGranted) && serviceDataCollection == null) {
             Log.d(Constants.PERMISSIONS, "All permissions granted: Launching serviceDataCollection");
@@ -712,7 +691,6 @@ public class ActivityNavigation extends AppCompatActivity
 
             /* Start the service and bind to it, ONLY ONCE PERMISSIONS ACQUIRED */
             Intent locationServiceIntent = new Intent(this, ServiceDataCollection.class);
-            startService(locationServiceIntent);
             bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
@@ -726,10 +704,10 @@ public class ActivityNavigation extends AppCompatActivity
 
         if (grantResults.length > 0 && PermissionManager.isManagedPermission(requestCode)) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkPermissionsStartService(true);
+                checkPermissionsBindService(true);
             } else {
                 /* Do not keep asking user for that permission if they denied the first time */
-                checkPermissionsStartService(false);
+                checkPermissionsBindService(false);
             }
         } else {
             Toast.makeText(ActivityNavigation.this, "onRequestPermissionResult case not set for requestCode " + requestCode, Toast.LENGTH_LONG).show();
