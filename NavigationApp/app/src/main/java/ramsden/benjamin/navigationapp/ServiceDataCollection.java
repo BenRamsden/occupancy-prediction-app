@@ -3,7 +3,6 @@ package ramsden.benjamin.navigationapp;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,9 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,17 +17,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.LocationListener;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -106,13 +101,11 @@ public class ServiceDataCollection extends Service {
             switch (key) {
                 case Constants.PREFERENCE_MIN_DISTANCE:
                     minDistance = sharedPreferences.getFloat(Constants.PREFERENCE_MIN_DISTANCE, Constants.DEFAULT_MIN_GPS_DISTANCE);
-                    initLocationListener();
-                    Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged minDistance:" + minDistance, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "NOT YET WHILE RUNNING: ServiceDataCollection onSharedPreferenceChanged minDistance:" + minDistance, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.PREFERENCE_MIN_TIME:
                     minTime = sharedPreferences.getLong(Constants.PREFERENCE_MIN_TIME, Constants.DEFAULT_MIN_GPS_TIME);
-                    initLocationListener();
-                    Toast.makeText(getBaseContext(), "ServiceDataCollection onSharedPreferenceChanged minTime:" + minTime, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "NOT YET WHILE RUNNING: ServiceDataCollection onSharedPreferenceChanged minTime:" + minTime, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL:
                     Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
@@ -138,6 +131,21 @@ public class ServiceDataCollection extends Service {
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnected");
+
+            if (ActivityCompat.checkSelfPermission(ServiceDataCollection.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ServiceDataCollection.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            if(mGoogleApiClient == null) {
+                return;
+            }
+
+            LocationRequest locationRequest = new LocationRequest()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(minTime)
+                    .setSmallestDisplacement(minDistance);
+
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, locationListener);
         }
 
         @Override
@@ -190,16 +198,9 @@ public class ServiceDataCollection extends Service {
                 .build();
         mGoogleApiClient.connect();  //TODO: No auto manage, need to call connect and disconnect manually
 
-        initLocationListener();
-
-        /* TODO: Experiment with calling locationListener.locationChanged(location)
-         * With the last received location, if no update has been provided by system for a period
-         * Meaning we get up to date data at the current location */
-
         Long start_all_sensors_interval = sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL);
 
         initSensorTimer(start_all_sensors_interval);
-
     }
 
     private Timer sensor_timer;
@@ -221,7 +222,7 @@ public class ServiceDataCollection extends Service {
 
                 Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-                if(location != null) {
+                if (location != null) {
                     Log.d(Constants.DATA_COLLECTION_SERVICE, "Started all sensors with location");
                     startAllSensors(location);
                 } else {
@@ -234,19 +235,19 @@ public class ServiceDataCollection extends Service {
 
     private void startAllSensors(Location location) {
 
-        if(sensorAccelerometerManager != null) {
+        if (sensorAccelerometerManager != null) {
             sensorAccelerometerManager.startAccelerometer(location);
         }
 
-        if(sensorAudioManager != null) {
+        if (sensorAudioManager != null) {
             sensorAudioManager.startAudio(location);
         }
 
-        if(sensorBluetoothManager != null) {
+        if (sensorBluetoothManager != null) {
             sensorBluetoothManager.startBluetooth(location);
         }
 
-        if(sensorHotspotManager != null) {
+        if (sensorHotspotManager != null) {
             sensorHotspotManager.startHotspot(location);
         }
 
@@ -268,7 +269,7 @@ public class ServiceDataCollection extends Service {
      * ensures the notification is not already active */
     public void startForegroundNotification() {
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection startForegroundNotification");
-        if(!notifActive) {
+        if (!notifActive) {
             startForeground(foregroudCode, foregroundNotif);
             notifActive = true;
         }
@@ -277,7 +278,7 @@ public class ServiceDataCollection extends Service {
     /* removes the foreground notificaiton if it does exist  */
     public void stopForegroundNotification() {
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection stopForegroundNotification");
-        if(notifActive) {
+        if (notifActive) {
             stopForeground(true);
             notifActive = false;
         }
@@ -288,10 +289,16 @@ public class ServiceDataCollection extends Service {
      * initialized and is receiving updates, this method will request the location
      * manager remove updates the listener, and re-request the updates with the
      * Updated parameters */
-    private void initLocationListener() {
-        //TODO: Request location updates, even when app isn't open
-        //TODO: getLastLocation may not work when google maps not open
-    }
+
+    LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(Constants.DATA_COLLECTION_SERVICE, "onLocationChanged lat:" + location.getLatitude() + " lng:" + location.getLongitude());
+
+            //TODO: Verify this is a valid way
+            //Currently just logs that location update happened, getLastLocation is used to get the location
+        }
+    };
 
     /* Makes sure that the location listener is not still receiving updates
      * If the location service has been destroyed */
@@ -300,7 +307,9 @@ public class ServiceDataCollection extends Service {
         Log.d(Constants.DATA_COLLECTION_SERVICE, "ServiceDataCollection onDestroy");
         Toast.makeText(getBaseContext(), "ServiceDataCollection onDestroy", Toast.LENGTH_SHORT).show();
 
+
         if(mGoogleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, locationListener);
             mGoogleApiClient.disconnect();
         }
 
