@@ -252,31 +252,6 @@ public class ServiceDataCollection extends Service {
 
     }
 
-    public boolean sendCrowdObservation(Integer user_estimate) {
-
-        if (ActivityCompat.checkSelfPermission(ServiceDataCollection.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if(location == null) {
-            return false;
-        }
-
-        String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-
-        Uri uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.CrowdObservations.TABLE_NAME);
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(NavigationContract.CrowdObservations.KEY_LATITUDE, location.getLatitude());
-        contentValues.put(NavigationContract.CrowdObservations.KEY_LONGITUDE, location.getLongitude());
-        contentValues.put(NavigationContract.CrowdObservations.KEY_OCCUPANCY_ESTIMATE, user_estimate);
-        contentValues.put(NavigationContract.CrowdObservations.KEY_OBSERVATION_DATE, current_date);
-        getContentResolver().insert(uri, contentValues);
-
-        return true;
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // The service will be killed by the application on exit

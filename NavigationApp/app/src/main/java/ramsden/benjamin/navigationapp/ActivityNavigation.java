@@ -638,7 +638,7 @@ public class ActivityNavigation extends AppCompatActivity
                     return;
                 }
 
-                if(serviceDataCollection != null && serviceDataCollection.sendCrowdObservation(user_estimate)) {
+                if(serviceDataCollection != null && sendCrowdObservation(user_estimate)) {
                     Toast.makeText(ActivityNavigation.this, "Thank you for your estimate of " + user_estimate + " we will use this to make our service better!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(ActivityNavigation.this, "Error sending your estimate, Data Collection Service is not initialized", Toast.LENGTH_SHORT).show();
@@ -655,6 +655,35 @@ public class ActivityNavigation extends AppCompatActivity
         });
 
         builder.show();
+    }
+
+    private boolean sendCrowdObservation(Integer user_estimate) {
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        if(serviceDataCollection == null) {
+            return false;
+        }
+
+        Location location = serviceDataCollection.getLastLocation();
+
+        if(location == null) {
+            return false;
+        }
+
+        String current_date = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
+
+        Uri uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/" + NavigationContract.CrowdObservations.TABLE_NAME);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NavigationContract.CrowdObservations.KEY_LATITUDE, location.getLatitude());
+        contentValues.put(NavigationContract.CrowdObservations.KEY_LONGITUDE, location.getLongitude());
+        contentValues.put(NavigationContract.CrowdObservations.KEY_OCCUPANCY_ESTIMATE, user_estimate);
+        contentValues.put(NavigationContract.CrowdObservations.KEY_OBSERVATION_DATE, current_date);
+        getContentResolver().insert(uri, contentValues);
+
+        return true;
     }
 
     @Override
