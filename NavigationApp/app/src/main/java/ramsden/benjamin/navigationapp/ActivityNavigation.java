@@ -92,26 +92,6 @@ public class ActivityNavigation extends AppCompatActivity
         }
     };
 
-    GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Toast.makeText(ActivityNavigation.this, "Connection to GoogleApiClient failed", Toast.LENGTH_SHORT).show();
-            mGoogleApiClient = null;
-        }
-    };
-
-    GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
-        @Override
-        public void onConnected(@Nullable Bundle bundle) {
-            Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnected");
-        }
-
-        @Override
-        public void onConnectionSuspended(int i) {
-            Log.d(Constants.GOOGLE_API_CLIENT, "ConnectionCallbacks onConnectionSuspended");
-        }
-    };
-
     public static final String OCCUPANCY_ESTIMATE_RECEIVER = "ramsden.benjamin.navigationapp.ActivityNavigation.occupancyEstimateReceiver";
 
     final int opacity_multiplier = 3;
@@ -254,8 +234,6 @@ public class ActivityNavigation extends AppCompatActivity
     private GoogleMap mMap;
     private Circle lastLocationCircle = null;
 
-    private GoogleApiClient mGoogleApiClient;
-
     private Timer mapPollTimer;
     private long mMapPollInterval;
 
@@ -313,15 +291,7 @@ public class ActivityNavigation extends AppCompatActivity
 
         checkPermissionsStartService(true);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */,
-                        onConnectionFailedListener)
-                .addConnectionCallbacks(connectionCallbacks)
-                .addApi(LocationServices.API)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .build();
-        mGoogleApiClient.connect();
+
 
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
@@ -478,7 +448,7 @@ public class ActivityNavigation extends AppCompatActivity
             startActivity(new Intent(this, ActivityConfigure.class));
             return true;
         } else if (id == R.id.action_likely_place) {
-            findLikelyPlaces();
+            Toast.makeText(ActivityNavigation.this, "not implemented", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -551,37 +521,6 @@ public class ActivityNavigation extends AppCompatActivity
         }
     }
 
-    public void findLikelyPlaces() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(ActivityNavigation.this, "Cannot findLikelyPlaces, no ACCESS_FINE_LOCATION permission", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (mGoogleApiClient == null) {
-            Toast.makeText(ActivityNavigation.this, "Cannot find likely places, mGoogleApiClient is null", Toast.LENGTH_SHORT).show();
-            Log.d(Constants.GOOGLE_API_CLIENT, "Cannot find likely places, mGoogleApiClient is null");
-            return;
-        }
-
-        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
-
-        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-            @Override
-            public void onResult(@NonNull PlaceLikelihoodBuffer likelyPlaces) {
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    Toast.makeText(ActivityNavigation.this, "Place Name: " + placeLikelihood.getPlace().getName(), Toast.LENGTH_SHORT).show();
-                    break;
-                }
-
-                if (likelyPlaces.getCount() == 0) {
-                    Toast.makeText(ActivityNavigation.this, "Sorry, I could not identify the name of this place!", Toast.LENGTH_SHORT).show();
-                }
-
-                likelyPlaces.release();
-            }
-        });
-    }
-
     public static final String CROWD_OBSERVATION_MODE = "CROWD_OBSERVATION_MODE";
     public static final String MAP_POLL_MODE = "MAP_POLL_MODE";
 
@@ -651,10 +590,6 @@ public class ActivityNavigation extends AppCompatActivity
                 }
 
                 Location lastLocation = serviceDataCollection.getLastLocation();
-
-                if (lastLocation == null && mGoogleApiClient != null) {
-                    lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                }
 
                 if(lastLocation == null) {
                     Toast.makeText(ActivityNavigation.this, "Current location, and Last location are both unavailable! Please wait until location lock is achieved", Toast.LENGTH_SHORT).show();
@@ -736,10 +671,6 @@ public class ActivityNavigation extends AppCompatActivity
 
         if(!foreground_service) {
             stopService(new Intent(this, ServiceDataCollection.class));
-        }
-
-        if(mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
         }
 
         unregisterReceiver(occupancyEstimateReceiver);
