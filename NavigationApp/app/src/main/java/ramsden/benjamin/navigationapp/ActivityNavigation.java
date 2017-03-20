@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
-    
+
     private ServiceDataCollection serviceDataCollection = null;
     private ServiceConnection locationServiceConnection = new ServiceConnection() {
         @Override
@@ -91,6 +92,8 @@ public class ActivityNavigation extends AppCompatActivity
 
     private ArrayList<Polygon> occupancy_squares = new ArrayList<>();
 
+    private long lastServerErrorTime = 0;
+
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -99,6 +102,18 @@ public class ActivityNavigation extends AppCompatActivity
             //Toast.makeText(ActivityNavigation.this, "OccupancyEstimateReceiver onReceive, mode: " + mode, Toast.LENGTH_SHORT).show();
 
             switch (mode) {
+                case NavigationContract.ErrorUI.ERROR_UI_MODE:
+                    String err_message = "unknown";
+                    if(intent.hasExtra(NavigationContract.ErrorUI.ERROR_MESSAGE)) {
+                        err_message = intent.getStringExtra(NavigationContract.ErrorUI.ERROR_MESSAGE);
+                        serverStatusTextView.setText(err_message);
+                    } else {
+                        serverStatusTextView.setText("");
+                    }
+
+                    serverStatusImageView.setImageDrawable(getDrawable(android.R.drawable.presence_busy));
+                    lastServerErrorTime = System.currentTimeMillis();
+                    break;
                 case CROWD_OBSERVATION_MODE:
                     String occupancy_estimate = intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE);
 
@@ -279,6 +294,9 @@ public class ActivityNavigation extends AppCompatActivity
 
         start_date_textview = (TextView) findViewById(R.id.start_date_textview);
         end_date_textview = (TextView) findViewById(R.id.end_date_textview);
+
+        serverStatusImageView = (ImageView) findViewById(R.id.serverStatusImageView);
+        serverStatusTextView = (TextView) findViewById(R.id.serverStatusTextView);
     }
 
     private boolean time_offset_enabled = false;
@@ -289,6 +307,9 @@ public class ActivityNavigation extends AppCompatActivity
 
     private TextView start_date_textview;
     private TextView end_date_textview;
+
+    private ImageView serverStatusImageView;
+    private TextView serverStatusTextView;
 
     public void timeButtonClick(View v) {
         int id = v.getId();
@@ -353,11 +374,19 @@ public class ActivityNavigation extends AppCompatActivity
                     public void run() {
                         updateLastCameraCenter();
                         updateLastLocationCircle();
+                        updateServerStatusImage();
                     }
                 });
             }
         }, mMapPollInterval, mMapPollInterval);
 
+    }
+
+    private void updateServerStatusImage() {
+        if(lastServerErrorTime + 15000 < System.currentTimeMillis()) {
+            serverStatusImageView.setImageDrawable(getDrawable(android.R.drawable.presence_online));
+            serverStatusTextView.setText("");
+        }
     }
 
     private void updateLastCameraCenter() {

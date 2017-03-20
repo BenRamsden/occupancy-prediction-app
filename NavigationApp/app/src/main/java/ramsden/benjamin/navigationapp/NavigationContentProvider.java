@@ -50,15 +50,46 @@ public class NavigationContentProvider extends ContentProvider {
         public void onResponse(JSONObject response) {
             //Toast.makeText(getContext(), "NET_RESPONSE: "+response.toString(), Toast.LENGTH_SHORT).show();
             Log.d(Constants.CONTENT_PROVIDER, "RESPONSE: " + response);
+            try {
+
+                if(response.has("result")) {
+                    JSONObject result = response.getJSONObject("result");
+                    if(result.has("success")) {
+                        boolean success = result.getBoolean("success");
+                        if(success == false) {
+                            Intent fail_ui_warn_intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
+                            fail_ui_warn_intent.putExtra(NavigationContract.ErrorUI.EXTRA_MODE, NavigationContract.ErrorUI.ERROR_UI_MODE);
+
+                            if(result.has("reason")) {
+                                String reason = result.getString("reason");
+                                fail_ui_warn_intent.putExtra(NavigationContract.ErrorUI.ERROR_MESSAGE, reason);
+                            }
+
+                            Log.d(Constants.CONTENT_PROVIDER, "onResponse: Broadcasting fail_ui_warn_intent");
+                            getContext().sendBroadcast(fail_ui_warn_intent);
+                        }
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
 
     private final Response.ErrorListener DEFAULT_ERROR_LISTENER = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.d(Constants.CONTENT_PROVIDER, "ERROR: " + error);
-            Toast.makeText(getContext(), "NET_ERROR: " + error, Toast.LENGTH_SHORT).show();
+            Log.d(Constants.CONTENT_PROVIDER, "onErrorResponse: Broadcasting fail_ui_warn_intent");
+            //Toast.makeText(getContext(), "NET_ERROR: " + error, Toast.LENGTH_SHORT).show();
             //error.printStackTrace(System.out);
+            Intent fail_ui_warn_intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
+            fail_ui_warn_intent.putExtra(NavigationContract.ErrorUI.EXTRA_MODE, NavigationContract.ErrorUI.ERROR_UI_MODE);
+
+            fail_ui_warn_intent.putExtra(NavigationContract.ErrorUI.ERROR_MESSAGE, error.toString());
+
+            Log.d(Constants.CONTENT_PROVIDER, "onErrorResponse: Broadcasting fail_ui_warn_intent");
+            getContext().sendBroadcast(fail_ui_warn_intent);
         }
     };
 
@@ -300,6 +331,8 @@ public class NavigationContentProvider extends ContentProvider {
                             intent.putExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_LAT_LNG_OCCUPANCY_LIST, lat_lng_occupancy_list);
                             intent.putExtra(NavigationContract.OccupancyEstimateBulk.EXTRA_MODE, ActivityNavigation.MAP_POLL_MODE);
                             getContext().sendBroadcast(intent);
+
+                            Log.d(Constants.CONTENT_PROVIDER, "OCCUPANCY_RESPONSE: " + response);
                         }
                     };
                     break;

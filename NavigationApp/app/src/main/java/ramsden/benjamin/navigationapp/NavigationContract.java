@@ -125,4 +125,10 @@ public class NavigationContract implements BaseColumns {
         public static final String EXTRA_MODE = "mode";
 
     }
+
+    public static class ErrorUI {
+        public static final String EXTRA_MODE = "mode";
+        public static final String ERROR_UI_MODE = "error_ui_mode";
+        public static final String ERROR_MESSAGE = "errMessage";
+    }
 }
