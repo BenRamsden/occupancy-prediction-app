@@ -83,7 +83,7 @@ public class ActivityNavigation extends AppCompatActivity
 
     final int opacity_multiplier = 3;
     final double lat_target_offset = 0.0003d; //0.0007d
-    final double lng_target_offset = 0.0004d; //0.0010d
+    final double lng_target_offset = 0.0006d; //0.0010d
     final double lat_increment = 0.00023d;
     final double lng_increment = 0.00035d;
     final int max_opacity = 150;
