@@ -11,7 +11,9 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -31,8 +33,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,17 +48,21 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -297,6 +306,65 @@ public class ActivityNavigation extends AppCompatActivity
 
         serverStatusImageView = (ImageView) findViewById(R.id.serverStatusImageView);
         serverStatusTextView = (TextView) findViewById(R.id.serverStatusTextView);
+
+        mapsSearchView = (SearchView) findViewById(R.id.mapsSearchView);
+
+        final String[] from = new String[] {"cityName"};
+        final int[] to = new int[] {android.R.id.text1};
+        SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1,
+                null,
+                from,
+                to,
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+        mapsSearchView.setSuggestionsAdapter(mAdapter);
+
+        mapsSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if(last_user_marker != null) {
+                    last_user_marker.remove();
+                }
+
+                if(query.equals("")) {
+                    Toast.makeText(ActivityNavigation.this, "Please enter a valid location name", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                List<Address> addressList = null;
+                Geocoder geocoder = new Geocoder(ActivityNavigation.this);
+
+                try {
+                    addressList = addressList = geocoder.getFromLocationName(query, 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if(addressList == null) {
+                    Toast.makeText(ActivityNavigation.this, "Cannot find a location by that name", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                Address address = addressList.get(0);
+                LatLng address_location = new LatLng(address.getLatitude(), address.getLongitude());
+
+                last_user_marker = mMap.addMarker(new MarkerOptions().position(address_location));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(address_location, 17));
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(last_user_marker != null) {
+                    last_user_marker.remove();
+                    last_user_marker = null;
+                }
+
+                return false;
+            }
+        });
     }
 
     private boolean time_offset_enabled = false;
@@ -310,6 +378,10 @@ public class ActivityNavigation extends AppCompatActivity
 
     private ImageView serverStatusImageView;
     private TextView serverStatusTextView;
+
+    private SearchView mapsSearchView;
+
+    private Marker last_user_marker;
 
     public void timeButtonClick(View v) {
         int id = v.getId();
@@ -482,9 +554,6 @@ public class ActivityNavigation extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
-//    Marker last_user_marker;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
