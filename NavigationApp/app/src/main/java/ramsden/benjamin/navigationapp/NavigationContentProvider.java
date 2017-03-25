@@ -102,8 +102,9 @@ public class NavigationContentProvider extends ContentProvider {
     private static final int CROWD_OBSERVATIONS = 55;
     private static final int BLUETOOTH_OBSERVATIONS = 56;
     private static final int ACCELEROMETER_OBSERVATIONS = 57;
-    private static final int OCCUPANCY_ESTIMATE = 58;
+    private static final int CROWD_OCCUPANCY_ESTIMATE = 58;
     private static final int OCCUPANCY_ESTIMATE_BULK = 59;
+    private static final int DESTINATION_OCCUPANCY_ESTIMATE = 60;
 
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -114,8 +115,9 @@ public class NavigationContentProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.CrowdObservations.TABLE_NAME, CROWD_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.BluetoothObservations.TABLE_NAME, BLUETOOTH_OBSERVATIONS);
         URI_MATCHER.addURI(AUTHORITY, NavigationContract.AccelerometerObservations.TABLE_NAME, ACCELEROMETER_OBSERVATIONS);
-        URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE", OCCUPANCY_ESTIMATE);
+        URI_MATCHER.addURI(AUTHORITY, "CROWD_OCCUPANCY_ESTIMATE", CROWD_OCCUPANCY_ESTIMATE);
         URI_MATCHER.addURI(AUTHORITY, "OCCUPANCY_ESTIMATE_BULK", OCCUPANCY_ESTIMATE_BULK);
+        URI_MATCHER.addURI(AUTHORITY, "DESTINATION_OCCUPANCY_ESTIMATE", DESTINATION_OCCUPANCY_ESTIMATE);
     }
 
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -220,7 +222,7 @@ public class NavigationContentProvider extends ContentProvider {
     public Uri insert(Uri uri, final ContentValues values) {
         Log.d(Constants.NAVIGATION_APP,"NavigationContentProvider called with insert");
 
-        int uriType = URI_MATCHER.match(uri);
+        final int uriType = URI_MATCHER.match(uri);
 
         String api_sub = null;
         Response.Listener<JSONObject> responseListener = DEFAULT_RESPONSE_LISTENER;
@@ -282,7 +284,8 @@ public class NavigationContentProvider extends ContentProvider {
                     insertJSON.put(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE, new JSONObject(values.getAsString(NavigationContract.AccelerometerObservations.KEY_ACCELERATION_TIMELINE)));  //parse back into json to prevent triple slashes
                     insertJSON.put(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE, values.get(NavigationContract.AccelerometerObservations.KEY_OBSERVATION_DATE));
                     break;
-                case OCCUPANCY_ESTIMATE:
+                case CROWD_OCCUPANCY_ESTIMATE:
+                case DESTINATION_OCCUPANCY_ESTIMATE:
                     api_sub = "/occupancy";
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LAT, values.get(NavigationContract.OccupancyEstimate.ARG_LAT));
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LNG, values.get(NavigationContract.OccupancyEstimate.ARG_LNG));
@@ -299,9 +302,12 @@ public class NavigationContentProvider extends ContentProvider {
                                 return;
                             }
 
+                            //Toast.makeText(getContext(), "NCP: lat " + values.get(NavigationContract.OccupancyEstimate.ARG_LAT) + " lng " + values.get(NavigationContract.OccupancyEstimate.ARG_LNG) + " estimate " + occupancy_estimate, Toast.LENGTH_SHORT).show();
+
                             Intent intent = new Intent(ActivityNavigation.OCCUPANCY_ESTIMATE_RECEIVER);
                             intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE,occupancy_estimate);
-                            intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_MODE, ActivityNavigation.CROWD_OBSERVATION_MODE);
+                            if(uriType == CROWD_OCCUPANCY_ESTIMATE) intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_MODE, ActivityNavigation.CROWD_OBSERVATION_MODE);
+                            if(uriType == DESTINATION_OCCUPANCY_ESTIMATE) intent.putExtra(NavigationContract.OccupancyEstimate.EXTRA_MODE, ActivityNavigation.DESTINATION_MODE);
                             getContext().sendBroadcast(intent);
                         }
                     };

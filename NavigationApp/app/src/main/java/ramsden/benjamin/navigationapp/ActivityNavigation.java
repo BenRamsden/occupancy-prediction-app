@@ -127,6 +127,18 @@ public class ActivityNavigation extends AppCompatActivity
                     serverStatusImageView.setImageDrawable(getDrawable(android.R.drawable.presence_busy));
                     lastServerErrorTime = System.currentTimeMillis();
                     break;
+                case DESTINATION_MODE:
+                    String destination_occupancy = intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE);
+
+                    if(last_user_marker == null) {
+                        Toast.makeText(ActivityNavigation.this, "Cannot set last_user_marker text, it is null", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    last_user_marker.setTitle(destination_occupancy);
+                    last_user_marker.showInfoWindow();
+
+                    break;
                 case CROWD_OBSERVATION_MODE:
                     String occupancy_estimate = intent.getStringExtra(NavigationContract.OccupancyEstimate.EXTRA_OCCUPANCY_ESTIMATE);
 
@@ -318,10 +330,17 @@ public class ActivityNavigation extends AppCompatActivity
             public void onPlaceSelected(Place place) {
                 //Toast.makeText(ActivityNavigation.this, "Place found: " + place, Toast.LENGTH_SHORT).show();
 
+                if(last_user_marker != null) {
+                    last_user_marker.remove();
+                }
+
                 LatLng placeLatLng = place.getLatLng();
 
-                last_user_marker = mMap.addMarker(new MarkerOptions().position(placeLatLng));
+                last_user_marker = mMap.addMarker(new MarkerOptions().position(placeLatLng));  //put marker, then fire network request to populate its box
+
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 17));
+
+                requestOccupancyEstimate(DESTINATION_MODE, placeLatLng);
             }
 
             @Override
@@ -404,7 +423,8 @@ public class ActivityNavigation extends AppCompatActivity
             @Override
             public void run() {
                 Log.d(Constants.NAVIGATION_APP, "Map Poll Timer: polling");
-                requestOccupancyEstimate(MAP_POLL_MODE);
+
+                requestOccupancyEstimate(MAP_POLL_MODE, last_camera_center);
 
                 ActivityNavigation.this.runOnUiThread(new Runnable() {
                     @Override
@@ -512,7 +532,15 @@ public class ActivityNavigation extends AppCompatActivity
         } else if (id == R.id.nav_sent_log) {
             startActivity(new Intent(this, ActivitySentLog.class));
         } else if (id == R.id.nav_crowd_observation) {
-            requestOccupancyEstimate(CROWD_OBSERVATION_MODE);
+
+            if(serviceDataCollection != null) {
+                Location loc = serviceDataCollection.getLastLocation();
+                LatLng location = new LatLng(loc.getLatitude(), loc.getLongitude());
+                requestOccupancyEstimate(CROWD_OBSERVATION_MODE, location);
+            } else {
+                Toast.makeText(ActivityNavigation.this, "Cannot send crowd observation, location service not initialized", Toast.LENGTH_SHORT).show();
+            }
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -564,11 +592,17 @@ public class ActivityNavigation extends AppCompatActivity
         }
     }
 
+    public static final String DESTINATION_MODE = "DESTINATION_MODE";
     public static final String CROWD_OBSERVATION_MODE = "CROWD_OBSERVATION_MODE";
     public static final String MAP_POLL_MODE = "MAP_POLL_MODE";
 
-    public void requestOccupancyEstimate(String mode) {
+    public void requestOccupancyEstimate(String mode, LatLng location) {
         /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
+
+        if(location == null) {
+            Log.d(Constants.NAVIGATION_APP, "Error: requestOccupancyEstimate mode:" + mode + " location is null");
+            return;
+        }
 
         Uri uri;
         ContentValues contentValues;
@@ -576,12 +610,6 @@ public class ActivityNavigation extends AppCompatActivity
         switch (mode) {
             case ActivityNavigation.MAP_POLL_MODE:
                 uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE_BULK");
-
-                /* TODO: Concurrency issue?? */
-                if (last_camera_center == null) {
-                    Log.d(Constants.NAVIGATION_APP, "Checked for last_camera_center, null, cannot map poll");
-                    return;
-                }
 
                 JSONObject jsonObject = new JSONObject();
                 int index_count = 0;
@@ -619,29 +647,20 @@ public class ActivityNavigation extends AppCompatActivity
                 contentValues.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, jsonObject.toString());
                 getContentResolver().insert(uri, contentValues);
                 break;
-            case ActivityNavigation.CROWD_OBSERVATION_MODE:
-                uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/OCCUPANCY_ESTIMATE");
-
-                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(ActivityNavigation.this, "Please provide the location permissions so we can link your estimation to your location", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if(serviceDataCollection == null) {
-                    Toast.makeText(ActivityNavigation.this, "The app's service has not fully loaded for some reason, please ensure you have granted the app all required permissions", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Location lastLocation = serviceDataCollection.getLastLocation();
-
-                if(lastLocation == null) {
-                    Toast.makeText(ActivityNavigation.this, "Current location, and Last location are both unavailable! Please wait until location lock is achieved", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            case ActivityNavigation.DESTINATION_MODE:
+                uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/DESTINATION_OCCUPANCY_ESTIMATE");
 
                 contentValues = new ContentValues();
-                contentValues.put("lat", lastLocation.getLatitude());
-                contentValues.put("lng", lastLocation.getLongitude());
+                contentValues.put("lat", location.latitude);
+                contentValues.put("lng", location.longitude);
+                getContentResolver().insert(uri, contentValues);
+                break;
+            case ActivityNavigation.CROWD_OBSERVATION_MODE:
+                uri = Uri.parse(NavigationContentProvider.CONTENT_URI + "/CROWD_OCCUPANCY_ESTIMATE");
+
+                contentValues = new ContentValues();
+                contentValues.put("lat", location.latitude);
+                contentValues.put("lng", location.longitude);
                 getContentResolver().insert(uri, contentValues);
                 break;
         }
