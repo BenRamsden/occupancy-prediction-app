@@ -5,9 +5,4 @@
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_likely_place"
-        android:title="Likely Place"
-        app:showAsAction="never" />
 </menu>

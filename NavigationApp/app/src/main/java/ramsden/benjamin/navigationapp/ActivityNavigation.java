@@ -513,8 +513,6 @@ public class ActivityNavigation extends AppCompatActivity
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, ActivityConfigure.class));
             return true;
-        } else if (id == R.id.action_likely_place) {
-            Toast.makeText(ActivityNavigation.this, "not implemented", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
