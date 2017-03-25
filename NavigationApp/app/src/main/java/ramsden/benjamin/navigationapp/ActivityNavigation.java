@@ -41,6 +41,10 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -307,64 +311,25 @@ public class ActivityNavigation extends AppCompatActivity
         serverStatusImageView = (ImageView) findViewById(R.id.serverStatusImageView);
         serverStatusTextView = (TextView) findViewById(R.id.serverStatusTextView);
 
-        mapsSearchView = (SearchView) findViewById(R.id.mapsSearchView);
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
-        final String[] from = new String[] {"cityName"};
-        final int[] to = new int[] {android.R.id.text1};
-        SimpleCursorAdapter mAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1,
-                null,
-                from,
-                to,
-                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-
-        mapsSearchView.setSuggestionsAdapter(mAdapter);
-
-        mapsSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                if(last_user_marker != null) {
-                    last_user_marker.remove();
-                }
+            public void onPlaceSelected(Place place) {
+                //Toast.makeText(ActivityNavigation.this, "Place found: " + place, Toast.LENGTH_SHORT).show();
 
-                if(query.equals("")) {
-                    Toast.makeText(ActivityNavigation.this, "Please enter a valid location name", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
+                LatLng placeLatLng = place.getLatLng();
 
-                List<Address> addressList = null;
-                Geocoder geocoder = new Geocoder(ActivityNavigation.this);
-
-                try {
-                    addressList = addressList = geocoder.getFromLocationName(query, 1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if(addressList == null) {
-                    Toast.makeText(ActivityNavigation.this, "Cannot find a location by that name", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-
-                Address address = addressList.get(0);
-                LatLng address_location = new LatLng(address.getLatitude(), address.getLongitude());
-
-                last_user_marker = mMap.addMarker(new MarkerOptions().position(address_location));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(address_location, 17));
-
-                return false;
+                last_user_marker = mMap.addMarker(new MarkerOptions().position(placeLatLng));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 17));
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                if(last_user_marker != null) {
-                    last_user_marker.remove();
-                    last_user_marker = null;
-                }
-
-                return false;
+            public void onError(Status status) {
+                Toast.makeText(ActivityNavigation.this, "Error with Places API", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     private boolean time_offset_enabled = false;
