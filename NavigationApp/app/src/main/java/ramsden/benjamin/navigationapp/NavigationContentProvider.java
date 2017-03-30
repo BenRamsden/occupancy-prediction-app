@@ -289,6 +289,8 @@ public class NavigationContentProvider extends ContentProvider {
                     api_sub = "/occupancy";
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LAT, values.get(NavigationContract.OccupancyEstimate.ARG_LAT));
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LNG, values.get(NavigationContract.OccupancyEstimate.ARG_LNG));
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_START_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_START_DATE));
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_END_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_END_DATE));
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
@@ -315,11 +317,8 @@ public class NavigationContentProvider extends ContentProvider {
                 case OCCUPANCY_ESTIMATE_BULK:
                     api_sub = "/occupancy/bulk";
                     insertJSON.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, new JSONObject(values.getAsString(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST)) );
-
-                    if(values.containsKey(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE) && values.containsKey(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE)) {
-                        insertJSON.put(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE, values.get(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_START_DATE));
-                        insertJSON.put(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE, values.get(NavigationContract.OccupancyEstimateBulk.OPTIONAL_ARG_END_DATE));
-                    }
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_START_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_START_DATE));
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_END_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_END_DATE));
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override

@@ -392,7 +392,9 @@ public class ActivityNavigation extends AppCompatActivity
 
         if(time_offset_enabled) {
             start_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(start_date));
+            start_date_textview.setTextColor(Color.BLUE);
             end_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(end_date));
+            end_date_textview.setTextColor(Color.BLUE);
         } else {
             start_date_textview.setText("");
             end_date_textview.setText("");
@@ -638,8 +640,9 @@ public class ActivityNavigation extends AppCompatActivity
 
                 if(time_offset_enabled) {
                     contentValues.put("start_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", start_date).toString());
-
                     contentValues.put("end_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", end_date).toString());
+                } else {
+                    addNowDates(contentValues, true);
                 }
 
                 contentValues.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, jsonObject.toString());
@@ -651,6 +654,7 @@ public class ActivityNavigation extends AppCompatActivity
                 contentValues = new ContentValues();
                 contentValues.put("lat", location.latitude);
                 contentValues.put("lng", location.longitude);
+                addNowDates(contentValues, false);
                 getContentResolver().insert(uri, contentValues);
                 break;
             case ActivityNavigation.CROWD_OBSERVATION_MODE:
@@ -659,12 +663,33 @@ public class ActivityNavigation extends AppCompatActivity
                 contentValues = new ContentValues();
                 contentValues.put("lat", location.latitude);
                 contentValues.put("lng", location.longitude);
+                addNowDates(contentValues, false);
                 getContentResolver().insert(uri, contentValues);
                 break;
         }
 
 
         /* Broadcast Receiver calls showCrowdObservationsAlertDialog if server returns occupancy estimate */
+    }
+
+    private void addNowDates(ContentValues contentValues, boolean update_ui) {
+        final Date now_end_date = new Date();
+        final Date now_start_date = new Date(now_end_date.getTime() - time_step_millis);
+
+        contentValues.put("start_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", now_start_date).toString());
+        contentValues.put("end_date", DateFormat.format("yyyy-MM-dd HH:mm:ss", now_end_date).toString());
+
+        if(update_ui) {
+            ActivityNavigation.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    start_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(now_start_date));
+                    start_date_textview.setTextColor(Color.RED);
+                    end_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(now_end_date));
+                    end_date_textview.setTextColor(Color.RED);
+                }
+            });
+        }
     }
 
     private void showCrowdObservationAlertDialog(String occupancy_estimate) {

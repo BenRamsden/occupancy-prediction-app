@@ -107,6 +107,8 @@ public class NavigationContract implements BaseColumns {
     public static class OccupancyEstimate {
         public static final String ARG_LAT = "lat";
         public static final String ARG_LNG = "lng";
+        public static final String ARG_START_DATE = "start_date";
+        public static final String ARG_END_DATE = "end_date";
 
         public static final String RESPONSE_OCCUPANCY = "occupancy";
 
@@ -116,8 +118,6 @@ public class NavigationContract implements BaseColumns {
 
     public static class OccupancyEstimateBulk {
         public static final String ARG_LAT_LNG_LIST = "lat_lng_list";
-        public static final String OPTIONAL_ARG_START_DATE = "start_date";
-        public static final String OPTIONAL_ARG_END_DATE = "end_date";
 
         public static final String RESPONSE_LAT_LNG_OCCUPANCY_LIST = "lat_lng_occupancy_list";
 
