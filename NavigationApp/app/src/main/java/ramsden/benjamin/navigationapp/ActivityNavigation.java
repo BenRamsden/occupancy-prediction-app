@@ -11,9 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -33,11 +31,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,13 +56,11 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -428,9 +422,9 @@ public class ActivityNavigation extends AppCompatActivity
 
         if(time_offset_enabled) {
             start_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(start_date));
-            start_date_textview.setTextColor(Color.BLUE);
+            start_date_textview.setTextColor(getResources().getColor(R.color.colorOffsetTime));
             end_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(end_date));
-            end_date_textview.setTextColor(Color.BLUE);
+            end_date_textview.setTextColor(getResources().getColor(R.color.colorOffsetTime));
         } else {
             start_date_textview.setText("");
             end_date_textview.setText("");
@@ -720,9 +714,9 @@ public class ActivityNavigation extends AppCompatActivity
                 @Override
                 public void run() {
                     start_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(now_start_date));
-                    start_date_textview.setTextColor(Color.RED);
+                    start_date_textview.setTextColor(getResources().getColor(R.color.colorLiveTime));
                     end_date_textview.setText(SimpleDateFormat.getDateTimeInstance().format(now_end_date));
-                    end_date_textview.setTextColor(Color.RED);
+                    end_date_textview.setTextColor(getResources().getColor(R.color.colorLiveTime));
                 }
             });
         }
