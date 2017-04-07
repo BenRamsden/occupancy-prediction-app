@@ -397,22 +397,20 @@ public class ActivityNavigation extends AppCompatActivity
 
     private Marker last_user_marker;
 
-    public void timeButtonClick(View v) {
-        int id = v.getId();
-
+    public void timeButtonClick(int id) {
         if(end_date == null) end_date = new Date();
         if(start_date == null) start_date = new Date(end_date.getTime() - time_step_millis);
 
-        if(id == R.id.occupancy_past) {
+        if(id == R.id.action_past) {
             end_date = new Date(end_date.getTime() - time_step_millis);
             start_date = new Date(start_date.getTime() - time_step_millis);
             time_offset_enabled = true;
-        } else if(id == R.id.occupancy_reset) {
+        } else if(id == R.id.action_current) {
             start_date = null;
             end_date = null;
 
             time_offset_enabled = false;
-        } else if(id == R.id.occupancy_future) {
+        } else if(id == R.id.action_future) {
             end_date = new Date(end_date.getTime() + time_step_millis);
             start_date = new Date(start_date.getTime() + time_step_millis);
             time_offset_enabled = true;
@@ -545,6 +543,8 @@ public class ActivityNavigation extends AppCompatActivity
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, ActivityConfigure.class));
             return true;
+        } else if(id == R.id.action_past || id == R.id.action_current || id == R.id.action_future) {
+            timeButtonClick(id);
         }
 
         return super.onOptionsItemSelected(item);

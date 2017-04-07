@@ -91,36 +91,6 @@
 
         </FrameLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:text="Past"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/occupancy_past"
-                android:layout_weight="1"
-                android:onClick="timeButtonClick" />
-
-            <Button
-                android:text="Reset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/occupancy_reset"
-                android:layout_weight="1"
-                android:onClick="timeButtonClick" />
-
-            <Button
-                android:text="Future"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/occupancy_future"
-                android:layout_weight="1"
-                android:onClick="timeButtonClick" />
-        </LinearLayout>
-
     </LinearLayout>
 
 

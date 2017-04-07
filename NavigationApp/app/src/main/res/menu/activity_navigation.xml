@@ -2,7 +2,25 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_past"
+        android:icon="@drawable/cast_ic_expanded_controller_skip_previous"
+        android:title="@string/action_past"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_current"
+        android:icon="@drawable/cast_ic_notification_play"
+        android:title="@string/action_current"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_future"
+        android:icon="@drawable/cast_ic_expanded_controller_skip_next"
+        android:title="@string/action_future"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
 </menu>
