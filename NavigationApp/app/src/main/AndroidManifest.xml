@@ -56,9 +56,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ActivitySentLog" />
-        <activity android:name=".ActivityConfigure" />
+        <activity
+            android:name=".ActivitySentLog"
+            android:label="@string/title_activity_sent_log" />
 
+        <activity
+            android:name=".ActivityConfigure"
+            android:label="@string/title_activity_configure" />
 
     </application>
 

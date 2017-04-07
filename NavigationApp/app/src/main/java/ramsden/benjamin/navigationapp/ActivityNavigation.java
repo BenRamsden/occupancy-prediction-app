@@ -241,16 +241,23 @@ public class ActivityNavigation extends AppCompatActivity
                         int outer_red = 0;
                         int outer_green = 0;
                         int outer_blue = 0;
-                        int outer_opacity = 128;
+                        int outer_opacity = 0;
 
-                        if(crowd_data) {
+                        if(live_data && crowd_data) {
+                            outer_red = 0xcc;
+                            outer_green = 0x66;
+                            outer_blue = 0xcc;
+                            outer_opacity = 150;
+                        } else if(crowd_data) {
                             outer_red = 0x87;
                             outer_green = 0x37;
                             outer_blue = 0xff;
+                            outer_opacity = 64;
                         } else if(live_data) {
                             outer_red = 0xff;
                             outer_green = 0x25;
                             outer_blue = 0xe6;
+                            outer_opacity = 64;
                         } else {
                             outer_opacity = 5;
                         }

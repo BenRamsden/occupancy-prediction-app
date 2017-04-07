@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">NavigationApp</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_navigation">ActivityNavigation</string>
+    <string name="title_activity_configure">Configure</string>
+    <string name="title_activity_sent_log">Sent Log</string>
+    <string name="title_activity_navigation">Navigation</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
