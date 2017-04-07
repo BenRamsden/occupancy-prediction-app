@@ -295,10 +295,12 @@ public class NavigationContentProvider extends ContentProvider {
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
+                            JSONObject occupancy_object;
                             String occupancy_estimate;
 
                             try {
-                                occupancy_estimate = response.getString(NavigationContract.OccupancyEstimate.RESPONSE_OCCUPANCY);
+                                occupancy_object = response.getJSONObject(NavigationContract.OccupancyEstimate.RESPONSE_OCCUPANCY);
+                                occupancy_estimate = occupancy_object.getString("prediction");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 return;

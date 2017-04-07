@@ -101,7 +101,7 @@ public class ActivityNavigation extends AppCompatActivity
     final double lng_increment = 0.00035d;
     final int max_opacity = 150;
 
-    private HashMap<String, Float> occupancy_square_id_to_occupancy = new HashMap<>();
+    private HashMap<String, String> occupancy_square_id_to_occupancy = new HashMap<>();
 
     private ArrayList<Polygon> occupancy_squares = new ArrayList<>();
 
@@ -184,11 +184,17 @@ public class ActivityNavigation extends AppCompatActivity
 
                         //Toast.makeText(ActivityNavigation.this, "Got json object: " + lat_lng_occupancy.toString(), Toast.LENGTH_SHORT).show();
                         Double lat, lng;
+                        JSONObject occupancy_object;
                         String occupancy_str;
+                        Boolean crowd_data;
+                        Boolean live_data;
                         try {
                             lat = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LAT);
                             lng = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LNG);
-                            occupancy_str = lat_lng_occupancy.getString("occupancy");
+                            occupancy_object = lat_lng_occupancy.getJSONObject("occupancy");
+                            occupancy_str = occupancy_object.getString("prediction");
+                            crowd_data = occupancy_object.getBoolean("crowd_data");
+                            live_data = occupancy_object.getBoolean("live_data");
                         } catch (JSONException e) {
                             Log.d(Constants.NAVIGATION_APP, "Doubles lat, lng, occupancy could not all be parsed; possibly occupancy was null");
                             continue;
@@ -217,34 +223,57 @@ public class ActivityNavigation extends AppCompatActivity
                             continue;
                         }
 
-                        int red = 0;
-                        int green = 0;
-                        int blue = 0;
-                        int opacity = 0;
+                        int inner_red = 0;
+                        int inner_green = 0;
+                        int inner_blue = 0;
+                        int inner_opacity = 0;
 
                         if (occupancy > 30) {
-                            red = 255;
+                            inner_red = 255;
                         } else if (occupancy > 15) {
-                            red = 255;
-                            green = 165;
+                            inner_red = 255;
+                            inner_green = 165;
                         } else {
-                            green = 150;
+                            inner_green = 150;
+                        }
+
+
+                        int outer_red = 0;
+                        int outer_green = 0;
+                        int outer_blue = 0;
+                        int outer_opacity = 128;
+
+                        if(crowd_data) {
+                            outer_red = 0x87;
+                            outer_green = 0x37;
+                            outer_blue = 0xff;
+                        } else if(live_data) {
+                            outer_red = 0xff;
+                            outer_green = 0x25;
+                            outer_blue = 0xe6;
+                        } else {
+                            outer_opacity = 5;
                         }
 
                         if (occupancy > 0.5f) {
-                            opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
+                            inner_opacity = Math.min(max_opacity, Math.round(occupancy) * opacity_multiplier + 20);
                         } else {
-                            opacity = 5;
+                            inner_opacity = 5;
+                            outer_opacity = 5;
                         }
 
                         //Log.d("Color", String.valueOf(opacity));
 
                         Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
                                 .strokeColor(Color.TRANSPARENT)
-                                .fillColor(Color.argb(opacity, red, green, blue))
+                                .fillColor(Color.argb(inner_opacity, inner_red, inner_green, inner_blue))
+                                .strokeColor(Color.argb(outer_opacity, outer_red, outer_green, outer_blue))
                                 .clickable(true));
 
-                        occupancy_square_id_to_occupancy.put(polygon.getId(), occupancy);
+                        occupancy_square_id_to_occupancy.put(polygon.getId(),
+                                "Occupancy: " + occupancy + "\n" +
+                                "Live Data: " + live_data + "\n" +
+                                "Crowd Data: " + crowd_data);
 
                         occupancy_squares.add(polygon);
 
@@ -572,9 +601,9 @@ public class ActivityNavigation extends AppCompatActivity
                     return;
                 }
 
-                Float occupancy = occupancy_square_id_to_occupancy.get(polygon.getId());
+                String occupancy_string = occupancy_square_id_to_occupancy.get(polygon.getId());
 
-                Toast.makeText(ActivityNavigation.this, "Occupancy " + occupancy, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ActivityNavigation.this, occupancy_string, Toast.LENGTH_SHORT).show();
             }
         });
     }
