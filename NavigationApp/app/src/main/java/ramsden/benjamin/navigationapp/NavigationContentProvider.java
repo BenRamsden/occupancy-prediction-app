@@ -126,13 +126,28 @@ public class NavigationContentProvider extends ContentProvider {
             switch (key) {
                 case Constants.PREFERENCE_SERVER_URL:
                     server_url = sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL);
-                    Toast.makeText(getContext(), "NavigationContentProvider onSharedPreferenceChanged server_url: " + server_url, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "NavigationContentProvider PREFERENCE_SERVER_URL: " + server_url, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.PREFERENCE_LIVE_DATA:
+                    live_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_LIVE_DATA, true);
+                    Toast.makeText(getContext(), "NavigationContentProvider PREFERENCE_LIVE_DATA: " + live_enabled, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.PREFERENCE_TIME_OF_DAY:
+                    time_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_TIME_OF_DAY, true);
+                    Toast.makeText(getContext(), "NavigationContentProvider PREFERENCE_TIME_OF_DAY: " + time_enabled, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.PREFERENCE_CROWD_OPINION:
+                    crowd_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_CROWD_OPINION, true);
+                    Toast.makeText(getContext(), "NavigationContentProvider PREFERENCE_CROWD_OPINION: " + crowd_enabled, Toast.LENGTH_SHORT).show();
                     break;
             }
+
         }
     };
 
     SharedPreferences sharedPreferences;
+
+    Boolean live_enabled, time_enabled, crowd_enabled;
 
     @Override
     public boolean onCreate() {
@@ -141,6 +156,9 @@ public class NavigationContentProvider extends ContentProvider {
         sharedPreferences = getContext().getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
 
         server_url = sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL);
+        live_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_LIVE_DATA, true);
+        time_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_TIME_OF_DAY, true);
+        crowd_enabled = sharedPreferences.getBoolean(Constants.PREFERENCE_CROWD_OPINION, true);
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
 
@@ -292,6 +310,10 @@ public class NavigationContentProvider extends ContentProvider {
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_START_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_START_DATE));
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_END_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_END_DATE));
 
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LIVE_ENABLED, live_enabled);
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_TIME_ENABLED, time_enabled);
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_CROWD_ENABLED, crowd_enabled);
+
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -321,6 +343,10 @@ public class NavigationContentProvider extends ContentProvider {
                     insertJSON.put(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST, new JSONObject(values.getAsString(NavigationContract.OccupancyEstimateBulk.ARG_LAT_LNG_LIST)) );
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_START_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_START_DATE));
                     insertJSON.put(NavigationContract.OccupancyEstimate.ARG_END_DATE, values.get(NavigationContract.OccupancyEstimate.ARG_END_DATE));
+
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_LIVE_ENABLED, live_enabled);
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_TIME_ENABLED, time_enabled);
+                    insertJSON.put(NavigationContract.OccupancyEstimate.ARG_CROWD_ENABLED, crowd_enabled);
 
                     responseListener = new Response.Listener<JSONObject>() {
                         @Override

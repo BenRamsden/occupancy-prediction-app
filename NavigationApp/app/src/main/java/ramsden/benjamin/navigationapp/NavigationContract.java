@@ -110,6 +110,10 @@ public class NavigationContract implements BaseColumns {
         public static final String ARG_START_DATE = "start_date";
         public static final String ARG_END_DATE = "end_date";
 
+        public static final String ARG_LIVE_ENABLED = "live_enabled";
+        public static final String ARG_TIME_ENABLED = "time_enabled";
+        public static final String ARG_CROWD_ENABLED = "crowd_enabled";
+
         public static final String RESPONSE_OCCUPANCY = "occupancy";
 
         public static final String EXTRA_OCCUPANCY_ESTIMATE = "occupancy_estimate";

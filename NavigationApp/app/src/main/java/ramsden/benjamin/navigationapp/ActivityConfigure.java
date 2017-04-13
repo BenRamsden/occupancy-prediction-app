@@ -71,7 +71,7 @@ public class ActivityConfigure extends AppCompatActivity {
         live_data_switch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_LIVE_DATA + ": " + live_data_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_LIVE_DATA + ": " + live_data_switch.isChecked(), Toast.LENGTH_SHORT).show();
                 sharedPreferences.edit().putBoolean(Constants.PREFERENCE_LIVE_DATA, live_data_switch.isChecked()).commit();
             }
         });
@@ -81,7 +81,7 @@ public class ActivityConfigure extends AppCompatActivity {
         crowd_opinion_switch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_CROWD_OPINION + ": " + crowd_opinion_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_CROWD_OPINION + ": " + crowd_opinion_switch.isChecked(), Toast.LENGTH_SHORT).show();
                 sharedPreferences.edit().putBoolean(Constants.PREFERENCE_CROWD_OPINION, crowd_opinion_switch.isChecked()).commit();
             }
         });
@@ -91,7 +91,7 @@ public class ActivityConfigure extends AppCompatActivity {
         time_of_day_switch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_TIME_OF_DAY + ": " + time_of_day_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_TIME_OF_DAY + ": " + time_of_day_switch.isChecked(), Toast.LENGTH_SHORT).show();
                 sharedPreferences.edit().putBoolean(Constants.PREFERENCE_TIME_OF_DAY, time_of_day_switch.isChecked()).commit();
             }
         });
