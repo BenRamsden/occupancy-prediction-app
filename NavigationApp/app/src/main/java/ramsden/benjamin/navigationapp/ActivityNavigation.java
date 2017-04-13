@@ -182,6 +182,7 @@ public class ActivityNavigation extends AppCompatActivity
                         String occupancy_str;
                         Boolean crowd_data;
                         Boolean live_data;
+                        Boolean time_data;
                         try {
                             lat = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LAT);
                             lng = lat_lng_occupancy.getDouble(NavigationContract.OccupancyEstimate.ARG_LNG);
@@ -189,6 +190,7 @@ public class ActivityNavigation extends AppCompatActivity
                             occupancy_str = occupancy_object.getString("prediction");
                             crowd_data = occupancy_object.getBoolean("crowd_data");
                             live_data = occupancy_object.getBoolean("live_data");
+                            time_data = occupancy_object.getBoolean("time_data");
                         } catch (JSONException e) {
                             Log.d(Constants.NAVIGATION_APP, "Doubles lat, lng, occupancy could not all be parsed; possibly occupancy was null");
                             continue;
@@ -207,12 +209,12 @@ public class ActivityNavigation extends AppCompatActivity
                         } catch (NumberFormatException ex) {
                             //Log.d(Constants.NAVIGATION_APP, "String " + occupancy_str + " not a valid float");
                             //Expected to happen if occupancy estimate for that region is null
-//                            Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
-//                                    .strokeColor(Color.TRANSPARENT)
-//                                    .fillColor(Color.argb(50, 100, 100, 100))
-//                                    .clickable(true));
-//
-//                            occupancy_squares.add(polygon);
+                            Polygon polygon = mMap.addPolygon(new PolygonOptions().add(point1).add(point2).add(point3).add(point4)
+                                    .strokeColor(Color.TRANSPARENT)
+                                    .fillColor(Color.argb(50, 100, 100, 100))
+                                    .clickable(true));
+
+                            occupancy_squares.add(polygon);
 
                             continue;
                         }
@@ -274,7 +276,8 @@ public class ActivityNavigation extends AppCompatActivity
                         occupancy_square_id_to_occupancy.put(polygon.getId(),
                                 "Occupancy: " + occupancy + "\n" +
                                 "Live Data: " + live_data + "\n" +
-                                "Crowd Data: " + crowd_data);
+                                "Crowd Data: " + crowd_data + "\n" +
+                                "Time Data: " + time_data);
 
                         occupancy_squares.add(polygon);
 
