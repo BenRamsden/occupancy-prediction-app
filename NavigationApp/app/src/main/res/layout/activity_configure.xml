@@ -8,6 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:focusableInTouchMode="true"
     tools:context="ramsden.benjamin.navigationapp.ActivityConfigure">
 
     <ScrollView
@@ -173,12 +174,52 @@
                 android:layout_weight="1"
                 android:minHeight="20dp" />
 
+            <TextView
+                android:text="Context Sources"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView14"
+                android:layout_weight="1"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+
+            <Switch
+                android:id="@+id/live_data_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Live Data" />
+
+            <Switch
+                android:id="@+id/crowd_opinion_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Crowd Opinion" />
+
+            <Switch
+                android:id="@+id/time_of_day_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Time of Day" />
+
+            <TextView
+                android:text="Reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView15"
+                android:layout_weight="1"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
             <Button
                 android:text="Reset All Preferences"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/reset_all_prefs_button"
                 android:layout_weight="1" />
+
+
 
         </LinearLayout>
     </ScrollView>

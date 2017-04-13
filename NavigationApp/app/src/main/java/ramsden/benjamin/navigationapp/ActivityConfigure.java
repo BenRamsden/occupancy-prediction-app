@@ -53,6 +53,10 @@ public class ActivityConfigure extends AppCompatActivity {
     private EditText sensor_polling_edittext;
     private EditText server_url_edittext;
 
+    private Switch live_data_switch;
+    private Switch crowd_opinion_switch;
+    private Switch time_of_day_switch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +65,36 @@ public class ActivityConfigure extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences(Constants.PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
 
         service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
+
+        live_data_switch = (Switch) findViewById(R.id.live_data_switch);
+        live_data_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_LIVE_DATA, true ) );
+        live_data_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_LIVE_DATA + ": " + live_data_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                sharedPreferences.edit().putBoolean(Constants.PREFERENCE_LIVE_DATA, live_data_switch.isChecked()).commit();
+            }
+        });
+
+        crowd_opinion_switch = (Switch) findViewById(R.id.crowd_opinion_switch);
+        crowd_opinion_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_CROWD_OPINION, true ) );
+        crowd_opinion_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_CROWD_OPINION + ": " + crowd_opinion_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                sharedPreferences.edit().putBoolean(Constants.PREFERENCE_CROWD_OPINION, crowd_opinion_switch.isChecked()).commit();
+            }
+        });
+
+        time_of_day_switch = (Switch) findViewById(R.id.time_of_day_switch);
+        time_of_day_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_TIME_OF_DAY, true ) );
+        time_of_day_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ActivityConfigure.this, Constants.PREFERENCE_TIME_OF_DAY + ": " + time_of_day_switch.isChecked(), Toast.LENGTH_SHORT).show();
+                sharedPreferences.edit().putBoolean(Constants.PREFERENCE_TIME_OF_DAY, time_of_day_switch.isChecked()).commit();
+            }
+        });
 
         map_polling_edittext = (EditText) findViewById(R.id.map_polling_edittext);
         map_polling_edittext.setText( String.valueOf(sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL)) );
