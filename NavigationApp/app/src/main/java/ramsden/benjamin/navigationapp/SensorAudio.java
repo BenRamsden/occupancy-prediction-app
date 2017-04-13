@@ -20,7 +20,7 @@ import java.util.concurrent.SynchronousQueue;
 import ca.uol.aig.fftpack.RealDoubleFFT;
 
 /**
- * Created by ben on 09/02/2017.
+ * This class manages the collection of histograms from the microphone sensor
  */
 
 public class SensorAudio {

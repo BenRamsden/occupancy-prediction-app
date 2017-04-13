@@ -17,6 +17,13 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+/**
+ * This activity allows the user to configure the app to their preference
+ * The class mainly relies on the Shared Preferences to store the changes the user makes
+ * The class also has a Service Connection to the Service Data Collection
+ * This allows the user to set the service as a foreground service, to keep it alive
+ */
+
 public class ActivityConfigure extends AppCompatActivity {
 
     private ServiceDataCollection serviceDataCollection = null;
@@ -66,6 +73,7 @@ public class ActivityConfigure extends AppCompatActivity {
 
         service_connected_checkbox = (CheckBox) findViewById(R.id.service_connected_checkbox);
 
+        /* Switch allows to user to switch on/off prediction using Live Data */
         live_data_switch = (Switch) findViewById(R.id.live_data_switch);
         live_data_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_LIVE_DATA, true ) );
         live_data_switch.setOnClickListener(new View.OnClickListener() {
@@ -76,6 +84,7 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Switch allows to user to switch on/off prediction using Live Data */
         crowd_opinion_switch = (Switch) findViewById(R.id.crowd_opinion_switch);
         crowd_opinion_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_CROWD_OPINION, true ) );
         crowd_opinion_switch.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +95,7 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Switch allows to user to switch on/off prediction using Live Data */
         time_of_day_switch = (Switch) findViewById(R.id.time_of_day_switch);
         time_of_day_switch.setChecked( sharedPreferences.getBoolean(Constants.PREFERENCE_TIME_OF_DAY, true ) );
         time_of_day_switch.setOnClickListener(new View.OnClickListener() {
@@ -96,9 +106,11 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Defines in milliseconds how often the app polls occupancy in the area */
         map_polling_edittext = (EditText) findViewById(R.id.map_polling_edittext);
         map_polling_edittext.setText( String.valueOf(sharedPreferences.getLong(Constants.PREFERENCE_MAP_POLL_INTERVAL, Constants.DEFAULT_MAP_POLL_INTERVAL)) );
 
+        /* The web URL the Content Provider sends the requests to (can be hotswapped) */
         server_url_edittext = (EditText) findViewById(R.id.server_url_edittext);
         server_url_edittext.setText(sharedPreferences.getString(Constants.PREFERENCE_SERVER_URL, Constants.DEFAULT_SERVER_URL));
 
@@ -120,6 +132,7 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Allows the user to specify how often the app should trigger the sensors to take a reading and send to the server */
         sensor_polling_edittext = (EditText) findViewById(R.id.sensor_polling_edittext);
         sensor_polling_edittext.setText( String.valueOf( sharedPreferences.getLong(Constants.PREFERENCE_START_ALL_SENSORS_INTERVAL, Constants.DEFAULT_START_ALL_SENSORS_INTERVAL) ) );
 
@@ -141,6 +154,7 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Allows the user to set all preference back to default */
         final Button reset_all_prefs_button = (Button) findViewById(R.id.reset_all_prefs_button);
         reset_all_prefs_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,6 +164,7 @@ public class ActivityConfigure extends AppCompatActivity {
             }
         });
 
+        /* Gives the service a notification and switches it to a prioritized foreground service */
         foreground_service_switch = (Switch) findViewById(R.id.foreground_service_switch);
         foreground_service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

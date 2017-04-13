@@ -15,6 +15,9 @@ public class NavigationContract implements BaseColumns {
 
     private NavigationContract() {}
 
+    /**
+     * The field and table names to be used when sending user_data to the webserver
+     */
     public static class Users {
         public static final String TABLE_NAME = "users";
 
@@ -28,6 +31,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_API_TOKEN = "api_token";
     }
 
+    /**
+     * The field and table names to be used when sending hotspots to the webserver
+     */
     public static class Hotspots {
         public static final String TABLE_NAME = "hotspots";
 
@@ -38,6 +44,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_FREQUENCY = "frequency";
     }
 
+    /**
+     * The field and table names to be used when sending hotspot observations to the webserver
+     */
     public static class HotspotObservations {
         public static final String TABLE_NAME = "hotspot_observations";
 
@@ -52,6 +61,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 
+    /**
+     * The field and table names to be used when sending audio observations to the webserver
+     */
     public static class AudioObservations {
         public static final String TABLE_NAME = "audio_observations";
 
@@ -65,6 +77,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 
+    /**
+     * The field and table names to be used when sending crowd observations to the webserver
+     */
     public static class CrowdObservations {
         public static final String TABLE_NAME = "crowd_observations";
 
@@ -78,6 +93,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 
+    /**
+     * The field and table names to be used when sending bluetooth observations to the webserver
+     */
     public static class BluetoothObservations {
         public static final String TABLE_NAME = "bluetooth_observations";
 
@@ -91,6 +109,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 
+    /**
+     * The field and table names to be used when sending accelerometer observations to the webserver
+     */
     public static class AccelerometerObservations {
         public static final String TABLE_NAME = "accelerometer_observations";
 
@@ -104,6 +125,9 @@ public class NavigationContract implements BaseColumns {
         public static final String KEY_OBSERVATION_DATE = "observation_date";
     }
 
+    /**
+     * The fields to be used when requesting occupancy estimates from webserver
+     */
     public static class OccupancyEstimate {
         public static final String ARG_LAT = "lat";
         public static final String ARG_LNG = "lng";
@@ -120,6 +144,9 @@ public class NavigationContract implements BaseColumns {
         public static final String EXTRA_MODE = "mode";
     }
 
+    /**
+     * The additional field names required when requesting BULK occupancy estimates from webserver
+     */
     public static class OccupancyEstimateBulk {
         public static final String ARG_LAT_LNG_LIST = "lat_lng_list";
 
@@ -130,6 +157,10 @@ public class NavigationContract implements BaseColumns {
 
     }
 
+    /**
+     * Used between the Content Provider and the Broadcast Receiver in ActivityNavigation
+     * to pass error messages to the UI
+     */
     public static class ErrorUI {
         public static final String EXTRA_MODE = "mode";
         public static final String ERROR_UI_MODE = "error_ui_mode";

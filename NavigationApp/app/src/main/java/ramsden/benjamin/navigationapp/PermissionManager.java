@@ -11,7 +11,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 /**
- * Created by ben on 17/02/2017.
+ * This class checks for and acquires permissions on the behalf of an activity
+ * This abstracts away the lengthy permission code from the Activity UI code
+ * And provides a single point of failure to analyse if the permissions stop working
  */
 
 public class PermissionManager {

@@ -4,7 +4,7 @@ import android.location.Location;
 import android.util.Log;
 
 /**
- * Created by ben on 17/02/2017.
+ * This class manages and synchronizes an instance of SensorBluetooth for the Service Data Collection
  */
 
 public class SensorBluetoothManager {

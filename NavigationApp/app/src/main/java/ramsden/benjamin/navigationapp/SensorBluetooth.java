@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by ben on 10/02/2017.
+ * This class manages the collection of counts from the bluetooth module
  */
 
 public class SensorBluetooth {

@@ -4,7 +4,7 @@ import android.location.Location;
 import android.util.Log;
 
 /**
- * Created by ben on 17/02/2017.
+ * This class manages and synchronizes an instance of SensorAudio for the Service Data Collection
  */
 
 public class SensorAudioManager {

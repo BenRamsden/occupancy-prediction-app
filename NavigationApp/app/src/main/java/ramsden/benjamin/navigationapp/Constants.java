@@ -1,8 +1,10 @@
 package ramsden.benjamin.navigationapp;
 
 /**
- * Created by ben on 07/02/2017.
+ * This class manages and contains all of the values that should not change
+ * Including: Permission request ints, Preference keys, and Logging tokens
  */
+
 
 public class Constants {
     public static final long DEFAULT_MIN_GPS_TIME = 15;

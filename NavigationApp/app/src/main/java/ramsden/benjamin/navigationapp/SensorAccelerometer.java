@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
- * Created by ben on 09/02/2017.
+ * This class manages the collection of data from the accelerometer sensors
  */
 
 public class SensorAccelerometer implements SensorEventListener {

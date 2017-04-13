@@ -27,10 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by ben on 01/02/2017.
- */
-
-/**
  * This class provides the access point to the applications activities
  * To the location log database, where the users location data collected by
  * The app is stored for processing

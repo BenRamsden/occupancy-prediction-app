@@ -10,6 +10,12 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+/**
+ * This class prints out the data being sent to the server in real-time
+ * No logging is implemented, the sent log simply displays the data being sent whilst it is open
+ * This is mainly meant for debugging however it provides additional transparency to the user
+ */
+
 public class ActivitySentLog extends AppCompatActivity {
 
     public static final String SENT_LOG_RECEIVER = "ramsden.benjamin.navigationapp.SentLogReceiver";

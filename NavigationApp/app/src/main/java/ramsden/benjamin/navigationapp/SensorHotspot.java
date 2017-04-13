@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by ben on 11/02/2017.
+ * This class manages the collection of Hotspot data from the Wi-Fi module
  */
 
 public class SensorHotspot {

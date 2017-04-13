@@ -65,6 +65,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This is the main activity of the application
+ * The map of occupancy in the local area is visible here
+ * The class takes care of sending the current map center, and receiving the occupancy predictions for that area
+ * They are then displayed on the map and color coded in the Broadcast Receiver
+ * A service connection exists to the Data Collection Service to utilize its connection to the Google API
+ */
+
 public class ActivityNavigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
@@ -101,6 +109,9 @@ public class ActivityNavigation extends AppCompatActivity
 
     private long lastServerErrorTime = 0;
 
+    /* This Broadcast receiver receives the responses from the Content Provider
+     * These responses can relate to networking errors, but mainly relate to occupancy prediction
+     * The occupancy is drawn onto the map in this method */
     private final BroadcastReceiver occupancyEstimateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -300,6 +311,8 @@ public class ActivityNavigation extends AppCompatActivity
 
     private SharedPreferences sharedPreferences;
 
+    /* This updates the map polling interval when changed in the Configure activity by the user
+     * Once they come back to this class the resume method is called, so the new interval is used */
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -350,14 +363,22 @@ public class ActivityNavigation extends AppCompatActivity
         /* Get response from request for occupancy estimation */
         registerReceiver(occupancyEstimateReceiver, new IntentFilter(OCCUPANCY_ESTIMATE_RECEIVER));
 
+        /* The start and end date visible at the top of the map
+         * These indicate the time period which the occupancy is predicted for */
         start_date_textview = (TextView) findViewById(R.id.start_date_textview);
         end_date_textview = (TextView) findViewById(R.id.end_date_textview);
 
+        /* Server status icon
+         * Green - Running Normally
+         * Orange - Initializing
+         * Red - Error */
         serverStatusImageView = (ImageView) findViewById(R.id.serverStatusImageView);
         serverStatusTextView = (TextView) findViewById(R.id.serverStatusTextView);
 
+        /* This allows the user to search a destination by name
+         * This also sends off a specific request for the occupancy at that location
+         * The occupancy is displayed on the map by the Broadcast Receiver upon arrival */
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
@@ -400,6 +421,8 @@ public class ActivityNavigation extends AppCompatActivity
 
     private Marker last_user_marker;
 
+    /* Manages the start and end date of the current occupancy prediction
+     * Incrementing the times by the pre-defined time_step_millis */
     public void timeButtonClick(int id) {
         if(end_date == null) end_date = new Date();
         if(start_date == null) start_date = new Date(end_date.getTime() - time_step_millis);
@@ -437,6 +460,7 @@ public class ActivityNavigation extends AppCompatActivity
     public void onPause() {
         super.onPause();
 
+        /* Cancels the timer, this stops it running its task */
         if (mapPollTimer != null) {
             Log.d(Constants.NAVIGATION_APP, "onPause, cancelling mapPollTimer");
             mapPollTimer.cancel();
@@ -444,6 +468,8 @@ public class ActivityNavigation extends AppCompatActivity
 
     }
 
+    /* This method is responsible for managing the mapPollTimer
+     * This stops unnecessary Map polling when the activity is in the background */
     @Override
     public void onResume() {
         super.onResume();
@@ -472,6 +498,8 @@ public class ActivityNavigation extends AppCompatActivity
 
     }
 
+    /* Checks if the server has had an error in the last 15000 milliseconds
+     * If it hasn't sets the servers presence icon to green */
     private void updateServerStatusImage() {
         if(lastServerErrorTime + 15000 < System.currentTimeMillis()) {
             serverStatusImageView.setImageDrawable(getDrawable(android.R.drawable.presence_online));
@@ -479,6 +507,7 @@ public class ActivityNavigation extends AppCompatActivity
         }
     }
 
+    /* Caches the maps center coordinate, for use outside of UI context */
     private void updateLastCameraCenter() {
         if(mMap == null) {
             return;
@@ -488,6 +517,7 @@ public class ActivityNavigation extends AppCompatActivity
         last_camera_center = mMap.getCameraPosition().target;
     }
 
+    /* Visual representation of the Service Data Collections last location */
     private void updateLastLocationCircle() {
         if(mMap == null || serviceDataCollection == null) {
             return;
@@ -581,6 +611,8 @@ public class ActivityNavigation extends AppCompatActivity
         return true;
     }
 
+    /* This method is called when the Google Map fragment is first initalized
+     * This also sets the onclick listener for polygons on the map, and states their occupancy if they have one */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -613,6 +645,8 @@ public class ActivityNavigation extends AppCompatActivity
     }
 
 
+    /* This is called when the users permissions are updated
+     * first checking the map is enabled and then enabling location */
     public void enableMapMyLocation() {
         /* Try enable mMap location now user has responded to permission request
         * If not, error will be caught and dealt with here */
@@ -629,14 +663,16 @@ public class ActivityNavigation extends AppCompatActivity
     public static final String CROWD_OBSERVATION_MODE = "CROWD_OBSERVATION_MODE";
     public static final String MAP_POLL_MODE = "MAP_POLL_MODE";
 
+    /* Generates a set of coordinates offset from the current center of the map
+     * Then sends these coordinates in a bulk occupancy request to the backend
+     * The result comes back to the broadcast receiver in this class
+     * Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
     public void requestOccupancyEstimate(String mode, LatLng location) {
-        /* Only Toast for CROWD OBSERVATION MODE, as MAP POLL MODE on another thread */
-
         if(location == null) {
             Log.d(Constants.NAVIGATION_APP, "Error: requestOccupancyEstimate mode:" + mode + " location is null");
             return;
         }
-
+        
         Uri uri;
         ContentValues contentValues;
 
@@ -705,6 +741,7 @@ public class ActivityNavigation extends AppCompatActivity
         /* Broadcast Receiver calls showCrowdObservationsAlertDialog if server returns occupancy estimate */
     }
 
+    /* Adds the current timestamp to the ContentValues passed as an argument */
     private void addNowDates(ContentValues contentValues, boolean update_ui) {
         final Date now_end_date = new Date();
         final Date now_start_date = new Date(now_end_date.getTime() - time_step_millis);
@@ -725,6 +762,8 @@ public class ActivityNavigation extends AppCompatActivity
         }
     }
 
+    /* Requests a human occupancy observation from the user
+     * States the current occupancy_estimate by the system */
     private void showCrowdObservationAlertDialog(String occupancy_estimate) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Crowd Observation");
@@ -775,6 +814,8 @@ public class ActivityNavigation extends AppCompatActivity
         builder.show();
     }
 
+    /* Returns the users response to the crowd (human observation) request back to the server
+     * After doing some error checking */
     private boolean sendCrowdObservation(Integer user_estimate) {
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

@@ -31,7 +31,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Manages the applications LocationListener
+ * Manages the applications Location Listener
  * Ensures that the location listener continues to provide the content provider with information
  * Can be made into a foreground notification at the users request, to stop it being killed after the app closes
  * It is assumed that when this is called the Location permission has been granted
